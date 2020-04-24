@@ -1,8 +1,10 @@
 version: '3'
 services:
-  http-server:
+  backend:
     image: gufalcon/http-server:latest
     restart: always
+    depends_on:
+      - db
     ports:
       - "1280:8080"
       - "12443:8443"
@@ -10,7 +12,7 @@ services:
       - HTTP_PORT=8080
       - HTTP_HOST=0.0.0.0
       - DB_DRIVER=mysql
-      - DB_SERVER=db-container
+      - DB_SERVER=db
       - DB_PORT=3306
       - DB_NAME=httpserver
       - DB_USER=httpserver
@@ -22,7 +24,7 @@ services:
       - "traefik.http-server.frontend.rule=Host:http-server.unterrainer.info"
       - "traefik.http-server.frontend.entryPoints=http,https"
 
-  db-container:
+  db:
     image: mysql:latest
     restart: always
     ports:
