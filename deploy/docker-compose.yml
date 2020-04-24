@@ -1,0 +1,41 @@
+version: '3'
+services:
+  http-server:
+    image: gufalcon/http-server:latest
+    restart: always
+    ports:
+      - "1280:8080"
+      - "12443:8443"
+    environment:
+      - HTTP_PORT=8080
+      - HTTP_HOST=0.0.0.0
+      - DB_DRIVER=mysql
+      - DB_SERVER=db-container
+      - DB_PORT=3306
+      - DB_NAME=httpserver
+      - DB_USER=httpserver
+      - DB_PASSWORD=DP5V7hi7xgknaH39lDTX
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http-server.port=8080"
+      - "traefik.http-server.backend=http-server"
+      - "traefik.http-server.frontend.rule=Host:http-server.unterrainer.info"
+      - "traefik.http-server.frontend.entryPoints=http,https"
+
+  db-container:
+    image: mysql:latest
+    restart: always
+    ports:
+      - 14300:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=Z4e2RzOC7O6XPncQZooa
+      - MYSQL_DATABASE=httpserver
+      - MYSQL_USER=httpserver
+      - MYSQL_PASSWORD=DP5V7hi7xgknaH39lDTX
+    volumes:
+      - "/app/data/http-server/mysql-data/db:/var/lib/mysql"
+
+networks:
+  default:
+    external:
+      name: proxy_default

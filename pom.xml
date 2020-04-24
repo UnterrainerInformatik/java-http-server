@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+		<groupId>info.unterrainer.commons</groupId>
+		<artifactId>parent-pom</artifactId>
+		<version>0.0.17</version>
+	</parent>
+
+	<properties>
+		<mainclass>info.unterrainer.commons.jreutils.JreUtils</mainclass>
+	</properties>
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>http-server</artifactId>
+	<version>0.0.1</version>
+	<name>HttpServer</name>
+	<packaging>jar</packaging>
+
+	<dependencies>
+		<!-- <dependency>
+			<groupId>info.unterrainer.commons</groupId>
+			<artifactId>rdb-utils</artifactId>
+			<version>0.0.5</version>
+		</dependency> -->
+		<dependency>
+			<groupId>info.unterrainer.commons</groupId>
+			<artifactId>serialization</artifactId>
+			<version>0.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.javalin</groupId>
+			<artifactId>javalin</artifactId>
+			<version>3.8.0</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>javax.persistence-api</artifactId>
+			<version>2.2</version>
+		</dependency> -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.4.25.v20191220</version>
+		</dependency>
+	</dependencies>
+	
+</project>
