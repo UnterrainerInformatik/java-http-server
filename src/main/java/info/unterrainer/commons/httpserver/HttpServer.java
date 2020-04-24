@@ -15,11 +15,14 @@ import io.javalin.core.security.Role;
 import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
 import lombok.Builder;
+import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.impl.DefaultMapperFactory;
 
 public class HttpServer {
 
 	private HttpServerConfiguration config;
-	private JsonMapper mapper;
+	private JsonMapper jsonMapper;
+	private MapperFactory orikaFactory;
 	private String applicationName;
 	private List<HandlerInstance> handlerInstances = new ArrayList<>();
 
@@ -27,14 +30,26 @@ public class HttpServer {
 	}
 
 	@Builder
-	private HttpServer(final String configPrefix, final String applicationName, final JsonMapper jsonMapper) {
+	private HttpServer(final String configPrefix, final String applicationName, final MapperFactory orikaFactory,
+			final JsonMapper jsonMapper) {
 		config = HttpServerConfiguration.read(configPrefix);
 		this.applicationName = applicationName;
 		if (applicationName == null)
 			throw new IllegalArgumentException("The application-name cannot be null");
-		mapper = jsonMapper;
-		if (mapper == null)
-			mapper = JsonMapper.create();
+		this.jsonMapper = jsonMapper;
+		if (this.jsonMapper == null)
+			this.jsonMapper = JsonMapper.create();
+		this.orikaFactory = orikaFactory;
+		if (this.orikaFactory == null)
+			this.orikaFactory = new DefaultMapperFactory.Builder().build();
+	}
+
+	public <P, J> GenericHandlerGroupBuilder<P, J> handlerGroupFor(final Class<P> jpaType, final Class<J> jsonType) {
+		return new GenericHandlerGroupBuilder<>(this, jpaType, jsonType);
+	}
+
+	<P, J> void addGenericHandlerGroup(final GenericHandlerGroup<P, J> group) {
+
 	}
 
 	public void run() {
@@ -48,7 +63,7 @@ public class HttpServer {
 			config.server(() -> server);
 		}).start(config.port());
 
-		get("/", ctx -> ctx.result(mapper.toJsonFrom(MessageJson.builder().message(applicationName).build())));
+		get("/", ctx -> ctx.result(jsonMapper.toStringFrom(MessageJson.builder().message(applicationName).build())));
 		get("/health", ctx -> ctx.result("healthy"));
 
 		for (HandlerInstance hi : handlerInstances)
@@ -60,7 +75,7 @@ public class HttpServer {
 
 		app.exception(Exception.class, (e, ctx) -> {
 			ctx.status(500);
-			ctx.result(mapper.toJsonFrom(MessageJson.builder().message("500 Internal Server Error").build()));
+			ctx.result(jsonMapper.toStringFrom(MessageJson.builder().message("500 Internal Server Error").build()));
 		});
 	}
 

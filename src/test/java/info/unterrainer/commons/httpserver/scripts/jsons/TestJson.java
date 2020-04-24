@@ -1,15 +1,16 @@
 package info.unterrainer.commons.httpserver.scripts.jsons;
 
+import info.unterrainer.commons.httpserver.jsons.BasicJson;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestJson {
+@EqualsAndHashCode(callSuper = true)
+public class TestJson extends BasicJson {
 
 	private String message;
 }

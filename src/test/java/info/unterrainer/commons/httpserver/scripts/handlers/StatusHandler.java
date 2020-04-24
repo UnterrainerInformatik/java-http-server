@@ -13,8 +13,8 @@ public class StatusHandler implements Handler {
 
 	@Override
 	public void handle(final Context ctx) {
-		TestJson status = TestJson.builder().message("My status is great!").build();
-		ctx.result(mapper.toJsonFrom(status));
+		TestJson status = new TestJson("My status is great!");
+		ctx.result(mapper.toStringFrom(status));
 		ctx.status(200);
 	}
 }

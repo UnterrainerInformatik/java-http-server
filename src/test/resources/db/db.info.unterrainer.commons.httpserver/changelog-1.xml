@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<changeSet author="GUN" id="1.0">
+		<createTable tableName="test"
+			remarks="Contains test.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true"
+					primaryKeyName="pk_test" unique="true"
+					uniqueConstraintName="uc_test_id" />
+			</column>
+
+			<column name="message" type="varchar(300)">
+				<constraints nullable="true" />
+			</column>
+
+			<column name="createdOn" type="TIMESTAMP(3)">
+				<constraints nullable="true" />
+			</column>
+			<column name="editedOn" type="TIMESTAMP(3)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+
+</databaseChangeLog>
