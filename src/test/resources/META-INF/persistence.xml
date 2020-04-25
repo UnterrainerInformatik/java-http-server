@@ -8,6 +8,7 @@
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		
 		<class>info.unterrainer.commons.rdbutils.entities.BasicEntity</class>
+		<class>info.unterrainer.commons.rdbutils.converters.LocalDateTimeConverter</class>
 		
 		<properties>
 			<!-- Hibernate-specific / MariaDB-JDBC-driver specific -->

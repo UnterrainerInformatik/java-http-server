@@ -18,10 +18,10 @@
 				<constraints nullable="true" />
 			</column>
 
-			<column name="createdOn" type="TIMESTAMP(3)">
+			<column name="createdOn" type="TIMESTAMP(6)">
 				<constraints nullable="true" />
 			</column>
-			<column name="editedOn" type="TIMESTAMP(3)">
+			<column name="editedOn" type="TIMESTAMP(6)">
 				<constraints nullable="true" />
 			</column>
 		</createTable>
