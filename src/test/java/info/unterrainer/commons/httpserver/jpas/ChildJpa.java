@@ -1,6 +1,8 @@
-package info.unterrainer.commons.httpserver.scripts.jsons;
+package info.unterrainer.commons.httpserver.jpas;
 
-import info.unterrainer.commons.serialization.jsons.BasicJson;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -8,9 +10,11 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @NoArgsConstructor
-@SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true)
-public class TestJson extends BasicJson {
+@SuperBuilder(toBuilder = true)
+@Entity
+@Table(name = "test")
+public class ChildJpa extends BasicJpa {
 
 	private String message;
 }
