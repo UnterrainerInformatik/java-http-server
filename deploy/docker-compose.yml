@@ -25,7 +25,7 @@ services:
       - "traefik.http-server.frontend.entryPoints=http,https"
 
   db:
-    image: mysql:latest
+    image: mariadb:latest
     restart: always
     ports:
       - 14300:3306
