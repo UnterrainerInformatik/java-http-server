@@ -5,9 +5,9 @@ import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
 public interface BasicDao<P extends BasicJpa> {
 
-	ListJson<P> getList(int offset, int size);
-
 	P getById(Long id);
+
+	ListJson<P> getList(int offset, int size);
 
 	P create(P entity);
 

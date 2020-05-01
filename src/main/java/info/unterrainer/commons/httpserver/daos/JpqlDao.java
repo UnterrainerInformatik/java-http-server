@@ -23,13 +23,13 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 	}
 
 	@Override
-	public ListJson<P> getList(final int offset, final int size) {
-		return Transactions.withNewTransactionReturning(emf, em -> getPage(em, offset, size));
+	public P getById(final Long id) {
+		return Transactions.withNewTransactionReturning(emf, em -> getEntityById(em, id));
 	}
 
 	@Override
-	public P getById(final Long id) {
-		return Transactions.withNewTransactionReturning(emf, em -> getEntityById(em, id));
+	public ListJson<P> getList(final int offset, final int size) {
+		return Transactions.withNewTransactionReturning(emf, em -> getPage(em, offset, size));
 	}
 
 	@Override
@@ -50,9 +50,9 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		});
 	}
 
-	private P create(final EntityManager em, final P entity) {
-		em.persist(entity);
-		return entity;
+	private P getEntityById(final EntityManager em, final Long id) {
+		return em.createQuery(String.format("SELECT o FROM %s AS o WHERE o.id = :id", type.getSimpleName()), type)
+				.setParameter("id", id).getSingleResult();
 	}
 
 	private ListJson<P> getPage(final EntityManager em, final int offset, final int size) {
@@ -68,8 +68,8 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return r;
 	}
 
-	private P getEntityById(final EntityManager em, final Long id) {
-		return em.createQuery(String.format("SELECT o FROM %s AS o WHERE o.id = :id", type.getSimpleName()), type)
-				.setParameter("id", id).getSingleResult();
+	private P create(final EntityManager em, final P entity) {
+		em.persist(entity);
+		return entity;
 	}
 }
