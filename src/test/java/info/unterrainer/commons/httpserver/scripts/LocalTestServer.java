@@ -3,6 +3,8 @@ package info.unterrainer.commons.httpserver.scripts;
 import javax.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.httpserver.HttpServer;
+import info.unterrainer.commons.httpserver.daos.JpqlDao;
+import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.scripts.handlers.StatusHandler;
 import info.unterrainer.commons.httpserver.scripts.jpas.TestJpa;
 import info.unterrainer.commons.httpserver.scripts.jsons.TestJson;
@@ -40,8 +42,9 @@ public class LocalTestServer {
 		HttpServer server = HttpServer.builder().applicationName("local-test-server").build();
 
 		server.get("/status", new StatusHandler(mapper));
-		server.handlerGroupFor(TestJpa.class, TestJson.class).path("/test").add();
-		server.run();
+		server.handlerGroupFor(TestJpa.class, TestJson.class).path("/test").endpoints(Endpoint.ALL)
+				.dao(new JpqlDao<>(emf, TestJpa.class)).jsonMapper(mapper).add();
+		server.start();
 	}
 
 }
