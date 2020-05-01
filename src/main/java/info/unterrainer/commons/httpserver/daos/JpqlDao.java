@@ -59,7 +59,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		ListJson<P> r = new ListJson<>();
 		TypedQuery<P> q = em
 				.createQuery(String.format("SELECT o FROM %s AS o ORDER BY o.id ASC", type.getSimpleName()), type)
-				.setFirstResult(offset).setMaxResults(size);
+				.setMaxResults(size).setFirstResult(offset);
 		List<P> qResult = q.getResultList();
 		Query cq = em.createQuery(String.format("SELECT COUNT(o.id) FROM %s AS o", type.getSimpleName()));
 		Long cqResult = (Long) cq.getSingleResult();
