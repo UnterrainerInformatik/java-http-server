@@ -46,5 +46,4 @@ public class LocalTestServer {
 				.dao(new JpqlDao<>(emf, TestJpa.class)).jsonMapper(mapper).add();
 		server.start();
 	}
-
 }
