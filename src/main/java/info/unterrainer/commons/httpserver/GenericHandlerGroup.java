@@ -3,10 +3,13 @@ package info.unterrainer.commons.httpserver;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.daos.BasicDao;
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
+import info.unterrainer.commons.httpserver.enums.HttpMethod;
+import info.unterrainer.commons.httpserver.enums.Position;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
@@ -31,6 +34,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	private final MapperFacade orikaMapper;
 	private final String path;
 	private final List<Endpoint> endpoints;
+	private final GenericHandlerAddons<P, J> extensions;
+	private final ExecutorService executorService;
 
 	@Override
 	public void addHandlers(final HttpServer server) {
@@ -106,12 +111,22 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	}
 
 	private void getEntry(final Context ctx) {
+		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.GET_SINGLE, executorService, null, null, null))
+			return;
+
 		P jpa = getJpaById(ctx, dao);
 		J json = orikaMapper.map(jpa, jsonType);
+
+		if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.GET_SINGLE, executorService, jpa, json, null))
+			return;
+
 		ctx.attribute(Attribute.RESPONSE_OBJECT, json);
 	}
 
 	private void getList(final Context ctx) {
+		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.GET_LIST, executorService, null, null, null))
+			return;
+
 		Integer offset = parseListParam(QueryField.PAGINATION_OFFSET, 0, ctx);
 		Integer size = parseListParam(QueryField.PAGINATION_SIZE, Integer.MAX_VALUE, ctx);
 
@@ -121,10 +136,17 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			jList.getEntries().add(orikaMapper.map(entry, jsonType));
 
 		setPaginationParamsFor(jList, offset, size, bList.getCount(), ctx);
+
+		if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.GET_LIST, executorService, null, null, jList))
+			return;
+
 		ctx.attribute(Attribute.RESPONSE_OBJECT, jList);
 	}
 
 	private void create(final Context ctx) throws IOException {
+		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.POST, executorService, null, null, null))
+			return;
+
 		String b = ctx.body();
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, b);
@@ -134,13 +156,21 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			mappedJpa.setEditedOn(time);
 			P createdJpa = dao.create(mappedJpa);
 			J r = orikaMapper.map(createdJpa, jsonType);
+
+			if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.POST, executorService, mappedJpa, json, null))
+				return;
+
 			ctx.attribute(Attribute.RESPONSE_OBJECT, r);
+
 		} catch (JsonProcessingException | JsonMappingException e) {
 			throw new BadRequestException();
 		}
 	}
 
 	private void fullUpdate(final Context ctx) throws IOException {
+		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.PUT, executorService, null, null, null))
+			return;
+
 		P jpa = getJpaById(ctx, dao);
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, ctx.body());
@@ -150,15 +180,25 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			mappedJpa.setId(jpa.getId());
 			dao.persist(mappedJpa);
 			ctx.status(204);
+
+			if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.PUT, executorService, mappedJpa, json, null))
+				return;
+
 		} catch (JsonProcessingException | JsonMappingException e) {
 			throw new BadRequestException();
 		}
 	}
 
 	private void delete(final Context ctx) {
+		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.DELETE, executorService, null, null, null))
+			return;
+
 		ctx.attribute(Attribute.RESPONSE_OBJECT, null);
 		Long id = checkAndGetId(ctx);
 		dao.delete(id);
 		ctx.status(204);
+
+		if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.DELETE, executorService, null, null, null))
+			return;
 	}
 }
