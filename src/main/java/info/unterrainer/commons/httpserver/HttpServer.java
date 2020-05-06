@@ -11,6 +11,7 @@ import org.eclipse.jetty.server.ServerConnector;
 
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.exceptions.HttpException;
+import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
 import info.unterrainer.commons.httpserver.handlers.AppNameHandler;
 import info.unterrainer.commons.httpserver.handlers.DateTimeHandler;
 import info.unterrainer.commons.httpserver.handlers.HealthHandler;
@@ -88,25 +89,32 @@ public class HttpServer {
 			ctx.contentType("application/json");
 		});
 
-		javalin.exception(Exception.class, (e, ctx) -> {
-			int status;
-			String message;
-			if (e.getClass().isAssignableFrom(HttpException.class)) {
-				HttpException h = (HttpException) e;
-				status = h.getHttpStatus();
-				message = status + " " + h.getHttpText();
-			} else {
-				status = 500;
-				message = "500 Internal Server Error";
-				log.error(e.getMessage(), e);
-			}
-			ctx.result(jsonMapper.toStringFrom(MessageJson.builder().message(message).build()))
-					.contentType("application/json").status(status);
+		javalin.error(404, ctx -> {
+			ctx.result(jsonMapper.toStringFrom(MessageJson.builder().message(NotFoundException.HTTP_STATUS + " " + NotFoundException.HTTP_TEXT).build()))
+			.contentType("application/json").status(NotFoundException.HTTP_STATUS);
+		}).exception(Exception.class, (e, ctx) -> {
+			handleException(e, ctx);
 		});
 
 		get("/", new AppNameHandler(applicationName));
 		get("/datetime", new DateTimeHandler());
 		get("/health", new HealthHandler());
+	}
+
+	private void handleException(final Exception e, final Context ctx) {
+		int status;
+		String message;
+		if (e.getClass().isAssignableFrom(HttpException.class)) {
+			HttpException h = (HttpException) e;
+			status = h.getHttpStatus();
+			message = status + " " + h.getHttpText();
+		} else {
+			status = 500;
+			message = "500 Internal Server Error";
+			log.error(e.getMessage(), e);
+		}
+		ctx.result(jsonMapper.toStringFrom(MessageJson.builder().message(message).build()))
+		.contentType("application/json").status(status);
 	}
 
 	public void start() {

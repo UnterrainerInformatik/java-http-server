@@ -147,6 +147,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			P mappedJpa = orikaMapper.map(json, jpaType);
 			mappedJpa.setEditedOn(LocalDateTime.now());
 			mappedJpa.setCreatedOn(jpa.getCreatedOn());
+			mappedJpa.setId(jpa.getId());
 			dao.persist(mappedJpa);
 			ctx.status(204);
 		} catch (JsonProcessingException | JsonMappingException e) {
