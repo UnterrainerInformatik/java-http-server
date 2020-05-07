@@ -34,7 +34,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	private final MapperFacade orikaMapper;
 	private final String path;
 	private final List<Endpoint> endpoints;
-	private final GenericHandlerAddons<P, J> extensions;
+	private final HandlerExtensions<P, J> extensions;
 	private final ExecutorService executorService;
 
 	@Override
@@ -74,8 +74,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		return jpa;
 	}
 
-	public void setPaginationParamsFor(final ListJson<J> jList, final int offset, final int pageSize, final long count,
-			final Context ctx) {
+	public void setPaginationParamsFor(final ListJson<J> jList, final long offset, final long pageSize,
+			final long count, final Context ctx) {
 
 		jList.setFirst(String.format(QueryField.LIST_LINK, ctx.url(), 0, pageSize));
 
@@ -86,11 +86,11 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			jList.setLast(String.format(QueryField.LIST_LINK, ctx.url(), last, pageSize));
 		}
 
-		int next = offset + pageSize;
+		long next = offset + pageSize;
 		if (next < count)
 			jList.setNext(String.format(QueryField.LIST_LINK, ctx.url(), next, pageSize));
 
-		int prev = offset - pageSize;
+		long prev = offset - pageSize;
 		if (prev < 0)
 			prev = 0;
 		jList.setPrevious(String.format(QueryField.LIST_LINK, ctx.url(), prev, pageSize));
@@ -98,12 +98,12 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		jList.setCount(count);
 	}
 
-	private Integer parseListParam(final String name, final Integer defaultValue, final Context ctx) {
+	private Long parseListParam(final String name, final Long defaultValue, final Context ctx) {
 		String o = ctx.queryParam(name);
-		Integer result = defaultValue;
+		Long result = defaultValue;
 		if (o != null)
 			try {
-				result = Integer.parseInt(o);
+				result = Long.parseLong(o);
 			} catch (NumberFormatException e) {
 				throw new BadRequestException(String.format("Parameter %s has to be a number", name));
 			}
@@ -111,24 +111,15 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	}
 
 	private void getEntry(final Context ctx) {
-		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.GET_SINGLE, executorService, null, null, null))
-			return;
-
 		P jpa = getJpaById(ctx, dao);
 		J json = orikaMapper.map(jpa, jsonType);
-
-		if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.GET_SINGLE, executorService, jpa, json, null))
-			return;
-
+		extensions.runPostGetSingle(ctx, jpa.getId(), jpa, json, executorService);
 		ctx.attribute(Attribute.RESPONSE_OBJECT, json);
 	}
 
 	private void getList(final Context ctx) {
-		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.GET_LIST, executorService, null, null, null))
-			return;
-
-		Integer offset = parseListParam(QueryField.PAGINATION_OFFSET, 0, ctx);
-		Integer size = parseListParam(QueryField.PAGINATION_SIZE, Integer.MAX_VALUE, ctx);
+		Long offset = parseListParam(QueryField.PAGINATION_OFFSET, 0L, ctx);
+		Long size = parseListParam(QueryField.PAGINATION_SIZE, Long.MAX_VALUE, ctx);
 
 		ListJson<P> bList = dao.getList(offset, size);
 		ListJson<J> jList = new ListJson<>();
@@ -137,9 +128,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 
 		setPaginationParamsFor(jList, offset, size, bList.getCount(), ctx);
 
-		if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.GET_LIST, executorService, null, null, jList))
-			return;
-
+		extensions.runPostGetList(ctx, size, offset, bList, jList, executorService);
 		ctx.attribute(Attribute.RESPONSE_OBJECT, jList);
 	}
 

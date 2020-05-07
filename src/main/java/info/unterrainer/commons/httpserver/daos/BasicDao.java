@@ -7,7 +7,7 @@ public interface BasicDao<P extends BasicJpa> {
 
 	P getById(Long id);
 
-	ListJson<P> getList(int offset, int size);
+	ListJson<P> getList(long offset, long size);
 
 	P create(P entity);
 

@@ -10,17 +10,13 @@ import javax.persistence.TypedQuery;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 
 	private final EntityManagerFactory emf;
 	private final Class<P> type;
-
-	public JpqlDao(final EntityManagerFactory entityManagerFactory, final Class<P> type) {
-		super();
-		emf = entityManagerFactory;
-		this.type = type;
-	}
 
 	@Override
 	public P getById(final Long id) {
@@ -28,7 +24,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 	}
 
 	@Override
-	public ListJson<P> getList(final int offset, final int size) {
+	public ListJson<P> getList(final long offset, final long size) {
 		return Transactions.withNewTransactionReturning(emf, em -> getPage(em, offset, size));
 	}
 
@@ -55,11 +51,11 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 				.setParameter("id", id).getSingleResult();
 	}
 
-	private ListJson<P> getPage(final EntityManager em, final int offset, final int size) {
+	private ListJson<P> getPage(final EntityManager em, final long offset, final long size) {
 		ListJson<P> r = new ListJson<>();
 		TypedQuery<P> q = em
 				.createQuery(String.format("SELECT o FROM %s AS o ORDER BY o.id ASC", type.getSimpleName()), type)
-				.setMaxResults(size).setFirstResult(offset);
+				.setMaxResults((int) size).setFirstResult((int) offset);
 		List<P> qResult = q.getResultList();
 		Query cq = em.createQuery(String.format("SELECT COUNT(o.id) FROM %s AS o", type.getSimpleName()));
 		Long cqResult = (Long) cq.getSingleResult();

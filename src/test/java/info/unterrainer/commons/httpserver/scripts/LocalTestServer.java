@@ -4,11 +4,7 @@ import javax.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.httpserver.HttpServer;
 import info.unterrainer.commons.httpserver.daos.JpqlDao;
-import info.unterrainer.commons.httpserver.enums.Concurrency;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
-import info.unterrainer.commons.httpserver.enums.HttpMethod;
-import info.unterrainer.commons.httpserver.enums.Position;
-import info.unterrainer.commons.httpserver.extensions.ExtensionHandler;
 import info.unterrainer.commons.httpserver.scripts.handlers.StatusHandler;
 import info.unterrainer.commons.httpserver.scripts.jpas.TestJpa;
 import info.unterrainer.commons.httpserver.scripts.jsons.TestJson;
@@ -46,20 +42,12 @@ public class LocalTestServer {
 		HttpServer server = HttpServer.builder().applicationName("local-test-server").build();
 
 		server.get("/status", new StatusHandler(mapper));
-		server.handlerGroupFor(TestJpa.class, TestJson.class)
-				.path("/test")
-				.endpoints(Endpoint.ALL)
-				.addon(ExtensionHandler.<TestJpa, TestJson>builder()
-						.position(Position.BEFORE)
-						.method(HttpMethod.POST)
-						.concurrency(Concurrency.SYNC)
-						.delegate(sctx -> {
-							log.info("before insert");
-						})
-						.build())
-				.dao(new JpqlDao<>(emf, TestJpa.class))
-				.jsonMapper(mapper)
-				.add();
+		server.handlerGroupFor(TestJpa.class, TestJson.class).path("/test").endpoints(Endpoint.ALL)
+				.dao(new JpqlDao<>(emf, TestJpa.class)).jsonMapper(mapper).extension()
+				.preInsertSync((ctx, receivedJson, resultJpa) -> {
+					log.info("before insert");
+					return resultJpa;
+				}).add();
 		server.start();
 	}
 }

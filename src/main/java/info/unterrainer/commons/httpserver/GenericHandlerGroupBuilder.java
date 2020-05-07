@@ -31,6 +31,8 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 	private GenericHandlerAddons<P, J> addons = new GenericHandlerAddons<>();
 	private ExecutorService executorService;
 
+	HandlerExtensions<P, J> extensions = new HandlerExtensions<>();
+
 	public HttpServer add() {
 		if (jsonMapper == null)
 			jsonMapper = JsonMapper.create();
@@ -42,6 +44,10 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 				orikaFactory.getMapperFacade(), path, endpoints, addons, executorService);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
+	}
+
+	public AddonBuilder<P, J> extension() {
+		return new AddonBuilder<>(this);
 	}
 
 	public GenericHandlerGroupBuilder<P, J> dao(final BasicDao<P> dao) {
