@@ -17,7 +17,8 @@ public interface PostModifyAsync<P extends BasicJpa, J extends BasicJson> {
 	 * @param readJpa      the JPA that was read from the database based on the
 	 *                     received ID
 	 * @param mappedJpa    the JPA that was modified
+	 * @param persistedJpa the JPA that was returned from the database when saving
 	 * @param response     the JSON that will be sent as a response
 	 */
-	void handle(Long receivedId, J receivedJson, P readJpa, P mappedJpa, J response);
+	void handle(Long receivedId, J receivedJson, P readJpa, P mappedJpa, P persistedJpa, J response);
 }

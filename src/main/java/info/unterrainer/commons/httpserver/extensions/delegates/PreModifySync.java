@@ -17,8 +17,8 @@ public interface PreModifySync<P extends BasicJpa, J extends BasicJson> {
 	 * @param receivedJson the JSON that was received in the HTTP call
 	 * @param readJpa      the JPA that was read from the database based on the
 	 *                     received ID
-	 * @param mappedJpa    the JPA that was mapped and is about to be modified
+	 * @param resultJpa    the JPA that was mapped and is about to be modified
 	 * @return the modified JPA that will be persisted
 	 */
-	P handle(Context ctx, Long receivedId, J receivedJson, P readJpa, P mappedJpa);
+	P handle(Context ctx, Long receivedId, J receivedJson, P readJpa, P resultJpa);
 }

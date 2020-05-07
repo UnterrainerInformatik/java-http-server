@@ -8,8 +8,6 @@ import java.util.concurrent.ExecutorService;
 import info.unterrainer.commons.httpserver.daos.BasicDao;
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
-import info.unterrainer.commons.httpserver.enums.HttpMethod;
-import info.unterrainer.commons.httpserver.enums.Position;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
@@ -113,7 +111,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	private void getEntry(final Context ctx) {
 		P jpa = getJpaById(ctx, dao);
 		J json = orikaMapper.map(jpa, jsonType);
-		extensions.runPostGetSingle(ctx, jpa.getId(), jpa, json, executorService);
+		json = extensions.runPostGetSingle(ctx, jpa.getId(), jpa, json, executorService);
 		ctx.attribute(Attribute.RESPONSE_OBJECT, json);
 	}
 
@@ -128,14 +126,11 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 
 		setPaginationParamsFor(jList, offset, size, bList.getCount(), ctx);
 
-		extensions.runPostGetList(ctx, size, offset, bList, jList, executorService);
+		jList = extensions.runPostGetList(ctx, size, offset, bList, jList, executorService);
 		ctx.attribute(Attribute.RESPONSE_OBJECT, jList);
 	}
 
 	private void create(final Context ctx) throws IOException {
-		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.POST, executorService, null, null, null))
-			return;
-
 		String b = ctx.body();
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, b);
@@ -143,12 +138,11 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			LocalDateTime time = LocalDateTime.now();
 			mappedJpa.setCreatedOn(time);
 			mappedJpa.setEditedOn(time);
+			mappedJpa = extensions.runPreInsert(ctx, json, mappedJpa, executorService);
 			P createdJpa = dao.create(mappedJpa);
 			J r = orikaMapper.map(createdJpa, jsonType);
 
-			if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.POST, executorService, mappedJpa, json, null))
-				return;
-
+			r = extensions.runPostInsert(ctx, json, mappedJpa, createdJpa, r, executorService);
 			ctx.attribute(Attribute.RESPONSE_OBJECT, r);
 
 		} catch (JsonProcessingException | JsonMappingException e) {
@@ -157,9 +151,6 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	}
 
 	private void fullUpdate(final Context ctx) throws IOException {
-		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.PUT, executorService, null, null, null))
-			return;
-
 		P jpa = getJpaById(ctx, dao);
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, ctx.body());
@@ -167,11 +158,12 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			mappedJpa.setEditedOn(LocalDateTime.now());
 			mappedJpa.setCreatedOn(jpa.getCreatedOn());
 			mappedJpa.setId(jpa.getId());
-			dao.persist(mappedJpa);
-			ctx.status(204);
+			mappedJpa = extensions.runPreModify(ctx, jpa.getId(), json, jpa, mappedJpa, executorService);
+			P persistedJpa = dao.persist(mappedJpa);
 
-			if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.PUT, executorService, mappedJpa, json, null))
-				return;
+			J r = orikaMapper.map(persistedJpa, jsonType);
+			r = extensions.runPostModify(ctx, jpa.getId(), json, jpa, mappedJpa, persistedJpa, r, executorService);
+			ctx.attribute(Attribute.RESPONSE_OBJECT, r);
 
 		} catch (JsonProcessingException | JsonMappingException e) {
 			throw new BadRequestException();
@@ -179,15 +171,11 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	}
 
 	private void delete(final Context ctx) {
-		if (!extensions.runHandlers(ctx, Position.BEFORE, HttpMethod.DELETE, executorService, null, null, null))
-			return;
-
 		ctx.attribute(Attribute.RESPONSE_OBJECT, null);
 		Long id = checkAndGetId(ctx);
+		id = extensions.runPreDelete(ctx, id, executorService);
 		dao.delete(id);
 		ctx.status(204);
-
-		if (!extensions.runHandlers(ctx, Position.AFTER, HttpMethod.DELETE, executorService, null, null, null))
-			return;
+		extensions.runPostDelete(ctx, id, executorService);
 	}
 }

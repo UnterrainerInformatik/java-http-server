@@ -47,6 +47,28 @@ public class LocalTestServer {
 				.preInsertSync((ctx, receivedJson, resultJpa) -> {
 					log.info("before insert");
 					return resultJpa;
+				}).extension().preDeleteSync((ctx, receivedId) -> {
+					log.info("before delete id:[{}]", receivedId);
+					return receivedId;
+				}).extension().preModifySync((ctx, receivedId, receivedJson, readJpa, resultJpa) -> {
+					log.info("before modify");
+					return resultJpa;
+				}).extension().postGetSingleSync((ctx, receivedId, readJpa, response) -> {
+					log.info("after get-single");
+					return response;
+				}).extension().postGetListSync((ctx, size, offset, readJpaList, responseList) -> {
+					log.info("after get-list");
+					return responseList;
+				}).extension().postDeleteSync((ctx, receivedId) -> {
+					log.info("after delete");
+					return true;
+				}).extension()
+				.postModifySync((ctx, receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response) -> {
+					log.info("after modify");
+					return response;
+				}).extension().postInsertSync((ctx, receivedJson, mappedJpa, createdJpa, response) -> {
+					log.info("after insert");
+					return response;
 				}).add();
 		server.start();
 	}

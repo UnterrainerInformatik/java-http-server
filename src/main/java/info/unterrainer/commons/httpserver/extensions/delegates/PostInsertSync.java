@@ -15,8 +15,9 @@ public interface PostInsertSync<P extends BasicJpa, J extends BasicJson> {
 	 * @param ctx          the Javalin context
 	 * @param receivedJson the JSON that was received in the HTTP call
 	 * @param mappedJpa    the JPA that was inserted
+	 * @param createdJpa   the JPA that was created in (returned from) the database
 	 * @param response     the JSON that will be sent as a response
 	 * @return the JSON that will be sent as a response
 	 */
-	J handle(Context ctx, J receivedJson, P mappedJpa, J response);
+	J handle(Context ctx, J receivedJson, P mappedJpa, P createdJpa, J response);
 }

@@ -14,7 +14,8 @@ public interface PostInsertAsync<P extends BasicJpa, J extends BasicJson> {
 	 *
 	 * @param receivedJson the JSON that was received in the HTTP call
 	 * @param mappedJpa    the JPA that was inserted
+	 * @param createdJpa   the JPA that was created in (returned from) the database
 	 * @param response     the JSON that will be sent as a response
 	 */
-	void handle(J receivedJson, P mappedJpa, J response);
+	void handle(J receivedJson, P mappedJpa, P createdJpa, J response);
 }

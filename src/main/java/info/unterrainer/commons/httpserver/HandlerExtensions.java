@@ -52,7 +52,7 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson> {
 	private final List<PreModifyAsync<P, J>> preModifyAsync = new ArrayList<>();
 	private final List<PreModifySync<P, J>> preModifySync = new ArrayList<>();
 
-	public void runPostGetSingle(final Context ctx, final Long receivedId, final P readJpa, final J response,
+	public J runPostGetSingle(final Context ctx, final Long receivedId, final P readJpa, final J response,
 			final ExecutorService executorService) {
 		for (PostGetSingleAsync<P, J> h : postGetSingleAsync())
 			executorService.execute(() -> h.handle(receivedId, readJpa, response));
@@ -63,9 +63,10 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson> {
 			if (result == null)
 				throw new GracefulCancelationException();
 		}
+		return result;
 	}
 
-	public void runPostGetList(final Context ctx, final Long size, final Long offset, final ListJson<P> readList,
+	public ListJson<J> runPostGetList(final Context ctx, final Long size, final Long offset, final ListJson<P> readList,
 			final ListJson<J> response, final ExecutorService executorService) {
 		for (PostGetListAsync<P, J> h : postGetListAsync())
 			executorService.execute(() -> h.handle(size, offset, readList, response));
@@ -76,5 +77,85 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson> {
 			if (result == null)
 				throw new GracefulCancelationException();
 		}
+		return result;
+	}
+
+	public P runPreInsert(final Context ctx, final J receivedJson, final P resultJpa,
+			final ExecutorService executorService) {
+		for (PreInsertAsync<P, J> h : preInsertAsync())
+			executorService.execute(() -> h.handle(receivedJson, resultJpa));
+
+		P result = resultJpa;
+		for (PreInsertSync<P, J> h : preInsertSync()) {
+			result = h.handle(ctx, receivedJson, resultJpa);
+			if (result == null)
+				throw new GracefulCancelationException();
+		}
+		return result;
+	}
+
+	public J runPostInsert(final Context ctx, final J receivedJson, final P mappedJpa, final P createdJpa,
+			final J response, final ExecutorService executorService) {
+		for (PostInsertAsync<P, J> h : postInsertAsync())
+			executorService.execute(() -> h.handle(receivedJson, mappedJpa, createdJpa, response));
+
+		J result = response;
+		for (PostInsertSync<P, J> h : postInsertSync()) {
+			result = h.handle(ctx, receivedJson, mappedJpa, createdJpa, response);
+			if (result == null)
+				throw new GracefulCancelationException();
+		}
+		return result;
+	}
+
+	public P runPreModify(final Context ctx, final Long receivedId, final J receivedJson, final P readJpa,
+			final P resultJpa, final ExecutorService executorService) {
+		for (PreModifyAsync<P, J> h : preModifyAsync())
+			executorService.execute(() -> h.handle(receivedId, receivedJson, readJpa, resultJpa));
+
+		P result = resultJpa;
+		for (PreModifySync<P, J> h : preModifySync()) {
+			result = h.handle(ctx, receivedId, receivedJson, readJpa, resultJpa);
+			if (result == null)
+				throw new GracefulCancelationException();
+		}
+		return result;
+	}
+
+	public J runPostModify(final Context ctx, final Long receivedId, final J receivedJson, final P readJpa,
+			final P mappedJpa, final P persistedJpa, final J response, final ExecutorService executorService) {
+		for (PostModifyAsync<P, J> h : postModifyAsync())
+			executorService
+					.execute(() -> h.handle(receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response));
+
+		J result = response;
+		for (PostModifySync<P, J> h : postModifySync()) {
+			result = h.handle(ctx, receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response);
+			if (result == null)
+				throw new GracefulCancelationException();
+		}
+		return result;
+	}
+
+	public Long runPreDelete(final Context ctx, final Long receivedId, final ExecutorService executorService) {
+		for (PreDeleteAsync h : preDeleteAsync())
+			executorService.execute(() -> h.handle(receivedId));
+
+		Long result = receivedId;
+		for (PreDeleteSync h : preDeleteSync()) {
+			result = h.handle(ctx, receivedId);
+			if (result == null)
+				throw new GracefulCancelationException();
+		}
+		return result;
+	}
+
+	public void runPostDelete(final Context ctx, final Long receivedId, final ExecutorService executorService) {
+		for (PostDeleteAsync h : postDeleteAsync())
+			executorService.execute(() -> h.handle(receivedId));
+
+		for (PostDeleteSync h : postDeleteSync())
+			if (!h.handle(ctx, receivedId))
+				throw new GracefulCancelationException();
 	}
 }

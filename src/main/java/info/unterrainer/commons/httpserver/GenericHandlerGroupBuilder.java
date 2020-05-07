@@ -7,8 +7,6 @@ import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.daos.BasicDao;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
-import info.unterrainer.commons.httpserver.exceptions.GracefulCancelationException;
-import info.unterrainer.commons.httpserver.extensions.ExtensionHandler;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.serialization.JsonMapper;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
@@ -28,7 +26,6 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 	private MapperFactory orikaFactory;
 	private String path;
 	private List<Endpoint> endpoints = new ArrayList<>();
-	private GenericHandlerAddons<P, J> addons = new GenericHandlerAddons<>();
 	private ExecutorService executorService;
 
 	HandlerExtensions<P, J> extensions = new HandlerExtensions<>();
@@ -41,7 +38,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 		if (executorService == null)
 			executorService = server.executorService;
 		GenericHandlerGroup<P, J> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType, jsonMapper,
-				orikaFactory.getMapperFacade(), path, endpoints, addons, executorService);
+				orikaFactory.getMapperFacade(), path, endpoints, extensions, executorService);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
 	}
@@ -67,19 +64,6 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 
 	public GenericHandlerGroupBuilder<P, J> path(final String path) {
 		this.path = path;
-		return this;
-	}
-
-	/**
-	 * If you want to abort a synchronous action-chain, just throw a
-	 * {@link GracefulCancelationException}.
-	 *
-	 * @param addonHandlers
-	 * @return this instance to provide a fluent interface
-	 */
-	@SafeVarargs
-	public final GenericHandlerGroupBuilder<P, J> addon(final ExtensionHandler<P, J>... addonHandlers) {
-		addons.add(addonHandlers);
 		return this;
 	}
 
