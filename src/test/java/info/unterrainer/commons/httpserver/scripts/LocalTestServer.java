@@ -42,34 +42,52 @@ public class LocalTestServer {
 		HttpServer server = HttpServer.builder().applicationName("local-test-server").build();
 
 		server.get("/status", new StatusHandler(mapper));
-		server.handlerGroupFor(TestJpa.class, TestJson.class).path("/test").endpoints(Endpoint.ALL)
-				.dao(new JpqlDao<>(emf, TestJpa.class)).jsonMapper(mapper).extension()
+		server.handlerGroupFor(TestJpa.class, TestJson.class)
+				.path("/test")
+				.endpoints(Endpoint.ALL)
+				.dao(new JpqlDao<>(emf, TestJpa.class))
+				.jsonMapper(mapper)
+				.extension()
 				.preInsertSync((ctx, receivedJson, resultJpa) -> {
 					log.info("before insert");
 					return resultJpa;
-				}).extension().preDeleteSync((ctx, receivedId) -> {
+				})
+				.extension()
+				.preDeleteSync((ctx, receivedId) -> {
 					log.info("before delete id:[{}]", receivedId);
 					return receivedId;
-				}).extension().preModifySync((ctx, receivedId, receivedJson, readJpa, resultJpa) -> {
+				})
+				.extension()
+				.preModifySync((ctx, receivedId, receivedJson, readJpa, resultJpa) -> {
 					log.info("before modify");
 					return resultJpa;
-				}).extension().postGetSingleSync((ctx, receivedId, readJpa, response) -> {
+				})
+				.extension()
+				.postGetSingleSync((ctx, receivedId, readJpa, response) -> {
 					log.info("after get-single");
 					return response;
-				}).extension().postGetListSync((ctx, size, offset, readJpaList, responseList) -> {
+				})
+				.extension()
+				.postGetListSync((ctx, size, offset, readJpaList, responseList) -> {
 					log.info("after get-list");
 					return responseList;
-				}).extension().postDeleteSync((ctx, receivedId) -> {
+				})
+				.extension()
+				.postDeleteSync((ctx, receivedId) -> {
 					log.info("after delete");
 					return true;
-				}).extension()
+				})
+				.extension()
 				.postModifySync((ctx, receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response) -> {
 					log.info("after modify");
 					return response;
-				}).extension().postInsertSync((ctx, receivedJson, mappedJpa, createdJpa, response) -> {
+				})
+				.extension()
+				.postInsertSync((ctx, receivedJson, mappedJpa, createdJpa, response) -> {
 					log.info("after insert");
 					return response;
-				}).add();
+				})
+				.add();
 		server.start();
 	}
 }
