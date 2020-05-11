@@ -44,7 +44,7 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements
 				.setLockMode(LockModeType.PESSIMISTIC_WRITE);
 
 		for (int i = 0; i < states.length; i++)
-			q.setParameter("state" + i, states[i].name());
+			q.setParameter("state" + i, states[i]);
 
 		List<P> r = q.getResultList();
 		if (r.size() == 1) {
