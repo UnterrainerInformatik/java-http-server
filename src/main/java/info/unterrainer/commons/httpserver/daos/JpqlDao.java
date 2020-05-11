@@ -11,6 +11,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import info.unterrainer.commons.httpserver.daos.UpsertResult.UpsertResultBuilder;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
@@ -59,18 +60,35 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 	}
 
 	@Override
-	public P upsert(final P entity) {
-		return Transactions.withNewTransactionReturning(emf, em -> upsert(em, entity));
+	public UpsertResult<P> upsert(final String whereClause, final ParamMap params, final P entity) {
+		return Transactions.withNewTransactionReturning(emf,
+				em -> upsert(em, getQuery(em, whereClause, params), entity));
 	}
 
 	@Override
-	public P upsert(final EntityManager em, final P entity) {
-		P e = getById(em, entity.getId());
-		if (e == null)
+	public UpsertResult<P> upsert(final EntityManager em, final String whereClause, final ParamMap params,
+			final P entity) {
+		return upsert(em, getQuery(em, whereClause, params), entity);
+	}
+
+	@Override
+	public UpsertResult<P> upsert(final TypedQuery<P> query, final P entity) {
+		return Transactions.withNewTransactionReturning(emf, em -> upsert(em, query, entity));
+	}
+
+	@Override
+	public UpsertResult<P> upsert(final EntityManager em, final TypedQuery<P> query, final P entity) {
+		UpsertResultBuilder<P, ?, ?> builder = UpsertResult.builder();
+
+		P e = firstResultOf(query);
+		if (e == null) {
 			e = create(em, entity);
-		else
+			builder.wasInserted(true);
+		} else {
 			e = update(em, entity);
-		return e;
+			builder.wasUpdated(true);
+		}
+		return builder.jpa(e).build();
 	}
 
 	@Override
