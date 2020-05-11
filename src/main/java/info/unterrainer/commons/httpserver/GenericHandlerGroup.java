@@ -1,7 +1,6 @@
 package info.unterrainer.commons.httpserver;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -135,9 +134,6 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, b);
 			P mappedJpa = orikaMapper.map(json, jpaType);
-			LocalDateTime time = LocalDateTime.now();
-			mappedJpa.setCreatedOn(time);
-			mappedJpa.setEditedOn(time);
 			mappedJpa = extensions.runPreInsert(ctx, json, mappedJpa, executorService);
 			P createdJpa = dao.create(mappedJpa);
 			J r = orikaMapper.map(createdJpa, jsonType);
@@ -155,11 +151,9 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, ctx.body());
 			P mappedJpa = orikaMapper.map(json, jpaType);
-			mappedJpa.setEditedOn(LocalDateTime.now());
-			mappedJpa.setCreatedOn(jpa.getCreatedOn());
 			mappedJpa.setId(jpa.getId());
 			mappedJpa = extensions.runPreModify(ctx, jpa.getId(), json, jpa, mappedJpa, executorService);
-			P persistedJpa = dao.persist(mappedJpa);
+			P persistedJpa = dao.update(mappedJpa);
 
 			J r = orikaMapper.map(persistedJpa, jsonType);
 			r = extensions.runPostModify(ctx, jpa.getId(), json, jpa, mappedJpa, persistedJpa, r, executorService);

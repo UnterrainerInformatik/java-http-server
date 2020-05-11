@@ -1,6 +1,10 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -35,18 +39,38 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 
 	@Override
 	public P create(final EntityManager em, final P entity) {
+		LocalDateTime time = ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
+		entity.setCreatedOn(time);
+		entity.setEditedOn(time);
 		em.persist(entity);
 		return entity;
 	}
 
 	@Override
-	public P persist(final P entity) {
-		return Transactions.withNewTransactionReturning(emf, em -> em.merge(entity));
+	public P update(final P entity) {
+		return Transactions.withNewTransactionReturning(emf, em -> update(em, entity));
 	}
 
 	@Override
-	public P persist(final EntityManager em, final P entity) {
+	public P update(final EntityManager em, final P entity) {
+		LocalDateTime time = ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
+		entity.setEditedOn(time);
 		return em.merge(entity);
+	}
+
+	@Override
+	public P upsert(final P entity) {
+		return Transactions.withNewTransactionReturning(emf, em -> upsert(em, entity));
+	}
+
+	@Override
+	public P upsert(final EntityManager em, final P entity) {
+		P e = getById(em, entity.getId());
+		if (e == null)
+			e = create(em, entity);
+		else
+			e = update(em, entity);
+		return e;
 	}
 
 	@Override
@@ -65,23 +89,55 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 
 	@Override
 	public P getById(final EntityManager em, final Long id) {
-		return em.createQuery(String.format("SELECT o FROM %s AS o WHERE o.id = :id", type.getSimpleName()), type)
-				.setParameter("id", id)
+		return getQuery(em, "o.id = :id", ParamMap.builder().parameter("id", id).build()).setParameter("id", id)
 				.getSingleResult();
 	}
 
 	@Override
 	public ListJson<P> getList(final EntityManager em, final long offset, final long size) {
 		ListJson<P> r = new ListJson<>();
-		TypedQuery<P> q = em
-				.createQuery(String.format("SELECT o FROM %s AS o ORDER BY o.id ASC", type.getSimpleName()), type)
-				.setMaxResults((int) size)
-				.setFirstResult((int) offset);
+		TypedQuery<P> q = getQuery(em).setMaxResults((int) size).setFirstResult((int) offset);
 		List<P> qResult = q.getResultList();
 		Query cq = em.createQuery(String.format("SELECT COUNT(o.id) FROM %s AS o", type.getSimpleName()));
 		Long cqResult = (Long) cq.getSingleResult();
 		r.setEntries(qResult);
 		r.setCount(cqResult);
 		return r;
+	}
+
+	public TypedQuery<P> getQuery(final EntityManager em) {
+		return getQuery(em, "", null);
+	}
+
+	public TypedQuery<P> getQuery(final EntityManager em, final String whereClause, final ParamMap params) {
+		String query = "SELECT o FROM %s AS o";
+		if (whereClause != null && !whereClause.isBlank())
+			query += " WHERE " + whereClause;
+		TypedQuery<P> q = em.createQuery(String.format(query + " ORDER BY o.id ASC", type.getSimpleName()), type);
+		if (params != null)
+			for (Entry<String, Object> e : params.getParameters().entrySet())
+				q.setParameter(e.getKey(), e.getValue());
+		return q;
+	}
+
+	public P firstResultOf(final EntityManager em, final String whereClause, final ParamMap params) {
+		return firstResultOf(getQuery(em, whereClause, params));
+	}
+
+	public P firstResultOf(final TypedQuery<P> query) {
+		List<P> r = query.setMaxResults(1).getResultList();
+		if (r.size() == 1) {
+			P jpa = r.get(0);
+			return jpa;
+		}
+		return null;
+	}
+
+	public List<P> allResultsOf(final EntityManager em, final String whereClause, final ParamMap params) {
+		return allResultsOf(getQuery(em, whereClause, params));
+	}
+
+	public List<P> allResultsOf(final TypedQuery<P> query) {
+		return query.getResultList();
 	}
 }

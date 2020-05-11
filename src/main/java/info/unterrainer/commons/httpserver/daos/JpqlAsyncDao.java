@@ -65,7 +65,7 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements
 	public P setStateTo(final EntityManager em, final AsyncState stateToSetTo, final Long id) {
 		P jpa = getById(em, id);
 		jpa.setState(stateToSetTo);
-		persist(em, jpa);
+		update(em, jpa);
 		return jpa;
 	}
 }

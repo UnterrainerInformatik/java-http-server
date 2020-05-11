@@ -13,7 +13,9 @@ public interface BasicDao<P extends BasicJpa> {
 
 	P create(P entity);
 
-	P persist(P entity);
+	P update(P entity);
+
+	P upsert(P entity);
 
 	void delete(Long id);
 
@@ -23,7 +25,9 @@ public interface BasicDao<P extends BasicJpa> {
 
 	P create(EntityManager em, P entity);
 
-	P persist(EntityManager em, P entity);
+	P update(EntityManager em, P entity);
+
+	P upsert(EntityManager em, P entity);
 
 	void delete(EntityManager em, Long id);
 }
