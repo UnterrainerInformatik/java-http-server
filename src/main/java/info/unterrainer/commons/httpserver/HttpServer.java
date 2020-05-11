@@ -88,10 +88,8 @@ public class HttpServer {
 		server.setConnectors(new ServerConnector[] { connector });
 
 		javalin = Javalin.create(config -> {
-			config.server(() -> server)
-					.enableCorsForAllOrigins();
-		})
-				.start(config.port());
+			config.server(() -> server).enableCorsForAllOrigins();
+		}).start(config.port());
 
 		javalin.before(ctx -> ctx.attribute(Attribute.JAVALIN_SERVER, this));
 		javalin.before(ctx -> ctx.contentType("application/json"));
@@ -104,13 +102,10 @@ public class HttpServer {
 		javalin.error(404, ctx -> {
 			ctx.result(jsonMapper.toStringFrom(MessageJson.builder()
 					.message(NotFoundException.HTTP_STATUS + " " + NotFoundException.HTTP_TEXT)
-					.build()))
-					.contentType("application/json")
-					.status(NotFoundException.HTTP_STATUS);
-		})
-				.exception(Exception.class, (e, ctx) -> {
-					handleException(e, ctx);
-				});
+					.build())).contentType("application/json").status(NotFoundException.HTTP_STATUS);
+		}).exception(Exception.class, (e, ctx) -> {
+			handleException(e, ctx);
+		});
 
 		get("/", new AppNameHandler(applicationName));
 		get("/datetime", new DateTimeHandler());
@@ -134,8 +129,7 @@ public class HttpServer {
 	private void handleException(final Exception e, final Context ctx) {
 		int status;
 		String message;
-		if (e.getClass()
-				.isAssignableFrom(HttpException.class)) {
+		if (HttpException.class.isAssignableFrom(e.getClass())) {
 			HttpException h = (HttpException) e;
 			status = h.getHttpStatus();
 			message = status + " " + h.getHttpText();
@@ -144,9 +138,7 @@ public class HttpServer {
 			message = "500 Internal Server Error";
 			log.error(e.getMessage(), e);
 		}
-		ctx.result(jsonMapper.toStringFrom(MessageJson.builder()
-				.message(message)
-				.build()))
+		ctx.result(jsonMapper.toStringFrom(MessageJson.builder().message(message).build()))
 				.contentType("application/json")
 				.status(status);
 	}
