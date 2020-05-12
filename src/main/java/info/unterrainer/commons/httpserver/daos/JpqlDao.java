@@ -114,7 +114,13 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 	@Override
 	public ListJson<P> getList(final EntityManager em, final long offset, final long size) {
 		ListJson<P> r = new ListJson<>();
-		TypedQuery<P> q = getQuery(em).setMaxResults((int) size).setFirstResult((int) offset);
+		int s = Integer.MAX_VALUE;
+		if (size < s)
+			s = (int) size;
+		int o = Integer.MAX_VALUE;
+		if (offset < o)
+			o = (int) offset;
+		TypedQuery<P> q = getQuery(em).setMaxResults(s).setFirstResult(o);
 		List<P> qResult = q.getResultList();
 		Query cq = em.createQuery(String.format("SELECT COUNT(o.id) FROM %s AS o", type.getSimpleName()));
 		Long cqResult = (Long) cq.getSingleResult();
