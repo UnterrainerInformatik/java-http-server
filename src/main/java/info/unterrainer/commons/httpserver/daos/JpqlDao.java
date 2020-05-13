@@ -80,7 +80,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 	public UpsertResult<P> upsert(final EntityManager em, final TypedQuery<P> query, final P entity) {
 		UpsertResultBuilder<P, ?, ?> builder = UpsertResult.builder();
 
-		P e = firstResultOf(query);
+		P e = firstOf(query);
 		if (e == null) {
 			e = create(em, entity);
 			builder.wasInserted(true);
@@ -144,11 +144,11 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return q;
 	}
 
-	public P firstResultOf(final EntityManager em, final String whereClause, final ParamMap params) {
-		return firstResultOf(getQuery(em, whereClause, params));
+	public P firstOf(final EntityManager em, final String whereClause, final ParamMap params) {
+		return firstOf(getQuery(em, whereClause, params));
 	}
 
-	public P firstResultOf(final TypedQuery<P> query) {
+	public P firstOf(final TypedQuery<P> query) {
 		List<P> r = query.setMaxResults(1).getResultList();
 		if (r.size() == 1) {
 			P jpa = r.get(0);
@@ -157,11 +157,11 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return null;
 	}
 
-	public List<P> allResultsOf(final EntityManager em, final String whereClause, final ParamMap params) {
-		return allResultsOf(getQuery(em, whereClause, params));
+	public List<P> listOf(final EntityManager em, final String whereClause, final ParamMap params) {
+		return listOf(getQuery(em, whereClause, params));
 	}
 
-	public List<P> allResultsOf(final TypedQuery<P> query) {
+	public List<P> listOf(final TypedQuery<P> query) {
 		return query.getResultList();
 	}
 }
