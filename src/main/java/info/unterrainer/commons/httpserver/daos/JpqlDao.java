@@ -129,8 +129,16 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return r;
 	}
 
+	public TypedQuery<P> getQuery() {
+		return Transactions.withNewTransactionReturning(emf, em -> getQuery(em));
+	}
+
 	public TypedQuery<P> getQuery(final EntityManager em) {
 		return getQuery(em, "", null);
+	}
+
+	public TypedQuery<P> getQuery(final String whereClause, final ParamMap params) {
+		return Transactions.withNewTransactionReturning(emf, em -> getQuery(em, whereClause, params));
 	}
 
 	public TypedQuery<P> getQuery(final EntityManager em, final String whereClause, final ParamMap params) {
@@ -144,6 +152,10 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return q;
 	}
 
+	public P firstOf(final String whereClause, final ParamMap params) {
+		return Transactions.withNewTransactionReturning(emf, em -> firstOf(em, whereClause, params));
+	}
+
 	public P firstOf(final EntityManager em, final String whereClause, final ParamMap params) {
 		return firstOf(getQuery(em, whereClause, params));
 	}
@@ -155,6 +167,10 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 			return jpa;
 		}
 		return null;
+	}
+
+	public List<P> listOf(final String whereClause, final ParamMap params) {
+		return Transactions.withNewTransactionReturning(emf, em -> listOf(em, whereClause, params));
 	}
 
 	public List<P> listOf(final EntityManager em, final String whereClause, final ParamMap params) {
