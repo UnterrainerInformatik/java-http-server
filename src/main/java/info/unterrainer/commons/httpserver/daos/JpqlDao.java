@@ -142,10 +142,29 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 	}
 
 	public TypedQuery<P> getQuery(final EntityManager em, final String whereClause, final ParamMap params) {
+		return getQuery(em, whereClause, params, type, "o.id ASC");
+	}
+
+	public <T> TypedQuery<T> getQuery(final Class<T> type, final String orderBy) {
+		return Transactions.withNewTransactionReturning(emf, em -> getQuery(em, type, orderBy));
+	}
+
+	public <T> TypedQuery<T> getQuery(final EntityManager em, final Class<T> type, final String orderBy) {
+		return getQuery(em, "", null, type, orderBy);
+	}
+
+	public <T> TypedQuery<T> getQuery(final String whereClause, final ParamMap params, final Class<T> type) {
+		return Transactions.withNewTransactionReturning(emf, em -> getQuery(em, whereClause, params, type, "o.id ASC"));
+	}
+
+	public <T> TypedQuery<T> getQuery(final EntityManager em, final String whereClause, final ParamMap params,
+			final Class<T> type, final String orderBy) {
 		String query = "SELECT o FROM %s AS o";
 		if (whereClause != null && !whereClause.isBlank())
 			query += " WHERE " + whereClause;
-		TypedQuery<P> q = em.createQuery(String.format(query + " ORDER BY o.id ASC", type.getSimpleName()), type);
+		if (orderBy != null && !orderBy.isBlank())
+			query += " ORDER BY " + orderBy;
+		TypedQuery<T> q = em.createQuery(String.format(query, type.getSimpleName()), type);
 		if (params != null)
 			for (Entry<String, Object> e : params.getParameters().entrySet())
 				q.setParameter(e.getKey(), e.getValue());
@@ -167,6 +186,19 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 			return jpa;
 		}
 		return null;
+	}
+
+	public <T> T singleOf(final String whereClause, final ParamMap params, final Class<T> type) {
+		return Transactions.withNewTransactionReturning(emf, em -> singleOf(em, whereClause, params, type));
+	}
+
+	public <T> T singleOf(final EntityManager em, final String whereClause, final ParamMap params,
+			final Class<T> type) {
+		return singleOf(getQuery(em, whereClause, params, type, null));
+	}
+
+	public <T> T singleOf(final TypedQuery<T> query) {
+		return query.getSingleResult();
 	}
 
 	public List<P> listOf(final String whereClause, final ParamMap params) {
