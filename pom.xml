@@ -9,7 +9,7 @@
 	</parent>
 
 	<properties>
-		<mainclass>info.unterrainer.commons.jreutils.JreUtils</mainclass>
+		<mainclass>info.unterrainer.commons.httpserver.HttpServer</mainclass>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
