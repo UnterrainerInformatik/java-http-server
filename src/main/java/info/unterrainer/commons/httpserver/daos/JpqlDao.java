@@ -172,7 +172,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 			query += " WHERE " + whereClause;
 		if (orderBy != null && !orderBy.isBlank())
 			query += " ORDER BY " + orderBy;
-		TypedQuery<T> q = em.createQuery(String.format(query, type.getSimpleName()), type);
+		TypedQuery<T> q = em.createQuery(String.format(query, this.type.getSimpleName()), type);
 		if (params != null)
 			for (Entry<String, Object> e : params.getParameters().entrySet())
 				q.setParameter(e.getKey(), e.getValue());
