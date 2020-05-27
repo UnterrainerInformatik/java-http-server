@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
@@ -107,8 +108,12 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 
 	@Override
 	public P getById(final EntityManager em, final Long id) {
-		return getQuery(em, "o.id = :id", ParamMap.builder().parameter("id", id).build()).setParameter("id", id)
-				.getSingleResult();
+		try {
+			return getQuery(em, "o.id = :id", ParamMap.builder().parameter("id", id).build()).setParameter("id", id)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
 	}
 
 	@Override
