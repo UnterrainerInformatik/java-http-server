@@ -1,6 +1,7 @@
 package info.unterrainer.commons.httpserver.daos;
 
 import java.util.List;
+import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -58,13 +59,27 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements
 
 	@Override
 	public P setStateTo(final AsyncState stateToSetTo, final Long id) {
-		return Transactions.withNewTransactionReturning(emf, em -> setStateTo(em, stateToSetTo, id));
+		return setStateTo(stateToSetTo, id, null);
 	}
 
 	@Override
 	public P setStateTo(final EntityManager em, final AsyncState stateToSetTo, final Long id) {
+		return setStateTo(em, stateToSetTo, id, null);
+	}
+
+	@Override
+	public P setStateTo(final AsyncState stateToSetTo, final Long id, final Function<P, P> additionalTransformations) {
+		return Transactions.withNewTransactionReturning(emf,
+				em -> setStateTo(em, stateToSetTo, id, additionalTransformations));
+	}
+
+	@Override
+	public P setStateTo(final EntityManager em, final AsyncState stateToSetTo, final Long id,
+			final Function<P, P> additionalTransformations) {
 		P jpa = getById(em, id);
 		jpa.setState(stateToSetTo);
+		if (additionalTransformations != null)
+			jpa = additionalTransformations.apply(jpa);
 		update(em, jpa);
 		return jpa;
 	}

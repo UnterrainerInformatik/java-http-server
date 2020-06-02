@@ -1,5 +1,7 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import java.util.function.Function;
+
 import javax.persistence.EntityManager;
 
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
@@ -11,7 +13,12 @@ public interface BasicAsyncDao<P extends BasicAsyncJpa> extends BasicDao<P> {
 
 	P setStateTo(final AsyncState stateToSetTo, Long id);
 
+	P setStateTo(final AsyncState stateToSetTo, Long id, final Function<P, P> additionalTransformations);
+
 	P lockedGetNextWith(EntityManager em, final AsyncState stateToSetTo, final AsyncState... states);
 
 	P setStateTo(EntityManager em, final AsyncState stateToSetTo, Long id);
+
+	P setStateTo(EntityManager em, final AsyncState stateToSetTo, Long id,
+			final Function<P, P> additionalTransformations);
 }
