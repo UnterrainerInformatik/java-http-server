@@ -152,6 +152,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			J json = jsonMapper.fromStringTo(jsonType, ctx.body());
 			P mappedJpa = orikaMapper.map(json, jpaType);
 			mappedJpa.setId(jpa.getId());
+			mappedJpa.setCreatedOn(jpa.getCreatedOn());
+			mappedJpa.setEditedOn(jpa.getEditedOn());
 			mappedJpa = extensions.runPreModify(ctx, jpa.getId(), json, jpa, mappedJpa, executorService);
 			P persistedJpa = dao.update(mappedJpa);
 
