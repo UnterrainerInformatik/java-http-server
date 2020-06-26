@@ -23,7 +23,7 @@
 				<repository>
 					<id>gitlab-maven</id>
 					<name>gitlab-maven</name>
-					<url>https://gitlab.elite-zettl.at:4880/api/v4/projects/4/packages/maven</url>
+					<url>https://gitlab.elite-zettl.at/api/v4/projects/4/packages/maven</url>
 				</repository>
 			</repositories>
 		</profile>
