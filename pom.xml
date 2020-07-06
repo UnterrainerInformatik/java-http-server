@@ -10,6 +10,7 @@
 
 	<properties>
 		<mainclass>info.unterrainer.commons.httpserver.HttpServer</mainclass>
+		<name>Http-Server</name>
 		<package-path>info/unterrainer/commons/httpserver</package-path>
 		<packg-string>info.unterrainer.commons.httpserver</packg-string>
 	</properties>
@@ -24,7 +25,7 @@
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>jre-utils</artifactId>
-			<version>0.0.6</version>
+			<version>0.0.10</version>
 		</dependency>
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>

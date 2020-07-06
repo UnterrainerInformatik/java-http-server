@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -38,6 +39,7 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 @Slf4j
 public class HttpServer {
 
+	private static final String VERSION_FQN = "info.unterrainer.commons.httpserver.Information";
 	private Javalin javalin;
 	private HttpServerConfiguration config;
 	private String applicationName;
@@ -46,16 +48,20 @@ public class HttpServer {
 	private final List<HandlerGroup> handlerGroups = new ArrayList<>();
 	private List<HandlerInstance> handlerInstances = new ArrayList<>();
 	ExecutorService executorService;
+	List<String> appVersionFqns;
 
 	private HttpServer() {
 	}
 
 	@Builder
 	private HttpServer(final String configPrefix, final String applicationName, final MapperFactory orikaFactory,
-			final JsonMapper jsonMapper, final ExecutorService executorService) {
+			final JsonMapper jsonMapper, final ExecutorService executorService, final String... appVersionFqns) {
 		config = HttpServerConfiguration.read(configPrefix);
 		this.applicationName = applicationName;
 		this.executorService = executorService;
+		this.appVersionFqns = new ArrayList<>(List.of(Optional.ofNullable(appVersionFqns).orElse(new String[0])));
+		if (!this.appVersionFqns.contains(VERSION_FQN))
+			this.appVersionFqns.add(VERSION_FQN);
 		if (executorService == null)
 			this.executorService = new ThreadPoolExecutor(1, 200, 0L, TimeUnit.MILLISECONDS,
 					new LinkedBlockingQueue<Runnable>());
@@ -109,7 +115,7 @@ public class HttpServer {
 		});
 
 		get("/", new AppNameHandler(applicationName));
-		get("/version", new AppVersionHandler());
+		get("/version", new AppVersionHandler(appVersionFqns));
 		get("/datetime", new DateTimeHandler());
 		get("/health", new HealthHandler());
 

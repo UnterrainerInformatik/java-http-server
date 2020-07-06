@@ -1,5 +1,7 @@
 package info.unterrainer.commons.httpserver.jsons;
 
+import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -7,9 +9,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class AppVersionJson {
+public class VersionsJson {
 
-	private String name;
-	private String buildTime;
-	private String pomVersion;
+	private List<AppVersionJson> Versions;
 }
