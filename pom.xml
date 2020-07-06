@@ -5,11 +5,13 @@
 	<parent>
 		<groupId>info.unterrainer.commons</groupId>
 		<artifactId>parent-pom</artifactId>
-		<version>0.0.20</version>
+		<version>0.0.21</version>
 	</parent>
 
 	<properties>
 		<mainclass>info.unterrainer.commons.httpserver.HttpServer</mainclass>
+		<package-path>info/unterrainer/commons/httpserver</package-path>
+		<packg-string>info.unterrainer.commons.httpserver</packg-string>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>

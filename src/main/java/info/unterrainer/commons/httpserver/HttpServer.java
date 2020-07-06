@@ -17,6 +17,7 @@ import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.exceptions.HttpException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
 import info.unterrainer.commons.httpserver.handlers.AppNameHandler;
+import info.unterrainer.commons.httpserver.handlers.AppVersionHandler;
 import info.unterrainer.commons.httpserver.handlers.DateTimeHandler;
 import info.unterrainer.commons.httpserver.handlers.HealthHandler;
 import info.unterrainer.commons.httpserver.jsons.MessageJson;
@@ -108,6 +109,7 @@ public class HttpServer {
 		});
 
 		get("/", new AppNameHandler(applicationName));
+		get("/version", new AppVersionHandler());
 		get("/datetime", new DateTimeHandler());
 		get("/health", new HealthHandler());
 

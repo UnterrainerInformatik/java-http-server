@@ -1,0 +1,6 @@
+package @package@;
+
+public class Information {
+	public static final String BuildTime = "@buildTime@";
+	public static final String PomVersion = "@pomVersion@";
+}
