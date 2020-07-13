@@ -1,9 +1,35 @@
 package info.unterrainer.commons.httpserver;
 
+import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
+import info.unterrainer.commons.httpserver.jsons.ListJson;
 import io.javalin.http.Context;
 
 public class HandlerUtils {
+
+	public <J> void setPaginationParamsFor(final ListJson<J> jList, final long offset, final long pageSize,
+			final long count, final Context ctx) {
+
+		jList.setFirst(String.format(QueryField.LIST_LINK, ctx.url(), 0, pageSize));
+
+		if (pageSize > 0) {
+			int last = (int) (count / pageSize * pageSize);
+			if (last == count)
+				last -= pageSize;
+			jList.setLast(String.format(QueryField.LIST_LINK, ctx.url(), last, pageSize));
+		}
+
+		long next = offset + pageSize;
+		if (next < count)
+			jList.setNext(String.format(QueryField.LIST_LINK, ctx.url(), next, pageSize));
+
+		long prev = offset - pageSize;
+		if (prev < 0)
+			prev = 0;
+		jList.setPrevious(String.format(QueryField.LIST_LINK, ctx.url(), prev, pageSize));
+
+		jList.setCount(count);
+	}
 
 	public Long getQueryParamAsLong(final Context ctx, final String name) {
 		return getQueryParamAsLong(ctx, "scanId", true, null);

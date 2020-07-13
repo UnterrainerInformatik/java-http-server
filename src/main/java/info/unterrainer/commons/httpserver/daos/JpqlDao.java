@@ -34,6 +34,10 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return Transactions.withNewTransactionReturning(emf, em -> getList(em, offset, size));
 	}
 
+	public ListJson<P> getList(final long offset, final long size, final String whereClause, final ParamMap params) {
+		return Transactions.withNewTransactionReturning(emf, em -> getList(em, offset, size, whereClause, params));
+	}
+
 	@Override
 	public P create(final P entity) {
 		return Transactions.withNewTransactionReturning(emf, em -> create(em, entity));
@@ -118,6 +122,13 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 
 	@Override
 	public ListJson<P> getList(final EntityManager em, final long offset, final long size) {
+		return getList(em, offset, size, "", null);
+	}
+
+	public ListJson<P> getList(final EntityManager em, final long offset, final long size, String whereClause,
+			final ParamMap params) {
+		if (whereClause == null)
+			whereClause = "";
 		ListJson<P> r = new ListJson<>();
 		int s = Integer.MAX_VALUE;
 		if (size < s)
@@ -125,9 +136,9 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		int o = Integer.MAX_VALUE;
 		if (offset < o)
 			o = (int) offset;
-		TypedQuery<P> q = getQuery(em).setMaxResults(s).setFirstResult(o);
+		TypedQuery<P> q = getQuery(em, whereClause, params).setMaxResults(s).setFirstResult(o);
 		List<P> qResult = q.getResultList();
-		Query cq = em.createQuery(String.format("SELECT COUNT(o.id) FROM %s AS o", type.getSimpleName()));
+		Query cq = getCountQuery(em, whereClause, params);
 		Long cqResult = (Long) cq.getSingleResult();
 		r.setEntries(qResult);
 		r.setCount(cqResult);
@@ -173,6 +184,17 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		if (orderBy != null && !orderBy.isBlank())
 			query += " ORDER BY " + orderBy;
 		TypedQuery<T> q = em.createQuery(String.format(query, this.type.getSimpleName()), type);
+		if (params != null)
+			for (Entry<String, Object> e : params.getParameters().entrySet())
+				q.setParameter(e.getKey(), e.getValue());
+		return q;
+	}
+
+	public Query getCountQuery(final EntityManager em, final String whereClause, final ParamMap params) {
+		String query = "SELECT COUNT(o.id) FROM %s AS o";
+		if (whereClause != null && !whereClause.isBlank())
+			query += " WHERE " + whereClause;
+		Query q = em.createQuery(String.format(query, this.type.getSimpleName()));
 		if (params != null)
 			for (Entry<String, Object> e : params.getParameters().entrySet())
 				q.setParameter(e.getKey(), e.getValue());
