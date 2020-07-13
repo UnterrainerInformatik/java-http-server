@@ -33,6 +33,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	private final List<Endpoint> endpoints;
 	private final HandlerExtensions<P, J> extensions;
 	private final ExecutorService executorService;
+	private final HandlerUtils hu = new HandlerUtils();
 
 	@Override
 	public void addHandlers(final HttpServer server) {
@@ -95,18 +96,6 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		jList.setCount(count);
 	}
 
-	private Long parseListParam(final String name, final Long defaultValue, final Context ctx) {
-		String o = ctx.queryParam(name);
-		Long result = defaultValue;
-		if (o != null)
-			try {
-				result = Long.parseLong(o);
-			} catch (NumberFormatException e) {
-				throw new BadRequestException(String.format("Parameter %s has to be a number", name));
-			}
-		return result;
-	}
-
 	private void getEntry(final Context ctx) {
 		P jpa = getJpaById(ctx, dao);
 		J json = orikaMapper.map(jpa, jsonType);
@@ -115,8 +104,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	}
 
 	private void getList(final Context ctx) {
-		Long offset = parseListParam(QueryField.PAGINATION_OFFSET, 0L, ctx);
-		Long size = parseListParam(QueryField.PAGINATION_SIZE, Long.MAX_VALUE, ctx);
+		Long offset = hu.getQueryParamAsLong(ctx, QueryField.PAGINATION_OFFSET, 0L);
+		Long size = hu.getQueryParamAsLong(ctx, QueryField.PAGINATION_SIZE, Long.MAX_VALUE);
 
 		ListJson<P> bList = dao.getList(offset, size);
 		ListJson<J> jList = new ListJson<>();
