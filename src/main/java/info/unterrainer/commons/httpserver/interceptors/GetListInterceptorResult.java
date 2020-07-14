@@ -10,4 +10,5 @@ public class GetListInterceptorResult {
 
 	private String whereClause;
 	private ParamMap params;
+	private String partOfQueryString;
 }
