@@ -90,17 +90,16 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 				.whereClause("")
 				.params(null)
 				.build();
-		try {
-			for (GetListInterceptor interceptor : getListInterceptors) {
+		for (GetListInterceptor interceptor : getListInterceptors)
+			try {
 				GetListInterceptorResult result = interceptor.intercept(ctx, hu);
 				if (result != null) {
 					interceptorResult = result;
 					break;
 				}
+			} catch (Exception e) {// NOOP}
 			}
-		} catch (Exception e) {// NOOP}
 
-		}
 		ListJson<P> bList = dao.getList(offset, size, interceptorResult.getWhereClause(),
 				interceptorResult.getParams());
 		ListJson<J> jList = new ListJson<>();
