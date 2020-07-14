@@ -32,11 +32,11 @@ public class HandlerUtils {
 	}
 
 	public Long getQueryParamAsLong(final Context ctx, final String name) {
-		return getQueryParamAsLong(ctx, "scanId", true, null);
+		return getQueryParamAsLong(ctx, name, true, null);
 	}
 
 	public Long getQueryParamAsLong(final Context ctx, final String name, final Long defaultValue) {
-		return getQueryParamAsLong(ctx, "scanId", false, defaultValue);
+		return getQueryParamAsLong(ctx, name, false, defaultValue);
 	}
 
 	private Long getQueryParamAsLong(final Context ctx, final String name, final boolean mandatory,
@@ -55,11 +55,11 @@ public class HandlerUtils {
 	}
 
 	public String getQueryParamAsString(final Context ctx, final String name) {
-		return getQueryParamAsString(ctx, "scanId", true, null);
+		return getQueryParamAsString(ctx, name, true, null);
 	}
 
 	public String getQueryParamAsString(final Context ctx, final String name, final String defaultValue) {
-		return getQueryParamAsString(ctx, "scanId", false, defaultValue);
+		return getQueryParamAsString(ctx, name, false, defaultValue);
 	}
 
 	private String getQueryParamAsString(final Context ctx, final String name, final boolean mandatory,

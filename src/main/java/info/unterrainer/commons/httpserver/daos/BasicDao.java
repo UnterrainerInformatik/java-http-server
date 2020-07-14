@@ -12,13 +12,15 @@ public interface BasicDao<P extends BasicJpa> {
 
 	ListJson<P> getList(long offset, long size);
 
+	ListJson<P> getList(long offset, long size, String whereClause, ParamMap params);
+
 	P create(P entity);
 
 	P update(P entity);
 
-	UpsertResult<P> upsert(final String whereClause, final ParamMap params, final P entity);
+	UpsertResult<P> upsert(String whereClause, ParamMap params, P entity);
 
-	UpsertResult<P> upsert(final TypedQuery<P> query, final P entity);
+	UpsertResult<P> upsert(TypedQuery<P> query, P entity);
 
 	void delete(Long id);
 
@@ -26,13 +28,15 @@ public interface BasicDao<P extends BasicJpa> {
 
 	ListJson<P> getList(EntityManager em, long offset, long size);
 
+	ListJson<P> getList(EntityManager em, long offset, long size, String whereClause, ParamMap params);
+
 	P create(EntityManager em, P entity);
 
 	P update(EntityManager em, P entity);
 
-	UpsertResult<P> upsert(final EntityManager em, final String whereClause, final ParamMap params, final P entity);
+	UpsertResult<P> upsert(EntityManager em, String whereClause, ParamMap params, P entity);
 
-	UpsertResult<P> upsert(final EntityManager em, final TypedQuery<P> query, final P entity);
+	UpsertResult<P> upsert(EntityManager em, TypedQuery<P> query, P entity);
 
 	void delete(EntityManager em, Long id);
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.daos.BasicDao;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
+import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.serialization.JsonMapper;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
@@ -26,6 +27,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 	private MapperFactory orikaFactory;
 	private String path;
 	private List<Endpoint> endpoints = new ArrayList<>();
+	private List<GetListInterceptor> getListInterceptors = new ArrayList<>();
 	private ExecutorService executorService;
 
 	HandlerExtensions<P, J> extensions = new HandlerExtensions<>();
@@ -38,7 +40,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 		if (executorService == null)
 			executorService = server.executorService;
 		GenericHandlerGroup<P, J> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType, jsonMapper,
-				orikaFactory.getMapperFacade(), path, endpoints, extensions, executorService);
+				orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors, extensions, executorService);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
 	}
@@ -74,6 +76,11 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 
 	public GenericHandlerGroupBuilder<P, J> endpoints(final Endpoint... endpoints) {
 		this.endpoints.addAll(Arrays.asList(endpoints));
+		return this;
+	}
+
+	public GenericHandlerGroupBuilder<P, J> getListInterceptor(final GetListInterceptor interceptor) {
+		getListInterceptors.add(interceptor);
 		return this;
 	}
 }

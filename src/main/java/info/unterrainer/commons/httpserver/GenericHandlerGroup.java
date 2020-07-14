@@ -10,6 +10,8 @@ import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
+import info.unterrainer.commons.httpserver.interceptors.GetListInterceptorResult;
+import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.serialization.JsonMapper;
@@ -31,6 +33,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	private final MapperFacade orikaMapper;
 	private final String path;
 	private final List<Endpoint> endpoints;
+	private final List<GetListInterceptor> getListInterceptors;
 	private final HandlerExtensions<P, J> extensions;
 	private final ExecutorService executorService;
 	private final HandlerUtils hu = new HandlerUtils();
@@ -83,7 +86,23 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		Long offset = hu.getQueryParamAsLong(ctx, QueryField.PAGINATION_OFFSET, 0L);
 		Long size = hu.getQueryParamAsLong(ctx, QueryField.PAGINATION_SIZE, Long.MAX_VALUE);
 
-		ListJson<P> bList = dao.getList(offset, size);
+		GetListInterceptorResult interceptorResult = GetListInterceptorResult.builder()
+				.whereClause("")
+				.params(null)
+				.build();
+		try {
+			for (GetListInterceptor interceptor : getListInterceptors) {
+				GetListInterceptorResult result = interceptor.intercept(ctx, hu);
+				if (result != null) {
+					interceptorResult = result;
+					break;
+				}
+			}
+		} catch (Exception e) {// NOOP}
+
+		}
+		ListJson<P> bList = dao.getList(offset, size, interceptorResult.getWhereClause(),
+				interceptorResult.getParams());
 		ListJson<J> jList = new ListJson<>();
 		for (P entry : bList.getEntries())
 			jList.getEntries().add(orikaMapper.map(entry, jsonType));

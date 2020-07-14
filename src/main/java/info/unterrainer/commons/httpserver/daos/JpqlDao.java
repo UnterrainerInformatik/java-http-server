@@ -34,6 +34,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return Transactions.withNewTransactionReturning(emf, em -> getList(em, offset, size));
 	}
 
+	@Override
 	public ListJson<P> getList(final long offset, final long size, final String whereClause, final ParamMap params) {
 		return Transactions.withNewTransactionReturning(emf, em -> getList(em, offset, size, whereClause, params));
 	}
@@ -125,6 +126,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return getList(em, offset, size, "", null);
 	}
 
+	@Override
 	public ListJson<P> getList(final EntityManager em, final long offset, final long size, String whereClause,
 			final ParamMap params) {
 		if (whereClause == null)
