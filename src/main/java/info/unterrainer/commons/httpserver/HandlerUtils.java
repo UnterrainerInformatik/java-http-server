@@ -15,27 +15,38 @@ public class HandlerUtils {
 	public DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(JsonMapper.DATETIME_PATTERN);
 
 	public <J> void setPaginationParamsFor(final ListJson<J> jList, final long offset, final long pageSize,
-			final long count, final Context ctx) {
+			final long count, final String additionalQueryParamsString, final Context ctx) {
 
-		jList.setFirst(String.format(QueryField.LIST_LINK, ctx.url(), 0, pageSize));
+		String addition = sanitizeAdditionalParamsString(additionalQueryParamsString);
+
+		jList.setFirst(String.format(QueryField.LIST_LINK, ctx.url(), 0, pageSize, addition));
 
 		if (pageSize > 0) {
 			int last = (int) (count / pageSize * pageSize);
 			if (last == count)
 				last -= pageSize;
-			jList.setLast(String.format(QueryField.LIST_LINK, ctx.url(), last, pageSize));
+			jList.setLast(String.format(QueryField.LIST_LINK, ctx.url(), last, pageSize, addition));
 		}
 
 		long next = offset + pageSize;
 		if (next < count)
-			jList.setNext(String.format(QueryField.LIST_LINK, ctx.url(), next, pageSize));
+			jList.setNext(String.format(QueryField.LIST_LINK, ctx.url(), next, pageSize, addition));
 
 		long prev = offset - pageSize;
 		if (prev < 0)
 			prev = 0;
-		jList.setPrevious(String.format(QueryField.LIST_LINK, ctx.url(), prev, pageSize));
+		jList.setPrevious(String.format(QueryField.LIST_LINK, ctx.url(), prev, pageSize, addition));
 
 		jList.setCount(count);
+	}
+
+	private String sanitizeAdditionalParamsString(final String additionalQueryParamString) {
+		String addition = additionalQueryParamString;
+		while (addition.startsWith("?"))
+			addition = addition.substring(1);
+		while (addition.startsWith("&"))
+			addition = addition.substring(1);
+		return addition;
 	}
 
 	public Long getQueryParamAsLong(final Context ctx, final String name) {

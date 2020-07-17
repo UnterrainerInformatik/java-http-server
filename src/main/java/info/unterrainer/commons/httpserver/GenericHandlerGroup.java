@@ -89,6 +89,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		GetListInterceptorResult interceptorResult = GetListInterceptorResult.builder()
 				.whereClause("")
 				.params(null)
+				.partOfQueryString("")
 				.build();
 		for (GetListInterceptor interceptor : getListInterceptors)
 			try {
@@ -106,7 +107,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		for (P entry : bList.getEntries())
 			jList.getEntries().add(orikaMapper.map(entry, jsonType));
 
-		hu.setPaginationParamsFor(jList, offset, size, bList.getCount(), ctx);
+		hu.setPaginationParamsFor(jList, offset, size, bList.getCount(), interceptorResult.getPartOfQueryString(), ctx);
 
 		jList = extensions.runPostGetList(ctx, size, offset, bList, jList, executorService);
 		ctx.attribute(Attribute.RESPONSE_OBJECT, jList);
