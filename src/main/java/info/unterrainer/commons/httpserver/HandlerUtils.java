@@ -17,7 +17,7 @@ public class HandlerUtils {
 	public <J> void setPaginationParamsFor(final ListJson<J> jList, final long offset, final long pageSize,
 			final long count, final String additionalQueryParamsString, final Context ctx) {
 
-		String addition = sanitizeAdditionalParamsString(additionalQueryParamsString);
+		String addition = "&" + sanitizeAdditionalParamsString(additionalQueryParamsString);
 
 		jList.setFirst(String.format(QueryField.LIST_LINK, ctx.url(), 0, pageSize, addition));
 
