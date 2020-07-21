@@ -17,7 +17,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.0.30</version>
+	<version>0.0.32</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>rdb-utils</artifactId>
-			<version>0.0.21</version>
+			<version>0.0.23</version>
 		</dependency>
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
