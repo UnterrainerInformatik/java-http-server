@@ -17,7 +17,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.0.29</version>
+	<version>0.0.30</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>11.0.0.beta1</version>
+			<version>9.4.30.v20200611</version>
 		</dependency>
 	</dependencies>
 
