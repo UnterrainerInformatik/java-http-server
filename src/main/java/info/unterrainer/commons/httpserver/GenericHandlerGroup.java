@@ -9,7 +9,6 @@ import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
-import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
 import info.unterrainer.commons.httpserver.interceptors.GetListInterceptorResult;
 import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
@@ -58,25 +57,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			server.delete(pId, this::delete);
 	}
 
-	public Long checkAndGetId(final Context ctx) {
-		String s = ctx.pathParam(QueryField.ID);
-		try {
-			return Long.parseLong(s);
-		} catch (NumberFormatException e) {
-			throw new BadRequestException("Parameter has to be of numeric type (Long).");
-		}
-	}
-
-	public P getJpaById(final Context ctx, final BasicDao<P> dao) {
-		Long id = checkAndGetId(ctx);
-		P jpa = dao.getById(id);
-		if (jpa == null)
-			throw new NotFoundException();
-		return jpa;
-	}
-
 	private void getEntry(final Context ctx) {
-		P jpa = getJpaById(ctx, dao);
+		P jpa = hu.getJpaById(ctx, dao);
 		J json = orikaMapper.map(jpa, jsonType);
 		json = extensions.runPostGetSingle(ctx, jpa.getId(), jpa, json, executorService);
 		ctx.attribute(Attribute.RESPONSE_OBJECT, json);
@@ -131,7 +113,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	}
 
 	private void fullUpdate(final Context ctx) throws IOException {
-		P jpa = getJpaById(ctx, dao);
+		P jpa = hu.getJpaById(ctx, dao);
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, ctx.body());
 			P mappedJpa = orikaMapper.map(json, jpaType);
@@ -152,7 +134,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 
 	private void delete(final Context ctx) {
 		ctx.attribute(Attribute.RESPONSE_OBJECT, null);
-		Long id = checkAndGetId(ctx);
+		Long id = hu.checkAndGetId(ctx);
 		id = extensions.runPreDelete(ctx, id, executorService);
 		dao.delete(id);
 		ctx.status(204);

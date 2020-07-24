@@ -4,12 +4,32 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import info.unterrainer.commons.httpserver.daos.BasicDao;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
+import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
+import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import io.javalin.http.Context;
 
 public class HandlerUtils {
+
+	public Long checkAndGetId(final Context ctx) {
+		String s = ctx.pathParam(QueryField.ID);
+		try {
+			return Long.parseLong(s);
+		} catch (NumberFormatException e) {
+			throw new BadRequestException("Parameter has to be of numeric type (Long).");
+		}
+	}
+
+	public <P extends BasicJpa> P getJpaById(final Context ctx, final BasicDao<P> dao) {
+		Long id = checkAndGetId(ctx);
+		P jpa = dao.getById(id);
+		if (jpa == null)
+			throw new NotFoundException();
+		return jpa;
+	}
 
 	public <J> void setPaginationParamsFor(final ListJson<J> jList, final long offset, final long pageSize,
 			final long count, final String additionalQueryParamsString, final Context ctx) {
