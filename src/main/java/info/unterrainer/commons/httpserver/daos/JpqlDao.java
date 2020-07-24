@@ -246,4 +246,40 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 	public List<P> listOf(final TypedQuery<P> query) {
 		return query.getResultList();
 	}
+
+	public List<P> reverseListOf(final String whereClause, final ParamMap params) {
+		return Transactions.withNewTransactionReturning(emf, em -> reverseListOf(em, whereClause, params));
+	}
+
+	public List<P> reverseListOf(final EntityManager em, final String whereClause, final ParamMap params) {
+		return reverseListOf(getQuery(em, "o", whereClause, params, type, "o.id DESC"));
+	}
+
+	public List<P> reverseListOf(final TypedQuery<P> query) {
+		return query.getResultList();
+	}
+
+	public List<P> firstNOf(final String whereClause, final long count, final ParamMap params) {
+		return Transactions.withNewTransactionReturning(emf, em -> firstNOf(em, whereClause, count, params));
+	}
+
+	public List<P> firstNOf(final EntityManager em, final String whereClause, final long count, final ParamMap params) {
+		return nOf(getQuery(em, whereClause, params), count);
+	}
+
+	public List<P> lastNOf(final String whereClause, final long count, final ParamMap params) {
+		return Transactions.withNewTransactionReturning(emf, em -> lastNOf(em, whereClause, count, params));
+	}
+
+	public List<P> lastNOf(final EntityManager em, final String whereClause, final long count, final ParamMap params) {
+		return nOf(getQuery(em, "o", whereClause, params, type, "o.id DESC"), count);
+	}
+
+	public List<P> nOf(final TypedQuery<P> query, final long count) {
+		int s = Integer.MAX_VALUE;
+		if (count < s)
+			s = (int) count;
+		query.setMaxResults(s);
+		return query.getResultList();
+	}
 }

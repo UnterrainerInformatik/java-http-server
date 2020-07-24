@@ -8,7 +8,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
-import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
@@ -30,12 +29,12 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements
 	}
 
 	@Override
-	public ListJson<P> getLastNWith(final Long count, final AsyncState... states) {
+	public List<P> getLastNWith(final Long count, final AsyncState... states) {
 		return Transactions.withNewTransactionReturning(emf, em -> getLastNWith(em, count, states));
 	}
 
 	@Override
-	public ListJson<P> getLastNWith(final EntityManager em, final Long count, final AsyncState... states) {
+	public List<P> getLastNWith(final EntityManager em, final Long count, final AsyncState... states) {
 		return internalGetList(em, count, false, false, null, states);
 	}
 
@@ -50,12 +49,12 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements
 	}
 
 	@Override
-	public ListJson<P> getNextNWith(final Long count, final AsyncState... states) {
+	public List<P> getNextNWith(final Long count, final AsyncState... states) {
 		return Transactions.withNewTransactionReturning(emf, em -> getNextNWith(em, count, states));
 	}
 
 	@Override
-	public ListJson<P> getNextNWith(final EntityManager em, final Long count, final AsyncState... states) {
+	public List<P> getNextNWith(final EntityManager em, final Long count, final AsyncState... states) {
 		return internalGetList(em, count, false, true, null, states);
 	}
 
@@ -70,25 +69,25 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements
 	}
 
 	@Override
-	public ListJson<P> lockedGetNextNWith(final Long count, final AsyncState stateToSetTo, final AsyncState... states) {
+	public List<P> lockedGetNextNWith(final Long count, final AsyncState stateToSetTo, final AsyncState... states) {
 		return Transactions.withNewTransactionReturning(emf, em -> lockedGetNextNWith(em, count, stateToSetTo, states));
 	}
 
 	@Override
-	public ListJson<P> lockedGetNextNWith(final EntityManager em, final Long count, final AsyncState stateToSetTo,
+	public List<P> lockedGetNextNWith(final EntityManager em, final Long count, final AsyncState stateToSetTo,
 			final AsyncState... states) {
 		return internalGetList(em, count, true, true, stateToSetTo, states);
 	}
 
 	public P internalGet(final EntityManager em, final boolean lockPessimistic, final boolean ascending,
 			final AsyncState stateToSetTo, final AsyncState... states) {
-		ListJson<P> list = internalGetList(em, 1, lockPessimistic, ascending, stateToSetTo, states);
-		if (list.getCount() == 0)
+		List<P> list = internalGetList(em, 1, lockPessimistic, ascending, stateToSetTo, states);
+		if (list.size() == 0)
 			return null;
-		return list.getEntries().get(0);
+		return list.get(0);
 	}
 
-	public ListJson<P> internalGetList(final EntityManager em, final long size, final boolean lockPessimistic,
+	public List<P> internalGetList(final EntityManager em, final long size, final boolean lockPessimistic,
 			final boolean ascending, final AsyncState stateToSetTo, final AsyncState... states) {
 		int s = Integer.MAX_VALUE;
 		if (size < s)
@@ -125,7 +124,7 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements
 				em.merge(jpa);
 			}
 
-		return ListJson.<P>builder().count(r.size()).entries(r).build();
+		return r;
 	}
 
 	@Override
