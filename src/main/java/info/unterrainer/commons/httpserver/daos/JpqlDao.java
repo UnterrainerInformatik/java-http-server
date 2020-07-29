@@ -275,6 +275,31 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
 		return nOf(getQuery(em, "o", whereClause, params, type, "o.id DESC"), count);
 	}
 
+	public List<P> nOf(final String whereClause, final long count, final ParamMap params,
+			final OrderByMap orderByFields) {
+		return Transactions.withNewTransactionReturning(emf, em -> lastNOf(em, whereClause, count, params));
+	}
+
+	public List<P> nOf(final EntityManager em, final String whereClause, final long count, final ParamMap params,
+			final OrderByMap orderByFields) {
+		String orderBy = "";
+		for (Entry<String, Boolean> entry : orderByFields.getOrderByFields().entrySet()) {
+
+			if (!orderBy.isEmpty())
+				orderBy += ",";
+
+			orderBy += "o." + entry.getKey();
+
+			if (entry.getValue())
+				orderBy += " DESC";
+			else
+				orderBy += " ASC";
+		}
+		if (orderBy.isEmpty())
+			orderBy = "o.id ASC";
+		return nOf(getQuery(em, "o", whereClause, params, type, orderBy), count);
+	}
+
 	public List<P> nOf(final TypedQuery<P> query, final long count) {
 		int s = Integer.MAX_VALUE;
 		if (count < s)
