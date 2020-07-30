@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.daos.BasicDao;
+import info.unterrainer.commons.httpserver.daos.DaoTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
@@ -17,12 +18,13 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson> {
+public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson, E> {
 
 	private final HttpServer server;
-	private BasicDao<P> dao;
+	private BasicDao<P, E> dao;
 	private final Class<P> jpaType;
 	private final Class<J> jsonType;
+	private final DaoTransactionManager<E> daoTransactionManager;
 	private JsonMapper jsonMapper;
 	private MapperFactory orikaFactory;
 	private String path;
@@ -30,7 +32,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 	private List<GetListInterceptor> getListInterceptors = new ArrayList<>();
 	private ExecutorService executorService;
 
-	HandlerExtensions<P, J> extensions = new HandlerExtensions<>();
+	HandlerExtensions<P, J, E> extensions = new HandlerExtensions<>();
 
 	public HttpServer add() {
 		if (jsonMapper == null)
@@ -39,47 +41,48 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson>
 			orikaFactory = new DefaultMapperFactory.Builder().build();
 		if (executorService == null)
 			executorService = server.executorService;
-		GenericHandlerGroup<P, J> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType, jsonMapper,
-				orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors, extensions, executorService);
+		GenericHandlerGroup<P, J, E> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType,
+				daoTransactionManager, jsonMapper, orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors,
+				extensions, executorService);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
 	}
 
-	public AddonBuilder<P, J> extension() {
+	public AddonBuilder<P, J, E> extension() {
 		return new AddonBuilder<>(this);
 	}
 
-	public GenericHandlerGroupBuilder<P, J> dao(final BasicDao<P> dao) {
+	public GenericHandlerGroupBuilder<P, J, E> dao(final BasicDao<P, E> dao) {
 		this.dao = dao;
 		return this;
 	}
 
-	public GenericHandlerGroupBuilder<P, J> jsonMapper(final JsonMapper jsonMapper) {
+	public GenericHandlerGroupBuilder<P, J, E> jsonMapper(final JsonMapper jsonMapper) {
 		this.jsonMapper = jsonMapper;
 		return this;
 	}
 
-	public GenericHandlerGroupBuilder<P, J> orikaFactory(final MapperFactory orikaFactory) {
+	public GenericHandlerGroupBuilder<P, J, E> orikaFactory(final MapperFactory orikaFactory) {
 		this.orikaFactory = orikaFactory;
 		return this;
 	}
 
-	public GenericHandlerGroupBuilder<P, J> path(final String path) {
+	public GenericHandlerGroupBuilder<P, J, E> path(final String path) {
 		this.path = path;
 		return this;
 	}
 
-	public GenericHandlerGroupBuilder<P, J> endpoints(final ExecutorService executorService) {
+	public GenericHandlerGroupBuilder<P, J, E> endpoints(final ExecutorService executorService) {
 		this.executorService = executorService;
 		return this;
 	}
 
-	public GenericHandlerGroupBuilder<P, J> endpoints(final Endpoint... endpoints) {
+	public GenericHandlerGroupBuilder<P, J, E> endpoints(final Endpoint... endpoints) {
 		this.endpoints.addAll(Arrays.asList(endpoints));
 		return this;
 	}
 
-	public GenericHandlerGroupBuilder<P, J> getListInterceptor(final GetListInterceptor interceptor) {
+	public GenericHandlerGroupBuilder<P, J, E> getListInterceptor(final GetListInterceptor interceptor) {
 		getListInterceptors.add(interceptor);
 		return this;
 	}

@@ -19,7 +19,7 @@ import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class JpqlDao<P extends BasicJpa> implements BasicDao<P> {
+public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 
 	protected final EntityManagerFactory emf;
 	protected final Class<P> type;

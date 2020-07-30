@@ -3,12 +3,10 @@ package info.unterrainer.commons.httpserver.daos;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.persistence.EntityManager;
-
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
 
-public interface BasicAsyncDao<P extends BasicAsyncJpa> extends BasicDao<P> {
+public interface BasicAsyncDao<P extends BasicAsyncJpa, E> extends BasicDao<P, E> {
 
 	P getLastWith(final AsyncState... states);
 
@@ -26,21 +24,19 @@ public interface BasicAsyncDao<P extends BasicAsyncJpa> extends BasicDao<P> {
 
 	P setStateTo(final AsyncState stateToSetTo, Long id, final Function<P, P> additionalTransformations);
 
-	P getLastWith(final EntityManager em, final AsyncState... states);
+	P getLastWith(final E em, final AsyncState... states);
 
-	List<P> getLastNWith(final EntityManager em, final Long count, final AsyncState... states);
+	List<P> getLastNWith(final E em, final Long count, final AsyncState... states);
 
-	P getNextWith(final EntityManager em, final AsyncState... states);
+	P getNextWith(final E em, final AsyncState... states);
 
-	List<P> getNextNWith(final EntityManager em, final Long count, final AsyncState... states);
+	List<P> getNextNWith(final E em, final Long count, final AsyncState... states);
 
-	P lockedGetNextWith(final EntityManager em, final AsyncState stateToSetTo, final AsyncState... states);
+	P lockedGetNextWith(final E em, final AsyncState stateToSetTo, final AsyncState... states);
 
-	List<P> lockedGetNextNWith(final EntityManager em, final Long count, final AsyncState stateToSetTo,
-			final AsyncState... states);
+	List<P> lockedGetNextNWith(final E em, final Long count, final AsyncState stateToSetTo, final AsyncState... states);
 
-	P setStateTo(final EntityManager em, final AsyncState stateToSetTo, Long id);
+	P setStateTo(final E em, final AsyncState stateToSetTo, Long id);
 
-	P setStateTo(final EntityManager em, final AsyncState stateToSetTo, Long id,
-			final Function<P, P> additionalTransformations);
+	P setStateTo(final E em, final AsyncState stateToSetTo, Long id, final Function<P, P> additionalTransformations);
 }

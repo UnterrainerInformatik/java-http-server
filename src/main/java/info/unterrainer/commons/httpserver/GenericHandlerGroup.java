@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.daos.BasicDao;
+import info.unterrainer.commons.httpserver.daos.DaoTransaction;
+import info.unterrainer.commons.httpserver.daos.DaoTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.enums.QueryField;
@@ -23,17 +25,18 @@ import lombok.RequiredArgsConstructor;
 import ma.glasnost.orika.MapperFacade;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implements HandlerGroup {
+public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> implements HandlerGroup {
 
-	private final BasicDao<P> dao;
+	private final BasicDao<P, E> dao;
 	private final Class<P> jpaType;
 	private final Class<J> jsonType;
+	private final DaoTransactionManager<E> daoTransactionManager;
 	private final JsonMapper jsonMapper;
 	private final MapperFacade orikaMapper;
 	private final String path;
 	private final List<Endpoint> endpoints;
 	private final List<GetListInterceptor> getListInterceptors;
-	private final HandlerExtensions<P, J> extensions;
+	private final HandlerExtensions<P, J, E> extensions;
 	private final ExecutorService executorService;
 	private final HandlerUtils hu = new HandlerUtils();
 
@@ -58,9 +61,13 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	}
 
 	private void getEntry(final Context ctx) {
-		P jpa = hu.getJpaById(ctx, dao);
+		DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
+
+		P jpa = hu.getJpaById(ctx, transaction.getManager(), dao);
 		J json = orikaMapper.map(jpa, jsonType);
-		json = extensions.runPostGetSingle(ctx, jpa.getId(), jpa, json, executorService);
+		json = extensions.runPostGetSingle(ctx, transaction.getManager(), jpa.getId(), jpa, json, executorService);
+
+		transaction.end();
 		ctx.attribute(Attribute.RESPONSE_OBJECT, json);
 	}
 
@@ -83,7 +90,9 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			} catch (Exception e) {// NOOP}
 			}
 
-		ListJson<P> bList = dao.getList(offset, size, interceptorResult.getWhereClause(),
+		DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
+
+		ListJson<P> bList = dao.getList(transaction.getManager(), offset, size, interceptorResult.getWhereClause(),
 				interceptorResult.getParams());
 		ListJson<J> jList = new ListJson<>();
 		for (P entry : bList.getEntries())
@@ -91,7 +100,9 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 
 		hu.setPaginationParamsFor(jList, offset, size, bList.getCount(), interceptorResult.getPartOfQueryString(), ctx);
 
-		jList = extensions.runPostGetList(ctx, size, offset, bList, jList, executorService);
+		jList = extensions.runPostGetList(ctx, transaction.getManager(), size, offset, bList, jList, executorService);
+
+		transaction.end();
 		ctx.attribute(Attribute.RESPONSE_OBJECT, jList);
 	}
 
@@ -100,11 +111,16 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, b);
 			P mappedJpa = orikaMapper.map(json, jpaType);
-			mappedJpa = extensions.runPreInsert(ctx, json, mappedJpa, executorService);
-			P createdJpa = dao.create(mappedJpa);
+			DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
+
+			mappedJpa = extensions.runPreInsert(ctx, transaction.getManager(), json, mappedJpa, executorService);
+			P createdJpa = dao.create(transaction.getManager(), mappedJpa);
 			J r = orikaMapper.map(createdJpa, jsonType);
 
-			r = extensions.runPostInsert(ctx, json, mappedJpa, createdJpa, r, executorService);
+			r = extensions.runPostInsert(ctx, transaction.getManager(), json, mappedJpa, createdJpa, r,
+					executorService);
+
+			transaction.end();
 			ctx.attribute(Attribute.RESPONSE_OBJECT, r);
 
 		} catch (JsonProcessingException | JsonMappingException e) {
@@ -120,11 +136,17 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 			mappedJpa.setId(jpa.getId());
 			mappedJpa.setCreatedOn(jpa.getCreatedOn());
 			mappedJpa.setEditedOn(jpa.getEditedOn());
-			mappedJpa = extensions.runPreModify(ctx, jpa.getId(), json, jpa, mappedJpa, executorService);
+			DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
+
+			mappedJpa = extensions.runPreModify(ctx, transaction.getManager(), jpa.getId(), json, jpa, mappedJpa,
+					executorService);
 			P persistedJpa = dao.update(mappedJpa);
 
 			J r = orikaMapper.map(persistedJpa, jsonType);
-			r = extensions.runPostModify(ctx, jpa.getId(), json, jpa, mappedJpa, persistedJpa, r, executorService);
+			r = extensions.runPostModify(ctx, transaction.getManager(), jpa.getId(), json, jpa, mappedJpa, persistedJpa,
+					r, executorService);
+
+			transaction.end();
 			ctx.attribute(Attribute.RESPONSE_OBJECT, r);
 
 		} catch (JsonProcessingException | JsonMappingException e) {
@@ -135,9 +157,13 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson> implem
 	private void delete(final Context ctx) {
 		ctx.attribute(Attribute.RESPONSE_OBJECT, null);
 		Long id = hu.checkAndGetId(ctx);
-		id = extensions.runPreDelete(ctx, id, executorService);
+		DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
+
+		id = extensions.runPreDelete(ctx, transaction.getManager(), id, executorService);
 		dao.delete(id);
 		ctx.status(204);
-		extensions.runPostDelete(ctx, id, executorService);
+		extensions.runPostDelete(ctx, transaction.getManager(), id, executorService);
+
+		transaction.end();
 	}
 }

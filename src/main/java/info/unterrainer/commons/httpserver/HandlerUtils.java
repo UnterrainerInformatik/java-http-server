@@ -23,7 +23,15 @@ public class HandlerUtils {
 		}
 	}
 
-	public <P extends BasicJpa> P getJpaById(final Context ctx, final BasicDao<P> dao) {
+	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final E entityManager, final BasicDao<P, E> dao) {
+		Long id = checkAndGetId(ctx);
+		P jpa = dao.getById(entityManager, id);
+		if (jpa == null)
+			throw new NotFoundException();
+		return jpa;
+	}
+
+	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final BasicDao<P, E> dao) {
 		Long id = checkAndGetId(ctx);
 		P jpa = dao.getById(id);
 		if (jpa == null)

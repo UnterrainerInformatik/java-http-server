@@ -12,7 +12,7 @@ import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
 
-public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements BasicAsyncDao<P> {
+public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements BasicAsyncDao<P, EntityManager> {
 
 	public JpqlAsyncDao(final EntityManagerFactory emf, final Class<P> type) {
 		super(emf, type);

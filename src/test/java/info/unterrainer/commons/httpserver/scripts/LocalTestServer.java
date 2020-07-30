@@ -4,6 +4,7 @@ import javax.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.httpserver.HttpServer;
 import info.unterrainer.commons.httpserver.daos.JpqlDao;
+import info.unterrainer.commons.httpserver.daos.JpqlTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.scripts.handlers.StatusHandler;
 import info.unterrainer.commons.httpserver.scripts.jpas.TestJpa;
@@ -42,48 +43,48 @@ public class LocalTestServer {
 		HttpServer server = HttpServer.builder().applicationName("local-test-server").build();
 
 		server.get("/status", new StatusHandler(mapper));
-		server.handlerGroupFor(TestJpa.class, TestJson.class)
+		server.handlerGroupFor(TestJpa.class, TestJson.class, new JpqlTransactionManager(emf))
 				.path("/test")
 				.endpoints(Endpoint.ALL)
 				.dao(new JpqlDao<>(emf, TestJpa.class))
 				.jsonMapper(mapper)
 				.extension()
-				.preInsertSync((ctx, receivedJson, resultJpa) -> {
+				.preInsertSync((ctx, em, receivedJson, resultJpa) -> {
 					log.info("before insert");
 					return resultJpa;
 				})
 				.extension()
-				.preDeleteSync((ctx, receivedId) -> {
+				.preDeleteSync((ctx, em, receivedId) -> {
 					log.info("before delete id:[{}]", receivedId);
 					return receivedId;
 				})
 				.extension()
-				.preModifySync((ctx, receivedId, receivedJson, readJpa, resultJpa) -> {
+				.preModifySync((ctx, em, receivedId, receivedJson, readJpa, resultJpa) -> {
 					log.info("before modify");
 					return resultJpa;
 				})
 				.extension()
-				.postGetSingleSync((ctx, receivedId, readJpa, response) -> {
+				.postGetSingleSync((ctx, em, receivedId, readJpa, response) -> {
 					log.info("after get-single");
 					return response;
 				})
 				.extension()
-				.postGetListSync((ctx, size, offset, readJpaList, responseList) -> {
+				.postGetListSync((ctx, em, size, offset, readJpaList, responseList) -> {
 					log.info("after get-list");
 					return responseList;
 				})
 				.extension()
-				.postDeleteSync((ctx, receivedId) -> {
+				.postDeleteSync((ctx, em, receivedId) -> {
 					log.info("after delete");
 					return true;
 				})
 				.extension()
-				.postModifySync((ctx, receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response) -> {
+				.postModifySync((ctx, em, receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response) -> {
 					log.info("after modify");
 					return response;
 				})
 				.extension()
-				.postInsertSync((ctx, receivedJson, mappedJpa, createdJpa, response) -> {
+				.postInsertSync((ctx, em, receivedJson, mappedJpa, createdJpa, response) -> {
 					log.info("after insert");
 					return response;
 				})
