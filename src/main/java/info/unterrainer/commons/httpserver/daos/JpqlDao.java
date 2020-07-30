@@ -277,7 +277,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 
 	public List<P> nOf(final String whereClause, final long count, final ParamMap params,
 			final OrderByMap orderByFields) {
-		return Transactions.withNewTransactionReturning(emf, em -> lastNOf(em, whereClause, count, params));
+		return Transactions.withNewTransactionReturning(emf, em -> nOf(em, whereClause, count, params, orderByFields));
 	}
 
 	public List<P> nOf(final EntityManager em, final String whereClause, final long count, final ParamMap params,
