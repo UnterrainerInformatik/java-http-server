@@ -29,6 +29,11 @@ public interface BasicDao<P extends BasicJpa, E> {
 
 	ListJson<P> getList(E em, long offset, long size, String whereClause, ParamMap params);
 
+	ListJson<P> getList(E em, long offset, long size, String joinClause, String whereClause, ParamMap params);
+
+	ListJson<P> getList(E em, long offset, long size, String selectClause, String joinClause, String whereClause,
+			ParamMap params);
+
 	P create(E em, P entity);
 
 	P update(E em, P entity);

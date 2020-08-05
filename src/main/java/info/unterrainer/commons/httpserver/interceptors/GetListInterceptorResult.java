@@ -8,7 +8,9 @@ import lombok.Data;
 @Builder
 public class GetListInterceptorResult {
 
+	private String selectClause;
 	private String whereClause;
+	private String joinClause;
 	private ParamMap params;
 	private String partOfQueryString;
 }

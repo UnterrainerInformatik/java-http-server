@@ -76,6 +76,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		Long size = hu.getQueryParamAsLong(ctx, QueryField.PAGINATION_SIZE, Long.MAX_VALUE);
 
 		GetListInterceptorResult interceptorResult = GetListInterceptorResult.builder()
+				.selectClause("o")
+				.joinClause("")
 				.whereClause("")
 				.params(null)
 				.partOfQueryString("")
@@ -92,8 +94,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 
 		DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
 
-		ListJson<P> bList = dao.getList(transaction.getManager(), offset, size, interceptorResult.getWhereClause(),
-				interceptorResult.getParams());
+		ListJson<P> bList = dao.getList(transaction.getManager(), offset, size, interceptorResult.getSelectClause(),
+				interceptorResult.getJoinClause(), interceptorResult.getWhereClause(), interceptorResult.getParams());
 		ListJson<J> jList = new ListJson<>();
 		for (P entry : bList.getEntries())
 			jList.getEntries().add(orikaMapper.map(entry, jsonType));
