@@ -18,8 +18,10 @@ import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 
 	protected final EntityManagerFactory emf;
@@ -244,7 +246,16 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 			query += " WHERE " + whereClause;
 		if (orderBy != null && !orderBy.isBlank())
 			query += " ORDER BY " + orderBy;
-		TypedQuery<T> q = em.createQuery(String.format(query, this.type.getSimpleName()), type);
+
+		query = String.format(query, this.type.getSimpleName());
+
+		String msg = query;
+		if (params != null)
+			for (Entry<String, Object> p : params.getParameters().entrySet())
+				msg += "\\n  " + p.getKey() + ": " + p.getValue();
+		log.debug(msg);
+
+		TypedQuery<T> q = em.createQuery(query, type);
 		if (lockPessimistic)
 			q.setLockMode(LockModeType.PESSIMISTIC_WRITE);
 		if (params != null)
