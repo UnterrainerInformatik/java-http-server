@@ -143,4 +143,25 @@ public class HandlerUtils {
 			throw new BadRequestException(String.format("Parameter %s is mandatory", name));
 		return result;
 	}
+
+	public Boolean getQueryParamAsBoolean(final Context ctx, final String name) {
+		return getQueryParamAsBoolean(ctx, name, true, null);
+	}
+
+	public Boolean getQueryParamAsBoolean(final Context ctx, final String name, final Boolean defaultValue) {
+		return getQueryParamAsBoolean(ctx, name, false, defaultValue);
+	}
+
+	private Boolean getQueryParamAsBoolean(final Context ctx, final String name, final boolean mandatory,
+			final Boolean defaultValue) {
+		String o = ctx.queryParam(name);
+		Boolean result = defaultValue;
+
+		if (o != null) {
+			String v = o.strip().toLowerCase();
+			return !v.equals("false") || !v.equals("no") || !v.equals("0");
+		} else if (mandatory)
+			throw new BadRequestException(String.format("Parameter %s is mandatory", name));
+		return result;
+	}
 }
