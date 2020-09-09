@@ -13,7 +13,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import info.unterrainer.commons.httpserver.daos.UpsertResult.UpsertResultBuilder;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
@@ -87,17 +86,17 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 
 	@Override
 	public UpsertResult<P> upsert(final EntityManager em, final TypedQuery<P> query, final P entity) {
-		UpsertResultBuilder<P, ?, ?> builder = UpsertResult.builder();
-
+		boolean wasInserted = false;
+		boolean wasUpdated = false;
 		P e = firstOf(query);
 		if (e == null) {
 			e = create(em, entity);
-			builder.wasInserted(true);
+			wasInserted = true;
 		} else {
 			e = update(em, entity);
-			builder.wasUpdated(true);
+			wasUpdated = true;
 		}
-		return builder.jpa(e).build();
+		return UpsertResult.<P>builder().wasInserted(wasInserted).wasUpdated(wasUpdated).jpa(e).build();
 	}
 
 	@Override
