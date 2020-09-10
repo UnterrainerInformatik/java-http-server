@@ -7,8 +7,8 @@ public interface PostDeleteSync<E> {
 	/**
 	 * Allows you to execute code after the deletion of an item.<br/>
 	 * You may change the ID with the return-value.
-	 * <p/>
-	 * Returning {@link false} will abort. So be sure to return something
+	 * <p>
+	 * Returning {@code false} will abort. So be sure to return something
 	 * (status...) in that case using the {@link Context}.
 	 *
 	 * @param ctx           the Javalin context

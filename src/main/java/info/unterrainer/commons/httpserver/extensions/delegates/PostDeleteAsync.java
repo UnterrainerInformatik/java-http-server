@@ -4,7 +4,7 @@ public interface PostDeleteAsync {
 
 	/**
 	 * Allows you to execute code after the deletion of an item.
-	 * <p/>
+	 * <p>
 	 * Since this is asynchronous changing the DTOs will do nothing (runs in
 	 * parallel and the action probably already happened when your code is
 	 * executed).

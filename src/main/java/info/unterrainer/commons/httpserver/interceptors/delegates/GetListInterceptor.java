@@ -10,8 +10,8 @@ public interface GetListInterceptor {
 	/**
 	 * Allows you to execute intercept the path to the get-list method currently
 	 * being built.
-	 * <p/>
-	 * Returning {@link null} or throwing an exception will abort the evaluation of
+	 * <p>
+	 * Returning {@code null} or throwing an exception will abort the evaluation of
 	 * this interceptor. If you'd like your interceptor to be taken by the server,
 	 * return a valid {@link GetListInterceptorResult}
 	 *

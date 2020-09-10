@@ -8,8 +8,8 @@ public interface PostGetSingleSync<P extends BasicJpa, J extends BasicJson, E> {
 
 	/**
 	 * Allows you to execute code after fetching of an item.
-	 * <p/>
-	 * Returning {@link null} will abort. So be sure to return something (status...)
+	 * <p>
+	 * Returning {@code null} will abort. So be sure to return something (status...)
 	 * in that case using the {@link Context}.
 	 *
 	 * @param ctx           the Javalin context

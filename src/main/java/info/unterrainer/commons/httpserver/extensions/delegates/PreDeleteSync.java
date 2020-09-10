@@ -5,10 +5,10 @@ import io.javalin.http.Context;
 public interface PreDeleteSync<E> {
 
 	/**
-	 * Allows you to execute code before deletion of an item.<br/>
+	 * Allows you to execute code before deletion of an item.<br>
 	 * You may change the ID with the return-value.
-	 * <p/>
-	 * Returning {@link null} will abort. So be sure to return something (status...)
+	 * <p>
+	 * Returning {@code null} will abort. So be sure to return something (status...)
 	 * in that case using the {@link Context}.
 	 *
 	 * @param ctx           the Javalin context

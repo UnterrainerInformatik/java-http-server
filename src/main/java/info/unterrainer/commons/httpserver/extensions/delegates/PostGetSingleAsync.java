@@ -7,7 +7,7 @@ public interface PostGetSingleAsync<P extends BasicJpa, J extends BasicJson> {
 
 	/**
 	 * Allows you to execute code after the fetching of a list of items.
-	 * <p/>
+	 * <p>
 	 * Since this is asynchronous changing the DTOs will do nothing (runs in
 	 * parallel and the action probably already happened when your code is
 	 * executed).
