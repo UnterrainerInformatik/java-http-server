@@ -3,6 +3,7 @@ package info.unterrainer.commons.httpserver.scripts;
 import javax.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.httpserver.HttpServer;
+import info.unterrainer.commons.httpserver.accessmanager.DefaultRoles;
 import info.unterrainer.commons.httpserver.daos.JpqlDao;
 import info.unterrainer.commons.httpserver.daos.JpqlTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
@@ -42,7 +43,7 @@ public class LocalTestServer {
 	private static void startServer() {
 		HttpServer server = HttpServer.builder().applicationName("local-test-server").build();
 
-		server.get("/status", new StatusHandler(mapper));
+		server.get("/status", new StatusHandler(mapper), DefaultRoles.AUTHENTICATED);
 		server.handlerGroupFor(TestJpa.class, TestJson.class, new JpqlTransactionManager(emf))
 				.path("/test")
 				.endpoints(Endpoint.ALL)

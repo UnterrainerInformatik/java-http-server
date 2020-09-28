@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 
+import info.unterrainer.commons.httpserver.accessmanager.HttpAccessManager;
 import info.unterrainer.commons.httpserver.daos.DaoTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.exceptions.HttpException;
@@ -96,7 +97,7 @@ public class HttpServer {
 		server.setConnectors(new ServerConnector[] { connector });
 
 		javalin = Javalin.create(config -> {
-			config.server(() -> server).enableCorsForAllOrigins();
+			config.server(() -> server).accessManager(new HttpAccessManager()).enableCorsForAllOrigins();
 		}).start(config.port());
 
 		javalin.before(ctx -> ctx.attribute(Attribute.JAVALIN_SERVER, this));
