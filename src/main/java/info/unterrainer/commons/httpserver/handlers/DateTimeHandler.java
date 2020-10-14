@@ -15,8 +15,10 @@ public class DateTimeHandler implements Handler {
 
 	@Override
 	public void handle(final Context ctx) throws Exception {
-		ctx.attribute(Attribute.RESPONSE_OBJECT, MessageJson.builder()
-				.message(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT)).build());
+		ctx.attribute(Attribute.RESPONSE_OBJECT,
+				MessageJson.builder()
+						.message(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT))
+						.build());
 		ctx.attribute(Attribute.RESPONSE_STATUS, 200);
 	}
 }
