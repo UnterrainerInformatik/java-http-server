@@ -1,0 +1,320 @@
+{
+	"info": {
+		"_postman_id": "97ab29e2-a457-4a98-91a7-a55b303910b7",
+		"name": "http-server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "test",
+			"item": [
+				{
+					"name": "get-list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/test?size=100&offset=0",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "100"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/test/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/test/16",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test",
+								"16"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "full-update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"message\": \"server has been storted.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/test/4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"message\": \"THIS SERVER HAS BEEN STURTLED.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/test",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "/",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/datetime",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/datetime",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"datetime"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/health",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/status",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/postman",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/postman",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"postman"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/version",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/version",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"version"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "6ba4ae05-4fbc-4d87-a114-0911f4329f36",
+				"type": "text/javascript",
+				"exec": [
+					"const access_token = pm.variables.get(\"access_token\");",
+					"console.log(access_token)",
+					"const access_token_refresh_timestamp = pm.variables.get(\"access_token_refresh_timestamp\");",
+					"console.log(access_token_refresh_timestamp)",
+					"if(!access_token || !access_token_refresh_timestamp || Date.now() > access_token_refresh_timestamp) {",
+					"    const username = encodeURIComponent(pm.variables.get(\"auth-username\"));",
+					"    console.log(username)",
+					"    const password = encodeURIComponent(pm.variables.get(\"auth-password\"));",
+					"    console.log(password)",
+					"    const client_secret = pm.variables.get(\"auth-client-secret\");",
+					"    console.log(client_secret)",
+					"    const client_id = pm.variables.get(\"auth-client-id\")",
+					"    console.log(client_id)",
+					"    const body = \"client_id=\" + client_id + \"&client_secret=\" + client_secret + \"&grant_type=password&username=\" + username + \"&password=\" + password",
+					"    console.log(body)",
+					"    pm.sendRequest({",
+					"        url: pm.variables.get(\"auth-url\"),",
+					"        method: 'POST',",
+					"        header: {",
+					"            'Content-Type': 'application/x-www-form-urlencoded',",
+					"            'Accept': 'application/json'",
+					"        },",
+					"        body: {",
+					"            mode: 'raw',",
+					"            raw: body",
+					"        }",
+					"    }, function (err, res) {",
+					"        const inOneHourTimestamp = Date.now() + 60*60*1000;",
+					"        pm.globals.set(\"access_token_refresh_timestamp\", inOneHourTimestamp);",
+					"        pm.globals.set(\"access_token\", res.json().access_token);",
+					"        pm.globals.set(\"refresh_token\", res.json().refresh_token);",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "20b8c49b-1d69-49c9-b720-9f84fe3bf870",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "1e0eadce-2c2c-4155-8d7a-bfb8a5162e5a",
+			"key": "url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"id": "0b982bb4-558a-4b7d-9a97-6477407f4536",
+			"key": "auth-url",
+			"value": "http://10.10.196.4:14888/auth/realms/Nexus/protocol/openid-connect/token"
+		},
+		{
+			"id": "600d783e-4ae3-4639-a4fa-eb73829a5ffc",
+			"key": "auth-client-secret",
+			"value": "38a0b40e-b464-4419-9f32-3c6e9972fd68"
+		},
+		{
+			"id": "87df32fe-98db-4b94-8b48-39f163ab634e",
+			"key": "auth-client-id",
+			"value": "clexus"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
