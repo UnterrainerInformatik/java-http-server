@@ -247,19 +247,19 @@
 				"id": "6ba4ae05-4fbc-4d87-a114-0911f4329f36",
 				"type": "text/javascript",
 				"exec": [
+					"var now_ts = new Date().getTime()",
+					"console.log(\"now: \" + now_ts)",
 					"const access_token = pm.variables.get(\"access_token\");",
 					"console.log(access_token)",
-					"const access_token_refresh_timestamp = pm.variables.get(\"access_token_refresh_timestamp\");",
-					"console.log(access_token_refresh_timestamp)",
-					"if(!access_token || !access_token_refresh_timestamp || Date.now() > access_token_refresh_timestamp) {",
+					"const refresh_ts = pm.variables.get(\"refresh_timestamp\");",
+					"console.log(refresh_ts)",
+					"var delta = refresh_ts - now_ts",
+					"console.log(\"valid for another: \" + ((delta - (delta % 1000))/1000) + \"s\")",
+					"if(!access_token || !refresh_ts || now_ts > refresh_ts) {",
 					"    const username = encodeURIComponent(pm.variables.get(\"auth-username\"));",
-					"    console.log(username)",
 					"    const password = encodeURIComponent(pm.variables.get(\"auth-password\"));",
-					"    console.log(password)",
 					"    const client_secret = pm.variables.get(\"auth-client-secret\");",
-					"    console.log(client_secret)",
 					"    const client_id = pm.variables.get(\"auth-client-id\")",
-					"    console.log(client_id)",
 					"    const body = \"client_id=\" + client_id + \"&client_secret=\" + client_secret + \"&grant_type=password&username=\" + username + \"&password=\" + password",
 					"    console.log(body)",
 					"    pm.sendRequest({",
@@ -274,10 +274,14 @@
 					"            raw: body",
 					"        }",
 					"    }, function (err, res) {",
-					"        const inOneHourTimestamp = Date.now() + 60*60*1000;",
-					"        pm.globals.set(\"access_token_refresh_timestamp\", inOneHourTimestamp);",
-					"        pm.globals.set(\"access_token\", res.json().access_token);",
-					"        pm.globals.set(\"refresh_token\", res.json().refresh_token);",
+					"        console.log(err ? err : res.json());",
+					"        if (err === null) {",
+					"            var expiryDate = new Date();",
+					"            expiryDate.setSeconds(expiryDate.getSeconds() + res.json().expires_in);",
+					"            pm.environment.set(\"refresh_timestamp\", expiryDate.getTime());",
+					"            pm.environment.set(\"access_token\", res.json().access_token);",
+					"            pm.environment.set(\"refresh_token\", res.json().refresh_token);",
+					"        }",
 					"    });",
 					"}"
 				]
@@ -296,22 +300,22 @@
 	],
 	"variable": [
 		{
-			"id": "1e0eadce-2c2c-4155-8d7a-bfb8a5162e5a",
+			"id": "2294afdb-a966-46c1-baa1-11b78d8dabd2",
 			"key": "url",
 			"value": "http://localhost:8080"
 		},
 		{
-			"id": "0b982bb4-558a-4b7d-9a97-6477407f4536",
+			"id": "59d57c82-07dc-4d3f-8f65-37d10445d510",
 			"key": "auth-url",
 			"value": "http://10.10.196.4:14888/auth/realms/Nexus/protocol/openid-connect/token"
 		},
 		{
-			"id": "600d783e-4ae3-4639-a4fa-eb73829a5ffc",
+			"id": "f385eacd-1431-4375-9e78-1334f5d396bf",
 			"key": "auth-client-secret",
 			"value": "38a0b40e-b464-4419-9f32-3c6e9972fd68"
 		},
 		{
-			"id": "87df32fe-98db-4b94-8b48-39f163ab634e",
+			"id": "ab543b34-6a22-4a85-8577-0edbf931195d",
 			"key": "auth-client-id",
 			"value": "clexus"
 		}

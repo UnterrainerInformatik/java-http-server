@@ -18,6 +18,7 @@ import org.keycloak.representations.idm.PublishedRealmRepresentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.exceptions.ForbiddenException;
 import info.unterrainer.commons.httpserver.exceptions.GatewayTimeoutException;
 import info.unterrainer.commons.httpserver.exceptions.UnauthorizedException;
@@ -32,6 +33,7 @@ public class HttpAccessManager implements AccessManager {
 
 	private String host;
 	private String realm;
+	private String authUrl;
 	private PublicKey publicKey = null;
 
 	public HttpAccessManager(final String host, final String realm) {
@@ -61,7 +63,7 @@ public class HttpAccessManager implements AccessManager {
 		if (!realm.startsWith("/"))
 			realm = "/" + realm;
 
-		String authUrl = host + "auth/realms" + realm;
+		authUrl = host + "auth/realms" + realm;
 		try {
 			log.info("Getting public key from: [{}]", authUrl);
 			HttpClient client = HttpClient.newHttpClient();
@@ -94,14 +96,16 @@ public class HttpAccessManager implements AccessManager {
 
 	private void checkAccess(final Context ctx, final Set<Role> permittedRoles) {
 
+		TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx);
+
 		if (permittedRoles.isEmpty() || permittedRoles.contains(DefaultRoles.PUBLIC))
 			return;
 
-		initPublicKey();
-		String authorizationHeader = ctx.header(HttpHeader.AUTHORIZATION.asString());
-		TokenVerifier<AccessToken> tokenVerifier = TokenVerifier.create(authorizationHeader, AccessToken.class);
-		tokenVerifier.publicKey(publicKey);
+		if (tokenVerifier == null)
+			throw new UnauthorizedException();
 
+		initPublicKey();
+		tokenVerifier.publicKey(publicKey);
 		try {
 			tokenVerifier.verifySignature();
 		} catch (VerificationException e) {
@@ -113,5 +117,59 @@ public class HttpAccessManager implements AccessManager {
 		} catch (VerificationException e) {
 			throw new ForbiddenException();
 		}
+	}
+
+	private TokenVerifier<AccessToken> persistUserInfoInContext(final Context ctx) {
+		String authorizationHeader = ctx.header(HttpHeader.AUTHORIZATION.asString());
+
+		if (authorizationHeader == null || authorizationHeader.isBlank())
+			return null;
+
+		if (authorizationHeader.toLowerCase().startsWith("bearer "))
+			authorizationHeader = authorizationHeader.substring(7);
+
+		try {
+			TokenVerifier<AccessToken> tokenVerifier = TokenVerifier.create(authorizationHeader, AccessToken.class);
+
+			AccessToken token = tokenVerifier.getToken();
+			String userName = token.getPreferredUsername();
+			if (userName == null)
+				userName = "unknown";
+			ctx.attribute(Attribute.USER_NAME, userName);
+			ctx.attribute(Attribute.USER_GIVEN_NAME, token.getGivenName());
+			ctx.attribute(Attribute.USER_FAMILY_NAME, token.getFamilyName());
+			ctx.attribute(Attribute.USER_CLIENT, token.getIssuedFor());
+			ctx.attribute(Attribute.USER_EMAIL, token.getEmail());
+			ctx.attribute(Attribute.USER_EMAIL_VERIFIED, token.getEmailVerified());
+			ctx.attribute(Attribute.USER_REALM_ROLES, token.getRealmAccess().getRoles());
+
+			Set<String> clientRoles = Set.of();
+			String key = token.getIssuedFor();
+			if (token.getResourceAccess().containsKey(key))
+				clientRoles = token.getResourceAccess().get(key).getRoles();
+			ctx.attribute(Attribute.USER_CLIENT_ROLES, clientRoles);
+
+			if (!token.isActive()) {
+				setTokenRejectionReason(ctx, "Token is inactive.");
+				return null;
+			}
+			if (!token.getType().equalsIgnoreCase("bearer")) {
+				setTokenRejectionReason(ctx, "Token is no bearer-token.");
+				return null;
+			}
+			if (!token.getIssuer().equalsIgnoreCase(authUrl)) {
+				setTokenRejectionReason(ctx, "Token has wrong real-url.");
+				return null;
+			}
+			return tokenVerifier;
+
+		} catch (VerificationException e) {
+			setTokenRejectionReason(ctx, "Token was checked and deemed invalid.");
+			return null;
+		}
+	}
+
+	private void setTokenRejectionReason(final Context ctx, final String reason) {
+		ctx.attribute(Attribute.KEYCLOAK_TOKEN_REJECTION_REASON, reason);
 	}
 }
