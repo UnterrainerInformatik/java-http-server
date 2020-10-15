@@ -171,10 +171,11 @@ public class HttpAccessManager implements AccessManager {
 				setTokenRejectionReason(ctx, "Token is no bearer-token.");
 				return null;
 			}
-			if (!token.getIssuer().equalsIgnoreCase(authUrl)) {
-				setTokenRejectionReason(ctx, "Token has wrong real-url.");
-				return null;
-			}
+			// Disabled to enable getting token from side-channels like 'localhost'.
+			/*
+			 * if (!token.getIssuer().equalsIgnoreCase(authUrl)) {
+			 * setTokenRejectionReason(ctx, "Token has wrong real-url."); return null; }
+			 */
 			return tokenVerifier;
 
 		} catch (VerificationException e) {
