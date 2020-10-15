@@ -17,6 +17,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import info.unterrainer.commons.httpserver.accessmanager.HttpAccessManager;
 import info.unterrainer.commons.httpserver.daos.DaoTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Attribute;
+import info.unterrainer.commons.httpserver.enums.ResponseType;
 import info.unterrainer.commons.httpserver.exceptions.HttpException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
 import info.unterrainer.commons.httpserver.handlers.AppNameHandler;
@@ -104,7 +105,7 @@ public class HttpServer {
 		}).start(config.port());
 
 		javalin.before(ctx -> ctx.attribute(Attribute.JAVALIN_SERVER, this));
-		javalin.before(ctx -> ctx.attribute(Attribute.RESPONSE_TYPE, "json"));
+		javalin.before(ctx -> ctx.attribute(Attribute.RESPONSE_TYPE, ResponseType.JSON));
 		javalin.before(ctx -> ctx.contentType("application/json"));
 
 		javalin.after(ctx -> render(ctx));
@@ -220,10 +221,13 @@ public class HttpServer {
 
 		Object dto = ctx.attribute(Attribute.RESPONSE_OBJECT);
 		if (dto != null)
-			if (ctx.attribute(Attribute.RESPONSE_TYPE) == "json")
+			switch ((ResponseType) ctx.attribute(Attribute.RESPONSE_TYPE)) {
+			case JSON:
 				ctx.result(jsonMapper.toStringFrom(dto));
-			else
+				break;
+			default:
 				ctx.result((String) dto);
+			}
 
 		Integer status = ctx.attribute(Attribute.RESPONSE_STATUS);
 		if (status != null)
