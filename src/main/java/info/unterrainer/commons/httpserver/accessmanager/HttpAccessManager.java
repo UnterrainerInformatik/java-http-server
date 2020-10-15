@@ -95,32 +95,36 @@ public class HttpAccessManager implements AccessManager {
 	}
 
 	private void checkAccess(final Context ctx, final Set<Role> permittedRoles) {
-
-		TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx);
-
-		if (permittedRoles.isEmpty() || permittedRoles.contains(DefaultRole.OPEN) && permittedRoles.size() == 1)
-			return;
-
-		if (tokenVerifier == null)
-			throw new UnauthorizedException();
-
-		initPublicKey();
-		tokenVerifier.publicKey(publicKey);
 		try {
-			tokenVerifier.verifySignature();
-		} catch (VerificationException e) {
-			throw new UnauthorizedException();
-		}
+			TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx);
 
-		try {
-			tokenVerifier.verify();
-			if (permittedRoles.contains(DefaultRole.AUTHENTICATED) && permittedRoles.size() == 1)
+			if (permittedRoles.isEmpty() || permittedRoles.contains(DefaultRole.OPEN) && permittedRoles.size() == 1)
 				return;
-			if (hasPermittedRole(ctx, permittedRoles))
-				return;
-			throw new ForbiddenException();
-		} catch (VerificationException e) {
-			throw new ForbiddenException();
+
+			if (tokenVerifier == null)
+				throw new UnauthorizedException();
+
+			initPublicKey();
+			tokenVerifier.publicKey(publicKey);
+			try {
+				tokenVerifier.verifySignature();
+			} catch (VerificationException e) {
+				throw new UnauthorizedException();
+			}
+
+			try {
+				tokenVerifier.verify();
+				if (permittedRoles.contains(DefaultRole.AUTHENTICATED) && permittedRoles.size() == 1)
+					return;
+				if (hasPermittedRole(ctx, permittedRoles))
+					return;
+				throw new ForbiddenException();
+			} catch (VerificationException e) {
+				throw new ForbiddenException();
+			}
+		} catch (Exception e) {
+			log.error("Error checking token.", e);
+			throw e;
 		}
 	}
 
