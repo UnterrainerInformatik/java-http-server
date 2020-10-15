@@ -98,7 +98,7 @@ public class HttpAccessManager implements AccessManager {
 
 		TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx);
 
-		if (permittedRoles.isEmpty() || permittedRoles.contains(DefaultRoles.PUBLIC))
+		if (permittedRoles.isEmpty() || permittedRoles.contains(DefaultRole.OPEN) && permittedRoles.size() == 1)
 			return;
 
 		if (tokenVerifier == null)
@@ -114,9 +114,23 @@ public class HttpAccessManager implements AccessManager {
 
 		try {
 			tokenVerifier.verify();
+			if (permittedRoles.contains(DefaultRole.AUTHENTICATED) && permittedRoles.size() == 1)
+				return;
+			if (hasPermittedRole(ctx, permittedRoles))
+				return;
+			throw new ForbiddenException();
 		} catch (VerificationException e) {
 			throw new ForbiddenException();
 		}
+	}
+
+	private boolean hasPermittedRole(final Context ctx, final Set<Role> permittedRoles) {
+		Set<String> clientRoles = ctx.attribute(Attribute.USER_CLIENT_ROLES);
+		for (Role role : permittedRoles)
+			if (role instanceof NamedRole)
+				if (clientRoles.contains(((NamedRole) role).name))
+					return true;
+		return false;
 	}
 
 	private TokenVerifier<AccessToken> persistUserInfoInContext(final Context ctx) {

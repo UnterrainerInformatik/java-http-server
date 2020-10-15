@@ -1,7 +1,10 @@
 package info.unterrainer.commons.httpserver;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.daos.BasicDao;
@@ -19,6 +22,7 @@ import info.unterrainer.commons.serialization.JsonMapper;
 import info.unterrainer.commons.serialization.exceptions.JsonMappingException;
 import info.unterrainer.commons.serialization.exceptions.JsonProcessingException;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
+import io.javalin.core.security.Role;
 import io.javalin.http.Context;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +41,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 	private final List<Endpoint> endpoints;
 	private final List<GetListInterceptor> getListInterceptors;
 	private final HandlerExtensions<P, J, E> extensions;
+	private final LinkedHashMap<Endpoint, Role[]> accessRoles;
 	private final ExecutorService executorService;
 	private final HandlerUtils hu = new HandlerUtils();
 
@@ -46,18 +51,42 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		if (!p.startsWith("/"))
 			p = "/" + p;
 		String pId = p + "/:" + QueryField.ID;
-		if (endpoints.contains(Endpoint.ALL) || endpoints.contains(Endpoint.READONLY)
-				|| endpoints.contains(Endpoint.GET_SINGLE))
-			server.get(pId, this::getEntry);
-		if (endpoints.contains(Endpoint.ALL) || endpoints.contains(Endpoint.READONLY)
-				|| endpoints.contains(Endpoint.GET_LIST))
-			server.get(p, this::getList);
-		if (endpoints.contains(Endpoint.ALL) || endpoints.contains(Endpoint.CREATE))
-			server.post(p, this::create);
-		if (endpoints.contains(Endpoint.ALL) || endpoints.contains(Endpoint.UPDATE_FULL))
-			server.put(pId, this::fullUpdate);
-		if (endpoints.contains(Endpoint.ALL) || endpoints.contains(Endpoint.DELETE))
-			server.delete(pId, this::delete);
+
+		List<Endpoint> endpointList;
+		endpointList = List.of(Endpoint.ALL, Endpoint.READONLY, Endpoint.GET_SINGLE);
+		if (endpointsToCreate(endpointList))
+			server.get(pId, this::getEntry, rolesFor(endpointList));
+
+		endpointList = List.of(Endpoint.ALL, Endpoint.READONLY, Endpoint.GET_LIST);
+		if (endpointsToCreate(endpointList))
+			server.get(p, this::getList, rolesFor(endpointList));
+
+		endpointList = List.of(Endpoint.ALL, Endpoint.WRITEONLY, Endpoint.CREATE);
+		if (endpointsToCreate(endpointList))
+			server.post(p, this::create, rolesFor(endpointList));
+
+		endpointList = List.of(Endpoint.ALL, Endpoint.WRITEONLY, Endpoint.UPDATE_FULL);
+		if (endpointsToCreate(endpointList))
+			server.put(pId, this::fullUpdate, rolesFor(endpointList));
+
+		endpointList = List.of(Endpoint.ALL, Endpoint.WRITEONLY, Endpoint.DELETE);
+		if (endpointsToCreate(endpointList))
+			server.delete(pId, this::delete, rolesFor(endpointList));
+	}
+
+	private boolean endpointsToCreate(final List<Endpoint> endpointList) {
+		for (Endpoint endpoint : endpointList)
+			if (endpoints.contains(endpoint))
+				return true;
+		return false;
+	}
+
+	private Role[] rolesFor(final List<Endpoint> endpointList) {
+		List<Role> roles = new ArrayList<>();
+		for (Entry<Endpoint, Role[]> entry : accessRoles.entrySet())
+			if (endpointList.contains(entry.getKey()))
+				roles.addAll(List.of(entry.getValue()));
+		return roles.toArray(new Role[0]);
 	}
 
 	private void getEntry(final Context ctx) {

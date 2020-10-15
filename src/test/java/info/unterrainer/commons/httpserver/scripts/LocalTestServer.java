@@ -3,7 +3,7 @@ package info.unterrainer.commons.httpserver.scripts;
 import javax.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.httpserver.HttpServer;
-import info.unterrainer.commons.httpserver.accessmanager.DefaultRoles;
+import info.unterrainer.commons.httpserver.accessmanager.RoleBuilder;
 import info.unterrainer.commons.httpserver.daos.JpqlDao;
 import info.unterrainer.commons.httpserver.daos.JpqlTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
@@ -43,12 +43,15 @@ public class LocalTestServer {
 	private static void startServer() {
 		HttpServer server = HttpServer.builder().applicationName("local-test-server").build();
 
-		server.get("/status", new StatusHandler(mapper), DefaultRoles.AUTHENTICATED);
+		server.get("/status", new StatusHandler(mapper), RoleBuilder.authenticated());
+		server.get("/status2", new StatusHandler(mapper), RoleBuilder.named("admin"));
 		server.handlerGroupFor(TestJpa.class, TestJson.class, new JpqlTransactionManager(emf))
 				.path("/test")
 				.endpoints(Endpoint.ALL)
 				.dao(new JpqlDao<>(emf, TestJpa.class))
 				.jsonMapper(mapper)
+				.addRoleFor(Endpoint.ALL, RoleBuilder.authenticated())
+				.addRoleFor(Endpoint.GET_SINGLE, RoleBuilder.named("user"))
 				.extension()
 				.preInsertSync((ctx, em, receivedJson, resultJpa) -> {
 					log.info("before insert");

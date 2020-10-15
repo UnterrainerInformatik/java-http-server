@@ -196,6 +196,23 @@
 			"response": []
 		},
 		{
+			"name": "/status2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/status2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"status2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "/postman",
 			"request": {
 				"method": "GET",
@@ -300,22 +317,22 @@
 	],
 	"variable": [
 		{
-			"id": "2294afdb-a966-46c1-baa1-11b78d8dabd2",
+			"id": "b6f9b509-b8ee-4d55-8242-8d535ecd989c",
 			"key": "url",
 			"value": "http://localhost:8080"
 		},
 		{
-			"id": "59d57c82-07dc-4d3f-8f65-37d10445d510",
+			"id": "a2146746-181e-441b-bf5b-5f3b6fb038da",
 			"key": "auth-url",
 			"value": "http://10.10.196.4:14888/auth/realms/Nexus/protocol/openid-connect/token"
 		},
 		{
-			"id": "f385eacd-1431-4375-9e78-1334f5d396bf",
+			"id": "891acf22-1874-4ed2-a7bb-8f4383460346",
 			"key": "auth-client-secret",
 			"value": "38a0b40e-b464-4419-9f32-3c6e9972fd68"
 		},
 		{
-			"id": "ab543b34-6a22-4a85-8577-0edbf931195d",
+			"id": "b50730b7-24ae-45f0-a7e8-c6671cc108dd",
 			"key": "auth-client-id",
 			"value": "clexus"
 		}
