@@ -276,8 +276,12 @@
 					"    const username = encodeURIComponent(pm.variables.get(\"auth-username\"));",
 					"    const password = encodeURIComponent(pm.variables.get(\"auth-password\"));",
 					"    const client_secret = pm.variables.get(\"auth-client-secret\");",
+					"    var cs = \"\"",
+					"    if(client_secret) {",
+					"        cs = \"&client_secret=\" + client_secret",
+					"    }",
 					"    const client_id = pm.variables.get(\"auth-client-id\")",
-					"    const body = \"client_id=\" + client_id + \"&client_secret=\" + client_secret + \"&grant_type=password&username=\" + username + \"&password=\" + password",
+					"    const body = \"client_id=\" + client_id + cs + \"&grant_type=password&username=\" + username + \"&password=\" + password",
 					"    console.log(body)",
 					"    pm.sendRequest({",
 					"        url: pm.variables.get(\"auth-url\"),",
@@ -317,22 +321,17 @@
 	],
 	"variable": [
 		{
-			"id": "b6f9b509-b8ee-4d55-8242-8d535ecd989c",
+			"id": "d59744f7-253b-4153-8abe-24c79e608211",
 			"key": "url",
 			"value": "http://localhost:8080"
 		},
 		{
-			"id": "a2146746-181e-441b-bf5b-5f3b6fb038da",
+			"id": "f29301eb-5f34-4e27-80ae-9b0fc72e3cf7",
 			"key": "auth-url",
 			"value": "http://10.10.196.4:14888/auth/realms/Nexus/protocol/openid-connect/token"
 		},
 		{
-			"id": "891acf22-1874-4ed2-a7bb-8f4383460346",
-			"key": "auth-client-secret",
-			"value": "38a0b40e-b464-4419-9f32-3c6e9972fd68"
-		},
-		{
-			"id": "b50730b7-24ae-45f0-a7e8-c6671cc108dd",
+			"id": "8e8e8fa0-9bf8-410e-9971-e27b6ad18060",
 			"key": "auth-client-id",
 			"value": "clexus"
 		}
