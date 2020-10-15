@@ -2,6 +2,7 @@ package info.unterrainer.commons.httpserver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -12,6 +13,7 @@ import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterce
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.serialization.JsonMapper;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
+import io.javalin.core.security.Role;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import ma.glasnost.orika.MapperFactory;
@@ -33,6 +35,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	private ExecutorService executorService;
 
 	HandlerExtensions<P, J, E> extensions = new HandlerExtensions<>();
+	private LinkedHashMap<Endpoint, Role[]> accessRoles = new LinkedHashMap<>();
 
 	public HttpServer add() {
 		if (jsonMapper == null)
@@ -43,13 +46,18 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 			executorService = server.executorService;
 		GenericHandlerGroup<P, J, E> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType,
 				daoTransactionManager, jsonMapper, orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors,
-				extensions, executorService);
+				extensions, accessRoles, executorService);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
 	}
 
 	public AddonBuilder<P, J, E> extension() {
 		return new AddonBuilder<>(this);
+	}
+
+	public GenericHandlerGroupBuilder<P, J, E> addRoleFor(final Endpoint endpoint, final Role... roles) {
+		accessRoles.put(endpoint, roles);
+		return this;
 	}
 
 	public GenericHandlerGroupBuilder<P, J, E> dao(final BasicDao<P, E> dao) {

@@ -1,31 +1,33 @@
 version: '3'
 services:
-  backend:
-    image: gufalcon/http-server:latest
-    restart: always
-    depends_on:
-      - db
-    ports:
-      - "1280:8080"
-      - "12443:8443"
-    environment:
-      - HTTP_PORT=8080
-      - HTTP_HOST=0.0.0.0
-      - DB_DRIVER=mysql
-      - DB_SERVER=db
-      - DB_PORT=3306
-      - DB_NAME=httpserver
-      - DB_USER=httpserver
-      - DB_PASSWORD=DP5V7hi7xgknaH39lDTX
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http-server.port=8080"
-      - "traefik.http-server.backend=http-server"
-      - "traefik.http-server.frontend.rule=Host:http-server.unterrainer.info"
-      - "traefik.http-server.frontend.entryPoints=http,https"
+#  backend:
+#    image: gufalcon/http-server:latest
+#    restart: always
+#    depends_on:
+#      - db
+#    ports:
+#      - "1280:8080"
+#      - "12443:8443"
+#    environment:
+#      - HTTP_PORT=8080
+#      - HTTP_HOST=0.0.0.0
+#      - DB_DRIVER=mysql
+#      - DB_SERVER=db
+#      - DB_PORT=3306
+#      - DB_NAME=httpserver
+#      - DB_USER=httpserver
+#      - DB_PASSWORD=DP5V7hi7xgknaH39lDTX
+#      - KEYCLOAK_HOST=keycloak
+#      - KEYCLOAK_REALM=nexus
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http-server.port=8080"
+#      - "traefik.http-server.backend=http-server"
+#      - "traefik.http-server.frontend.rule=Host:http-server.unterrainer.info"
+#      - "traefik.http-server.frontend.entryPoints=http,https"
 
-  db:
-    image: mariadb:latest
+  db-container:
+    image: mysql:latest
     restart: always
     ports:
       - 14300:3306
@@ -36,6 +38,35 @@ services:
       - MYSQL_PASSWORD=DP5V7hi7xgknaH39lDTX
     volumes:
       - "/app/data/http-server/mysql-data/db:/var/lib/mysql"
+
+  keycloak_db:
+    image: mariadb:latest
+    restart: always
+    ports:
+      - 14310:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=3YazHzbLuzChlwroXLSm5I
+      - MYSQL_DATABASE=keycloak
+      - MYSQL_USER=keycloak
+      - MYSQL_PASSWORD=8KNM3flMpEyCYkFw5wrGoCN3
+    volumes:
+      - "/app/data/keycloak/mysql-data/db:/var/lib/mysql"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    restart: always
+    depends_on:
+      - keycloak_db
+    ports:
+      - 14888:8080
+    environment:
+      DB_VENDOR: mariadb
+      DB_ADDR: keycloak_db
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: 8KNM3flMpEyCYkFw5wrGoCN3
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: cTWJiYZDutP6tYxXnv2yg0A
 
 networks:
   default:

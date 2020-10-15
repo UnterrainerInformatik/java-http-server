@@ -14,14 +14,17 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 
+import info.unterrainer.commons.httpserver.accessmanager.HttpAccessManager;
 import info.unterrainer.commons.httpserver.daos.DaoTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Attribute;
+import info.unterrainer.commons.httpserver.enums.ResponseType;
 import info.unterrainer.commons.httpserver.exceptions.HttpException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
 import info.unterrainer.commons.httpserver.handlers.AppNameHandler;
 import info.unterrainer.commons.httpserver.handlers.AppVersionHandler;
 import info.unterrainer.commons.httpserver.handlers.DateTimeHandler;
 import info.unterrainer.commons.httpserver.handlers.HealthHandler;
+import info.unterrainer.commons.httpserver.handlers.PostmanCollectionHandler;
 import info.unterrainer.commons.httpserver.jsons.MessageJson;
 import info.unterrainer.commons.jreutils.ShutdownHook;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
@@ -95,11 +98,14 @@ public class HttpServer {
 		connector.setPort(config.port());
 		server.setConnectors(new ServerConnector[] { connector });
 
-		javalin = Javalin.create(config -> {
-			config.server(() -> server).enableCorsForAllOrigins();
+		javalin = Javalin.create(c -> {
+			c.server(() -> server)
+					.accessManager(new HttpAccessManager(config.keycloakHost(), config.keycloakRealm()))
+					.enableCorsForAllOrigins();
 		}).start(config.port());
 
 		javalin.before(ctx -> ctx.attribute(Attribute.JAVALIN_SERVER, this));
+		javalin.before(ctx -> ctx.attribute(Attribute.RESPONSE_TYPE, ResponseType.JSON));
 		javalin.before(ctx -> ctx.contentType("application/json"));
 
 		javalin.after(ctx -> render(ctx));
@@ -119,6 +125,7 @@ public class HttpServer {
 		get("/version", new AppVersionHandler(appVersionFqns));
 		get("/datetime", new DateTimeHandler());
 		get("/health", new HealthHandler());
+		get("/postman", new PostmanCollectionHandler());
 
 		registerShutdownHook();
 	}
@@ -214,7 +221,13 @@ public class HttpServer {
 
 		Object dto = ctx.attribute(Attribute.RESPONSE_OBJECT);
 		if (dto != null)
-			ctx.result(jsonMapper.toStringFrom(dto));
+			switch ((ResponseType) ctx.attribute(Attribute.RESPONSE_TYPE)) {
+			case JSON:
+				ctx.result(jsonMapper.toStringFrom(dto));
+				break;
+			default:
+				ctx.result((String) dto);
+			}
 
 		Integer status = ctx.attribute(Attribute.RESPONSE_STATUS);
 		if (status != null)

@@ -1,0 +1,341 @@
+{
+	"info": {
+		"_postman_id": "97ab29e2-a457-4a98-91a7-a55b303910b7",
+		"name": "http-server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "test",
+			"item": [
+				{
+					"name": "get-list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/test?size=100&offset=0",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "100"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/test/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/test/16",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test",
+								"16"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "full-update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"message\": \"server has been storted.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/test/4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"message\": \"THIS SERVER HAS BEEN STURTLED.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/test",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"test"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "/",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/datetime",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/datetime",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"datetime"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/health",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/status",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/status2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/status2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"status2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/postman",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/postman",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"postman"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/version",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/version",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"version"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "6ba4ae05-4fbc-4d87-a114-0911f4329f36",
+				"type": "text/javascript",
+				"exec": [
+					"var now_ts = new Date().getTime()",
+					"console.log(\"now: \" + now_ts)",
+					"const access_token = pm.variables.get(\"access_token\");",
+					"console.log(access_token)",
+					"const refresh_ts = pm.variables.get(\"refresh_timestamp\");",
+					"console.log(refresh_ts)",
+					"var delta = refresh_ts - now_ts",
+					"console.log(\"valid for another: \" + ((delta - (delta % 1000))/1000) + \"s\")",
+					"if(!access_token || !refresh_ts || now_ts > refresh_ts) {",
+					"    const username = encodeURIComponent(pm.variables.get(\"auth-username\"));",
+					"    const password = encodeURIComponent(pm.variables.get(\"auth-password\"));",
+					"    const client_secret = pm.variables.get(\"auth-client-secret\");",
+					"    const client_id = pm.variables.get(\"auth-client-id\")",
+					"    const body = \"client_id=\" + client_id + \"&client_secret=\" + client_secret + \"&grant_type=password&username=\" + username + \"&password=\" + password",
+					"    console.log(body)",
+					"    pm.sendRequest({",
+					"        url: pm.variables.get(\"auth-url\"),",
+					"        method: 'POST',",
+					"        header: {",
+					"            'Content-Type': 'application/x-www-form-urlencoded',",
+					"            'Accept': 'application/json'",
+					"        },",
+					"        body: {",
+					"            mode: 'raw',",
+					"            raw: body",
+					"        }",
+					"    }, function (err, res) {",
+					"        console.log(err ? err : res.json());",
+					"        if (err === null) {",
+					"            var expiryDate = new Date();",
+					"            expiryDate.setSeconds(expiryDate.getSeconds() + res.json().expires_in);",
+					"            pm.environment.set(\"refresh_timestamp\", expiryDate.getTime());",
+					"            pm.environment.set(\"access_token\", res.json().access_token);",
+					"            pm.environment.set(\"refresh_token\", res.json().refresh_token);",
+					"        }",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "20b8c49b-1d69-49c9-b720-9f84fe3bf870",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "b6f9b509-b8ee-4d55-8242-8d535ecd989c",
+			"key": "url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"id": "a2146746-181e-441b-bf5b-5f3b6fb038da",
+			"key": "auth-url",
+			"value": "http://10.10.196.4:14888/auth/realms/Nexus/protocol/openid-connect/token"
+		},
+		{
+			"id": "891acf22-1874-4ed2-a7bb-8f4383460346",
+			"key": "auth-client-secret",
+			"value": "38a0b40e-b464-4419-9f32-3c6e9972fd68"
+		},
+		{
+			"id": "b50730b7-24ae-45f0-a7e8-c6671cc108dd",
+			"key": "auth-client-id",
+			"value": "clexus"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
