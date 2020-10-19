@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -26,6 +27,7 @@ import info.unterrainer.commons.httpserver.handlers.DateTimeHandler;
 import info.unterrainer.commons.httpserver.handlers.HealthHandler;
 import info.unterrainer.commons.httpserver.handlers.PostmanCollectionHandler;
 import info.unterrainer.commons.httpserver.jsons.MessageJson;
+import info.unterrainer.commons.httpserver.jsons.UserDataJson;
 import info.unterrainer.commons.jreutils.ShutdownHook;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.serialization.JsonMapper;
@@ -36,6 +38,7 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -53,6 +56,8 @@ public class HttpServer {
 	private List<HandlerInstance> handlerInstances = new ArrayList<>();
 	ExecutorService executorService;
 	List<String> appVersionFqns;
+	@Getter
+	private Consumer<UserDataJson> userAccessInterceptor;
 
 	private HttpServer() {
 	}
@@ -165,6 +170,11 @@ public class HttpServer {
 
 		for (HandlerInstance hi : handlerInstances)
 			javalin.addHandler(hi.handlerType(), hi.path(), hi.handler(), hi.roles());
+	}
+
+	public HttpServer setUserAccessInterceptor(final Consumer<UserDataJson> userAccessInterceptor) {
+		this.userAccessInterceptor = userAccessInterceptor;
+		return this;
 	}
 
 	public HttpServer get(final String path, final Handler handler, final Role... roles) {

@@ -9,6 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.security.PublicKey;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.eclipse.jetty.http.HttpHeader;
 import org.keycloak.TokenVerifier;
@@ -18,10 +19,12 @@ import org.keycloak.representations.idm.PublishedRealmRepresentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import info.unterrainer.commons.httpserver.HttpServer;
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.exceptions.ForbiddenException;
 import info.unterrainer.commons.httpserver.exceptions.GatewayTimeoutException;
 import info.unterrainer.commons.httpserver.exceptions.UnauthorizedException;
+import info.unterrainer.commons.httpserver.jsons.UserDataJson;
 import io.javalin.core.security.AccessManager;
 import io.javalin.core.security.Role;
 import io.javalin.http.Context;
@@ -49,7 +52,8 @@ public class HttpAccessManager implements AccessManager {
 
 	@Override
 	public void manage(final Handler handler, final Context ctx, final Set<Role> permittedRoles) throws Exception {
-		checkAccess(ctx, permittedRoles);
+		checkAccess(ctx, permittedRoles,
+				((HttpServer) ctx.attribute(Attribute.JAVALIN_SERVER)).getUserAccessInterceptor());
 		handler.handle(ctx);
 	}
 
@@ -79,10 +83,13 @@ public class HttpAccessManager implements AccessManager {
 				}
 				return response.body();
 			}).thenAccept(body -> {
-				if (body == null)
+				if (body == null) {
+					log.warn("Received empty body.");
 					return;
+				}
 				try {
 					publicKey = objectMapper.readValue(body, PublishedRealmRepresentation.class).getPublicKey();
+					log.info("Public key received.");
 				} catch (IOException e) {
 					log.error("Error parsing answer from keycloak.");
 					throw new UncheckedIOException(e);
@@ -94,9 +101,10 @@ public class HttpAccessManager implements AccessManager {
 		}
 	}
 
-	private void checkAccess(final Context ctx, final Set<Role> permittedRoles) {
+	private void checkAccess(final Context ctx, final Set<Role> permittedRoles,
+			final Consumer<UserDataJson> userAccessInterceptor) {
 		try {
-			TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx);
+			TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx, userAccessInterceptor);
 
 			if (permittedRoles.isEmpty() || permittedRoles.contains(DefaultRole.OPEN) && permittedRoles.size() == 1)
 				return;
@@ -137,7 +145,8 @@ public class HttpAccessManager implements AccessManager {
 		return false;
 	}
 
-	private TokenVerifier<AccessToken> persistUserInfoInContext(final Context ctx) {
+	private TokenVerifier<AccessToken> persistUserInfoInContext(final Context ctx,
+			final Consumer<UserDataJson> userAccessInterceptor) {
 		String authorizationHeader = ctx.header(HttpHeader.AUTHORIZATION.asString());
 
 		if (authorizationHeader == null || authorizationHeader.isBlank())
@@ -166,6 +175,19 @@ public class HttpAccessManager implements AccessManager {
 			if (token.getResourceAccess().containsKey(key))
 				clientRoles = token.getResourceAccess().get(key).getRoles();
 			ctx.attribute(Attribute.USER_CLIENT_ROLES, clientRoles);
+
+			userAccessInterceptor.accept(UserDataJson.builder()
+					.userName(userName)
+					.givenName(token.getGivenName())
+					.client(token.getIssuedFor())
+					.familyName(token.getFamilyName())
+					.email(token.getEmail())
+					.emailVerified(token.getEmailVerified())
+					.realmRoles(token.getRealmAccess().getRoles())
+					.clientRoles(clientRoles)
+					.isActive(token.isActive())
+					.isBearer(token.getType().equalsIgnoreCase("bearer"))
+					.build());
 
 			if (!token.isActive()) {
 				setTokenRejectionReason(ctx, "Token is inactive.");
