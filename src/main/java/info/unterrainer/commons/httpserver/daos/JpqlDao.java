@@ -92,6 +92,8 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 			e = create(em, entity);
 			wasInserted = true;
 		} else {
+			entity.setId(e.getId());
+			entity.setCreatedOn(e.getCreatedOn());
 			e = update(em, entity);
 			wasUpdated = true;
 		}
