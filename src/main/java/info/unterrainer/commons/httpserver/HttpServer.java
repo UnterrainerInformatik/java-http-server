@@ -39,6 +39,7 @@ import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -57,6 +58,7 @@ public class HttpServer {
 	ExecutorService executorService;
 	List<String> appVersionFqns;
 	@Getter
+	@Setter
 	private Consumer<UserDataJson> userAccessInterceptor;
 
 	private HttpServer() {
@@ -170,11 +172,6 @@ public class HttpServer {
 
 		for (HandlerInstance hi : handlerInstances)
 			javalin.addHandler(hi.handlerType(), hi.path(), hi.handler(), hi.roles());
-	}
-
-	public HttpServer setUserAccessInterceptor(final Consumer<UserDataJson> userAccessInterceptor) {
-		this.userAccessInterceptor = userAccessInterceptor;
-		return this;
 	}
 
 	public HttpServer get(final String path, final Handler handler, final Role... roles) {
