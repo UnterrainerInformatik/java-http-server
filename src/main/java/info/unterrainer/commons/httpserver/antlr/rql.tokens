@@ -1,0 +1,12 @@
+T__0=1
+T__1=2
+Operator=3
+NullOp=4
+NotNullOp=5
+And=6
+Or=7
+Identifier=8
+JpqlIdentifier=9
+Whitespace=10
+'('=1
+')'=2
