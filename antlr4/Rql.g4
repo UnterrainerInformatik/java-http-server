@@ -3,55 +3,42 @@ grammar Rql;
 /*
  * Parser Rules start with lower-case characters.
  */
-eval            returns [String r]
-                : op=orExpression                           {$r = $op.text;}
-                ;
+eval            : orExpression ;
 
-orExpression    returns [String r]
-                : op=andExpression                          {$r = $op.text;}
-                (an=Or                                      {$r += " " + $an.text + " ";}
-                ae=andExpression                            {$r += $ae.text;}
-                )*;
+orExpression    : andExpression (or andExpression)* ;
 
-andExpression   returns [String r]
-                : op=atomExpression                         {$r = $op.text;}
-                (an=And                                     {$r += " " + $an.text + " ";}
-                ae=atomExpression                           {$r += $ae.text;}
-                )*;
+andExpression   : atomExpression (and atomExpression)* ;
 
-atomExpression  returns [String r]
-                : op=term                                   {$r = $op.text;}
-                | '(' or=orExpression                       {$r = $or.text;}
-                ')'; 
+atomExpression  : atomTerm | (parOpen orExpression parClose) ;
 
-term            returns [String r]
-                : id=identifier                             {$r = $id.text;}
-                op=Operator                                 {$r += $op.text;}
-                jd=jpqlIdentifier                           {$r += $jd.text;}
-                ;
+atomTerm        : optTerm | term ;
 
-operator        returns [String r]
-                : op=Operator                               {$r = " " + $op.text + " ";}
-                ;
+and             : And ;
 
-identifier      returns [String r]
-                : op=Identifier                             {$r = $op.text;}
-                ;
+or              : Or ;
 
-jpqlIdentifier  returns [String r]
-                : op=JpqlIdentifier                         {$r = $op.text;}
-                ;
+parOpen         : ParOpen ;
+
+parClose        : ParClose ;
+
+optTerm         : OptIdentifier Operator JpqlIdentifier ;
+term            : Identifier Operator JpqlIdentifier ;
                 
 /*
  * Lexer Rules start with upper-case characters.
  */
-Operator        : ST | SEQ | GT | GEQ | EQ | NEQ | NullOp | NotNullOp;
+Operator        : ST | SEQ | GT | GEQ | EQ | NEQ | Like | NLike | NullOp | NotNullOp;
+Like            : L I K E;
+NLike           : Not L I K E;
 NullOp          : Is Null;
 NotNullOp       : Is Not Null;
 And             : A N D;
 Or              : O R;
-Identifier  : Alpha AlphaNum*;
-JpqlIdentifier      : ':' Alpha AlphaNum*;
+ParOpen         : '(';
+ParClose        : ')';
+Identifier      : (Alpha AlphaNum* '.')* Alpha AlphaNum*;
+OptIdentifier   : '?' Identifier;
+JpqlIdentifier  : ':' Alpha AlphaNum*;
 Whitespace      : [ \t\r\n]+ -> channel(HIDDEN);
 
 // a fragment rule can't be used inside parser rules, only in lexer rules

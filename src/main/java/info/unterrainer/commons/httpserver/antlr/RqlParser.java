@@ -17,29 +17,31 @@ public class RqlParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, Operator=3, NullOp=4, NotNullOp=5, And=6, Or=7, Identifier=8, 
-		JpqlIdentifier=9, Whitespace=10;
+		Operator=1, Like=2, NLike=3, NullOp=4, NotNullOp=5, And=6, Or=7, ParOpen=8, 
+		ParClose=9, Identifier=10, OptIdentifier=11, JpqlIdentifier=12, Whitespace=13;
 	public static final int
 		RULE_eval = 0, RULE_orExpression = 1, RULE_andExpression = 2, RULE_atomExpression = 3, 
-		RULE_term = 4, RULE_operator = 5, RULE_identifier = 6, RULE_jpqlIdentifier = 7;
+		RULE_atomTerm = 4, RULE_and = 5, RULE_or = 6, RULE_parOpen = 7, RULE_parClose = 8, 
+		RULE_optTerm = 9, RULE_term = 10;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"eval", "orExpression", "andExpression", "atomExpression", "term", "operator", 
-			"identifier", "jpqlIdentifier"
+			"eval", "orExpression", "andExpression", "atomExpression", "atomTerm", 
+			"and", "or", "parOpen", "parClose", "optTerm", "term"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'('", "')'"
+			null, null, null, null, null, null, null, null, "'('", "')'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, null, null, "Operator", "NullOp", "NotNullOp", "And", "Or", "Identifier", 
-			"JpqlIdentifier", "Whitespace"
+			null, "Operator", "Like", "NLike", "NullOp", "NotNullOp", "And", "Or", 
+			"ParOpen", "ParClose", "Identifier", "OptIdentifier", "JpqlIdentifier", 
+			"Whitespace"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -94,8 +96,6 @@ public class RqlParser extends Parser {
 	}
 
 	public static class EvalContext extends ParserRuleContext {
-		public String r;
-		public OrExpressionContext op;
 		public OrExpressionContext orExpression() {
 			return getRuleContext(OrExpressionContext.class,0);
 		}
@@ -124,9 +124,8 @@ public class RqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(16);
-			((EvalContext)_localctx).op = orExpression();
-			((EvalContext)_localctx).r =  (((EvalContext)_localctx).op!=null?_input.getText(((EvalContext)_localctx).op.start,((EvalContext)_localctx).op.stop):null);
+			setState(22);
+			orExpression();
 			}
 		}
 		catch (RecognitionException re) {
@@ -141,19 +140,17 @@ public class RqlParser extends Parser {
 	}
 
 	public static class OrExpressionContext extends ParserRuleContext {
-		public String r;
-		public AndExpressionContext op;
-		public Token an;
-		public AndExpressionContext ae;
 		public List<AndExpressionContext> andExpression() {
 			return getRuleContexts(AndExpressionContext.class);
 		}
 		public AndExpressionContext andExpression(int i) {
 			return getRuleContext(AndExpressionContext.class,i);
 		}
-		public List<TerminalNode> Or() { return getTokens(RqlParser.Or); }
-		public TerminalNode Or(int i) {
-			return getToken(RqlParser.Or, i);
+		public List<OrContext> or() {
+			return getRuleContexts(OrContext.class);
+		}
+		public OrContext or(int i) {
+			return getRuleContext(OrContext.class,i);
 		}
 		public OrExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -181,24 +178,21 @@ public class RqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(19);
-			((OrExpressionContext)_localctx).op = andExpression();
-			((OrExpressionContext)_localctx).r =  (((OrExpressionContext)_localctx).op!=null?_input.getText(((OrExpressionContext)_localctx).op.start,((OrExpressionContext)_localctx).op.stop):null);
-			setState(28);
+			setState(24);
+			andExpression();
+			setState(30);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==Or) {
 				{
 				{
-				setState(21);
-				((OrExpressionContext)_localctx).an = match(Or);
-				_localctx.r += " " + (((OrExpressionContext)_localctx).an!=null?((OrExpressionContext)_localctx).an.getText():null) + " ";
-				setState(23);
-				((OrExpressionContext)_localctx).ae = andExpression();
-				_localctx.r += (((OrExpressionContext)_localctx).ae!=null?_input.getText(((OrExpressionContext)_localctx).ae.start,((OrExpressionContext)_localctx).ae.stop):null);
+				setState(25);
+				or();
+				setState(26);
+				andExpression();
 				}
 				}
-				setState(30);
+				setState(32);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -216,19 +210,17 @@ public class RqlParser extends Parser {
 	}
 
 	public static class AndExpressionContext extends ParserRuleContext {
-		public String r;
-		public AtomExpressionContext op;
-		public Token an;
-		public AtomExpressionContext ae;
 		public List<AtomExpressionContext> atomExpression() {
 			return getRuleContexts(AtomExpressionContext.class);
 		}
 		public AtomExpressionContext atomExpression(int i) {
 			return getRuleContext(AtomExpressionContext.class,i);
 		}
-		public List<TerminalNode> And() { return getTokens(RqlParser.And); }
-		public TerminalNode And(int i) {
-			return getToken(RqlParser.And, i);
+		public List<AndContext> and() {
+			return getRuleContexts(AndContext.class);
+		}
+		public AndContext and(int i) {
+			return getRuleContext(AndContext.class,i);
 		}
 		public AndExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -256,24 +248,21 @@ public class RqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(31);
-			((AndExpressionContext)_localctx).op = atomExpression();
-			((AndExpressionContext)_localctx).r =  (((AndExpressionContext)_localctx).op!=null?_input.getText(((AndExpressionContext)_localctx).op.start,((AndExpressionContext)_localctx).op.stop):null);
-			setState(40);
+			setState(33);
+			atomExpression();
+			setState(39);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==And) {
 				{
 				{
-				setState(33);
-				((AndExpressionContext)_localctx).an = match(And);
-				_localctx.r += " " + (((AndExpressionContext)_localctx).an!=null?((AndExpressionContext)_localctx).an.getText():null) + " ";
+				setState(34);
+				and();
 				setState(35);
-				((AndExpressionContext)_localctx).ae = atomExpression();
-				_localctx.r += (((AndExpressionContext)_localctx).ae!=null?_input.getText(((AndExpressionContext)_localctx).ae.start,((AndExpressionContext)_localctx).ae.stop):null);
+				atomExpression();
 				}
 				}
-				setState(42);
+				setState(41);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -291,14 +280,17 @@ public class RqlParser extends Parser {
 	}
 
 	public static class AtomExpressionContext extends ParserRuleContext {
-		public String r;
-		public TermContext op;
-		public OrExpressionContext or;
-		public TermContext term() {
-			return getRuleContext(TermContext.class,0);
+		public AtomTermContext atomTerm() {
+			return getRuleContext(AtomTermContext.class,0);
+		}
+		public ParOpenContext parOpen() {
+			return getRuleContext(ParOpenContext.class,0);
 		}
 		public OrExpressionContext orExpression() {
 			return getRuleContext(OrExpressionContext.class,0);
+		}
+		public ParCloseContext parClose() {
+			return getRuleContext(ParCloseContext.class,0);
 		}
 		public AtomExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -323,27 +315,28 @@ public class RqlParser extends Parser {
 		AtomExpressionContext _localctx = new AtomExpressionContext(_ctx, getState());
 		enterRule(_localctx, 6, RULE_atomExpression);
 		try {
-			setState(51);
+			setState(47);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Identifier:
+			case OptIdentifier:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(43);
-				((AtomExpressionContext)_localctx).op = term();
-				((AtomExpressionContext)_localctx).r =  (((AtomExpressionContext)_localctx).op!=null?_input.getText(((AtomExpressionContext)_localctx).op.start,((AtomExpressionContext)_localctx).op.stop):null);
+				setState(42);
+				atomTerm();
 				}
 				break;
-			case T__0:
+			case ParOpen:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(46);
-				match(T__0);
-				setState(47);
-				((AtomExpressionContext)_localctx).or = orExpression();
-				((AtomExpressionContext)_localctx).r =  (((AtomExpressionContext)_localctx).or!=null?_input.getText(((AtomExpressionContext)_localctx).or.start,((AtomExpressionContext)_localctx).or.stop):null);
-				setState(49);
-				match(T__1);
+				{
+				setState(43);
+				parOpen();
+				setState(44);
+				orExpression();
+				setState(45);
+				parClose();
+				}
 				}
 				break;
 			default:
@@ -361,18 +354,288 @@ public class RqlParser extends Parser {
 		return _localctx;
 	}
 
-	public static class TermContext extends ParserRuleContext {
-		public String r;
-		public IdentifierContext id;
-		public Token op;
-		public JpqlIdentifierContext jd;
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
+	public static class AtomTermContext extends ParserRuleContext {
+		public OptTermContext optTerm() {
+			return getRuleContext(OptTermContext.class,0);
 		}
+		public TermContext term() {
+			return getRuleContext(TermContext.class,0);
+		}
+		public AtomTermContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_atomTerm; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterAtomTerm(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitAtomTerm(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitAtomTerm(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final AtomTermContext atomTerm() throws RecognitionException {
+		AtomTermContext _localctx = new AtomTermContext(_ctx, getState());
+		enterRule(_localctx, 8, RULE_atomTerm);
+		try {
+			setState(51);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case OptIdentifier:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(49);
+				optTerm();
+				}
+				break;
+			case Identifier:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(50);
+				term();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class AndContext extends ParserRuleContext {
+		public TerminalNode And() { return getToken(RqlParser.And, 0); }
+		public AndContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_and; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterAnd(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitAnd(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitAnd(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final AndContext and() throws RecognitionException {
+		AndContext _localctx = new AndContext(_ctx, getState());
+		enterRule(_localctx, 10, RULE_and);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(53);
+			match(And);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class OrContext extends ParserRuleContext {
+		public TerminalNode Or() { return getToken(RqlParser.Or, 0); }
+		public OrContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_or; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterOr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitOr(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitOr(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final OrContext or() throws RecognitionException {
+		OrContext _localctx = new OrContext(_ctx, getState());
+		enterRule(_localctx, 12, RULE_or);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(55);
+			match(Or);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ParOpenContext extends ParserRuleContext {
+		public TerminalNode ParOpen() { return getToken(RqlParser.ParOpen, 0); }
+		public ParOpenContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_parOpen; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterParOpen(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitParOpen(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitParOpen(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ParOpenContext parOpen() throws RecognitionException {
+		ParOpenContext _localctx = new ParOpenContext(_ctx, getState());
+		enterRule(_localctx, 14, RULE_parOpen);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(57);
+			match(ParOpen);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ParCloseContext extends ParserRuleContext {
+		public TerminalNode ParClose() { return getToken(RqlParser.ParClose, 0); }
+		public ParCloseContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_parClose; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterParClose(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitParClose(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitParClose(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ParCloseContext parClose() throws RecognitionException {
+		ParCloseContext _localctx = new ParCloseContext(_ctx, getState());
+		enterRule(_localctx, 16, RULE_parClose);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(59);
+			match(ParClose);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class OptTermContext extends ParserRuleContext {
+		public TerminalNode OptIdentifier() { return getToken(RqlParser.OptIdentifier, 0); }
 		public TerminalNode Operator() { return getToken(RqlParser.Operator, 0); }
-		public JpqlIdentifierContext jpqlIdentifier() {
-			return getRuleContext(JpqlIdentifierContext.class,0);
+		public TerminalNode JpqlIdentifier() { return getToken(RqlParser.JpqlIdentifier, 0); }
+		public OptTermContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
 		}
+		@Override public int getRuleIndex() { return RULE_optTerm; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterOptTerm(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitOptTerm(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitOptTerm(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final OptTermContext optTerm() throws RecognitionException {
+		OptTermContext _localctx = new OptTermContext(_ctx, getState());
+		enterRule(_localctx, 18, RULE_optTerm);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(61);
+			match(OptIdentifier);
+			setState(62);
+			match(Operator);
+			setState(63);
+			match(JpqlIdentifier);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class TermContext extends ParserRuleContext {
+		public TerminalNode Identifier() { return getToken(RqlParser.Identifier, 0); }
+		public TerminalNode Operator() { return getToken(RqlParser.Operator, 0); }
+		public TerminalNode JpqlIdentifier() { return getToken(RqlParser.JpqlIdentifier, 0); }
 		public TermContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -394,154 +657,16 @@ public class RqlParser extends Parser {
 
 	public final TermContext term() throws RecognitionException {
 		TermContext _localctx = new TermContext(_ctx, getState());
-		enterRule(_localctx, 8, RULE_term);
+		enterRule(_localctx, 20, RULE_term);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(53);
-			((TermContext)_localctx).id = identifier();
-			((TermContext)_localctx).r =  (((TermContext)_localctx).id!=null?_input.getText(((TermContext)_localctx).id.start,((TermContext)_localctx).id.stop):null);
-			setState(55);
-			((TermContext)_localctx).op = match(Operator);
-			_localctx.r += (((TermContext)_localctx).op!=null?((TermContext)_localctx).op.getText():null);
-			setState(57);
-			((TermContext)_localctx).jd = jpqlIdentifier();
-			_localctx.r += (((TermContext)_localctx).jd!=null?_input.getText(((TermContext)_localctx).jd.start,((TermContext)_localctx).jd.stop):null);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class OperatorContext extends ParserRuleContext {
-		public String r;
-		public Token op;
-		public TerminalNode Operator() { return getToken(RqlParser.Operator, 0); }
-		public OperatorContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_operator; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterOperator(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitOperator(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitOperator(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final OperatorContext operator() throws RecognitionException {
-		OperatorContext _localctx = new OperatorContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_operator);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(60);
-			((OperatorContext)_localctx).op = match(Operator);
-			((OperatorContext)_localctx).r =  " " + (((OperatorContext)_localctx).op!=null?((OperatorContext)_localctx).op.getText():null) + " ";
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class IdentifierContext extends ParserRuleContext {
-		public String r;
-		public Token op;
-		public TerminalNode Identifier() { return getToken(RqlParser.Identifier, 0); }
-		public IdentifierContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_identifier; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterIdentifier(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitIdentifier(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitIdentifier(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final IdentifierContext identifier() throws RecognitionException {
-		IdentifierContext _localctx = new IdentifierContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_identifier);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(63);
-			((IdentifierContext)_localctx).op = match(Identifier);
-			((IdentifierContext)_localctx).r =  (((IdentifierContext)_localctx).op!=null?((IdentifierContext)_localctx).op.getText():null);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class JpqlIdentifierContext extends ParserRuleContext {
-		public String r;
-		public Token op;
-		public TerminalNode JpqlIdentifier() { return getToken(RqlParser.JpqlIdentifier, 0); }
-		public JpqlIdentifierContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_jpqlIdentifier; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RqlListener ) ((RqlListener)listener).enterJpqlIdentifier(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RqlListener ) ((RqlListener)listener).exitJpqlIdentifier(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RqlVisitor ) return ((RqlVisitor<? extends T>)visitor).visitJpqlIdentifier(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final JpqlIdentifierContext jpqlIdentifier() throws RecognitionException {
-		JpqlIdentifierContext _localctx = new JpqlIdentifierContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_jpqlIdentifier);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
+			setState(65);
+			match(Identifier);
 			setState(66);
-			((JpqlIdentifierContext)_localctx).op = match(JpqlIdentifier);
-			((JpqlIdentifierContext)_localctx).r =  (((JpqlIdentifierContext)_localctx).op!=null?((JpqlIdentifierContext)_localctx).op.getText():null);
+			match(Operator);
+			setState(67);
+			match(JpqlIdentifier);
 			}
 		}
 		catch (RecognitionException re) {
@@ -556,23 +681,23 @@ public class RqlParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\fH\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\3\2\3\2\3\2\3\3\3\3"+
-		"\3\3\3\3\3\3\3\3\3\3\7\3\35\n\3\f\3\16\3 \13\3\3\4\3\4\3\4\3\4\3\4\3\4"+
-		"\3\4\7\4)\n\4\f\4\16\4,\13\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5\5\66\n"+
-		"\5\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\7\3\7\3\7\3\b\3\b\3\b\3\t\3\t\3\t\3\t"+
-		"\2\2\n\2\4\6\b\n\f\16\20\2\2\2B\2\22\3\2\2\2\4\25\3\2\2\2\6!\3\2\2\2\b"+
-		"\65\3\2\2\2\n\67\3\2\2\2\f>\3\2\2\2\16A\3\2\2\2\20D\3\2\2\2\22\23\5\4"+
-		"\3\2\23\24\b\2\1\2\24\3\3\2\2\2\25\26\5\6\4\2\26\36\b\3\1\2\27\30\7\t"+
-		"\2\2\30\31\b\3\1\2\31\32\5\6\4\2\32\33\b\3\1\2\33\35\3\2\2\2\34\27\3\2"+
-		"\2\2\35 \3\2\2\2\36\34\3\2\2\2\36\37\3\2\2\2\37\5\3\2\2\2 \36\3\2\2\2"+
-		"!\"\5\b\5\2\"*\b\4\1\2#$\7\b\2\2$%\b\4\1\2%&\5\b\5\2&\'\b\4\1\2\')\3\2"+
-		"\2\2(#\3\2\2\2),\3\2\2\2*(\3\2\2\2*+\3\2\2\2+\7\3\2\2\2,*\3\2\2\2-.\5"+
-		"\n\6\2./\b\5\1\2/\66\3\2\2\2\60\61\7\3\2\2\61\62\5\4\3\2\62\63\b\5\1\2"+
-		"\63\64\7\4\2\2\64\66\3\2\2\2\65-\3\2\2\2\65\60\3\2\2\2\66\t\3\2\2\2\67"+
-		"8\5\16\b\289\b\6\1\29:\7\5\2\2:;\b\6\1\2;<\5\20\t\2<=\b\6\1\2=\13\3\2"+
-		"\2\2>?\7\5\2\2?@\b\7\1\2@\r\3\2\2\2AB\7\n\2\2BC\b\b\1\2C\17\3\2\2\2DE"+
-		"\7\13\2\2EF\b\t\1\2F\21\3\2\2\2\5\36*\65";
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\17H\4\2\t\2\4\3\t"+
+		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4"+
+		"\f\t\f\3\2\3\2\3\3\3\3\3\3\3\3\7\3\37\n\3\f\3\16\3\"\13\3\3\4\3\4\3\4"+
+		"\3\4\7\4(\n\4\f\4\16\4+\13\4\3\5\3\5\3\5\3\5\3\5\5\5\62\n\5\3\6\3\6\5"+
+		"\6\66\n\6\3\7\3\7\3\b\3\b\3\t\3\t\3\n\3\n\3\13\3\13\3\13\3\13\3\f\3\f"+
+		"\3\f\3\f\3\f\2\2\r\2\4\6\b\n\f\16\20\22\24\26\2\2\2@\2\30\3\2\2\2\4\32"+
+		"\3\2\2\2\6#\3\2\2\2\b\61\3\2\2\2\n\65\3\2\2\2\f\67\3\2\2\2\169\3\2\2\2"+
+		"\20;\3\2\2\2\22=\3\2\2\2\24?\3\2\2\2\26C\3\2\2\2\30\31\5\4\3\2\31\3\3"+
+		"\2\2\2\32 \5\6\4\2\33\34\5\16\b\2\34\35\5\6\4\2\35\37\3\2\2\2\36\33\3"+
+		"\2\2\2\37\"\3\2\2\2 \36\3\2\2\2 !\3\2\2\2!\5\3\2\2\2\" \3\2\2\2#)\5\b"+
+		"\5\2$%\5\f\7\2%&\5\b\5\2&(\3\2\2\2\'$\3\2\2\2(+\3\2\2\2)\'\3\2\2\2)*\3"+
+		"\2\2\2*\7\3\2\2\2+)\3\2\2\2,\62\5\n\6\2-.\5\20\t\2./\5\4\3\2/\60\5\22"+
+		"\n\2\60\62\3\2\2\2\61,\3\2\2\2\61-\3\2\2\2\62\t\3\2\2\2\63\66\5\24\13"+
+		"\2\64\66\5\26\f\2\65\63\3\2\2\2\65\64\3\2\2\2\66\13\3\2\2\2\678\7\b\2"+
+		"\28\r\3\2\2\29:\7\t\2\2:\17\3\2\2\2;<\7\n\2\2<\21\3\2\2\2=>\7\13\2\2>"+
+		"\23\3\2\2\2?@\7\r\2\2@A\7\3\2\2AB\7\16\2\2B\25\3\2\2\2CD\7\f\2\2DE\7\3"+
+		"\2\2EF\7\16\2\2F\27\3\2\2\2\6 )\61\65";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

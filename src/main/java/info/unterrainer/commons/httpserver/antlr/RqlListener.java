@@ -48,6 +48,66 @@ public interface RqlListener extends ParseTreeListener {
 	 */
 	void exitAtomExpression(RqlParser.AtomExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RqlParser#atomTerm}.
+	 * @param ctx the parse tree
+	 */
+	void enterAtomTerm(RqlParser.AtomTermContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#atomTerm}.
+	 * @param ctx the parse tree
+	 */
+	void exitAtomTerm(RqlParser.AtomTermContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#and}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnd(RqlParser.AndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#and}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnd(RqlParser.AndContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#or}.
+	 * @param ctx the parse tree
+	 */
+	void enterOr(RqlParser.OrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#or}.
+	 * @param ctx the parse tree
+	 */
+	void exitOr(RqlParser.OrContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#parOpen}.
+	 * @param ctx the parse tree
+	 */
+	void enterParOpen(RqlParser.ParOpenContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#parOpen}.
+	 * @param ctx the parse tree
+	 */
+	void exitParOpen(RqlParser.ParOpenContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#parClose}.
+	 * @param ctx the parse tree
+	 */
+	void enterParClose(RqlParser.ParCloseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#parClose}.
+	 * @param ctx the parse tree
+	 */
+	void exitParClose(RqlParser.ParCloseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#optTerm}.
+	 * @param ctx the parse tree
+	 */
+	void enterOptTerm(RqlParser.OptTermContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#optTerm}.
+	 * @param ctx the parse tree
+	 */
+	void exitOptTerm(RqlParser.OptTermContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RqlParser#term}.
 	 * @param ctx the parse tree
 	 */
@@ -57,34 +117,4 @@ public interface RqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTerm(RqlParser.TermContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RqlParser#operator}.
-	 * @param ctx the parse tree
-	 */
-	void enterOperator(RqlParser.OperatorContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RqlParser#operator}.
-	 * @param ctx the parse tree
-	 */
-	void exitOperator(RqlParser.OperatorContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RqlParser#identifier}.
-	 * @param ctx the parse tree
-	 */
-	void enterIdentifier(RqlParser.IdentifierContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RqlParser#identifier}.
-	 * @param ctx the parse tree
-	 */
-	void exitIdentifier(RqlParser.IdentifierContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RqlParser#jpqlIdentifier}.
-	 * @param ctx the parse tree
-	 */
-	void enterJpqlIdentifier(RqlParser.JpqlIdentifierContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RqlParser#jpqlIdentifier}.
-	 * @param ctx the parse tree
-	 */
-	void exitJpqlIdentifier(RqlParser.JpqlIdentifierContext ctx);
 }

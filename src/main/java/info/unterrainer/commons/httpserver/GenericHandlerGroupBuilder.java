@@ -9,11 +9,14 @@ import java.util.concurrent.ExecutorService;
 import info.unterrainer.commons.httpserver.daos.BasicDao;
 import info.unterrainer.commons.httpserver.daos.DaoTransactionManager;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
+import info.unterrainer.commons.httpserver.interceptors.InterceptorParamBuilder;
 import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
+import info.unterrainer.commons.httpserver.rql.RqlUtils;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.serialization.JsonMapper;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
 import io.javalin.core.security.Role;
+import io.javalin.http.Context;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import ma.glasnost.orika.MapperFactory;
@@ -33,6 +36,10 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	private List<Endpoint> endpoints = new ArrayList<>();
 	private List<GetListInterceptor> getListInterceptors = new ArrayList<>();
 	private ExecutorService executorService;
+
+	private Context ctx;
+	private HandlerUtils hu = new HandlerUtils();
+	private RqlUtils rqlUtils = new RqlUtils(ctx, hu);
 
 	HandlerExtensions<P, J, E> extensions = new HandlerExtensions<>();
 	private LinkedHashMap<Endpoint, Role[]> accessRoles = new LinkedHashMap<>();
@@ -93,5 +100,11 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	public GenericHandlerGroupBuilder<P, J, E> getListInterceptor(final GetListInterceptor interceptor) {
 		getListInterceptors.add(interceptor);
 		return this;
+	}
+
+	public InterceptorParamBuilder<P, J, E> getListInterceptor() {
+		return new InterceptorParamBuilder<>(this, rqlUtils, data -> {
+			getListInterceptors.add((ctx, hu) -> data);
+		});
 	}
 }

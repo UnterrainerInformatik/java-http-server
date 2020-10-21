@@ -35,27 +35,45 @@ public interface RqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAtomExpression(RqlParser.AtomExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RqlParser#atomTerm}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAtomTerm(RqlParser.AtomTermContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#and}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnd(RqlParser.AndContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#or}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOr(RqlParser.OrContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#parOpen}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParOpen(RqlParser.ParOpenContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#parClose}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParClose(RqlParser.ParCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#optTerm}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOptTerm(RqlParser.OptTermContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RqlParser#term}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTerm(RqlParser.TermContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RqlParser#operator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOperator(RqlParser.OperatorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RqlParser#identifier}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdentifier(RqlParser.IdentifierContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RqlParser#jpqlIdentifier}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitJpqlIdentifier(RqlParser.JpqlIdentifierContext ctx);
 }
