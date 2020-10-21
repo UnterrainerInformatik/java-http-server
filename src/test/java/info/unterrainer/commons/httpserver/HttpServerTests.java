@@ -6,6 +6,5 @@ public class HttpServerTests {
 
 	@Test
 	public void test() {
-		
 	}
 }

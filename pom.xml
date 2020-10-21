@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>info.unterrainer.commons</groupId>
 		<artifactId>parent-pom</artifactId>
-		<version>0.0.26</version>
+		<version>0.0.28</version>
 	</parent>
 
 	<properties>
@@ -17,7 +17,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.1.4</version>
+	<version>0.1.5</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
@@ -51,6 +51,11 @@
 			<groupId>ma.glasnost.orika</groupId>
 			<artifactId>orika-core</artifactId>
 			<version>1.5.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
+			<version>4.8-1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

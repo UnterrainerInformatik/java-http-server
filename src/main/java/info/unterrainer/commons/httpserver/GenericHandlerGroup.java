@@ -14,7 +14,7 @@ import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
-import info.unterrainer.commons.httpserver.interceptors.GetListInterceptorResult;
+import info.unterrainer.commons.httpserver.interceptors.InterceptorData;
 import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
@@ -104,7 +104,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		Long offset = hu.getQueryParamAsLong(ctx, QueryField.PAGINATION_OFFSET, 0L);
 		Long size = hu.getQueryParamAsLong(ctx, QueryField.PAGINATION_SIZE, Long.MAX_VALUE);
 
-		GetListInterceptorResult interceptorResult = GetListInterceptorResult.builder()
+		InterceptorData interceptorResult = InterceptorData.builder()
 				.selectClause("o")
 				.joinClause("")
 				.whereClause("")
@@ -113,7 +113,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 				.build();
 		for (GetListInterceptor interceptor : getListInterceptors)
 			try {
-				GetListInterceptorResult result = interceptor.intercept(ctx, hu);
+				InterceptorData result = interceptor.intercept(ctx, hu);
 				if (result != null) {
 					interceptorResult = result;
 					break;
