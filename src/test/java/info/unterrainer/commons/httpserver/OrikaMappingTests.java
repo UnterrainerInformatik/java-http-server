@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import info.unterrainer.commons.httpserver.jpas.ChildJpa;
 import info.unterrainer.commons.httpserver.jsons.ChildJson;
@@ -18,7 +18,7 @@ public class OrikaMappingTests {
 	public static MapperFactory orikaFactory = new DefaultMapperFactory.Builder().build();
 	public static MapperFacade orikaMapper;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		orikaMapper = orikaFactory.getMapperFacade();
 	}
