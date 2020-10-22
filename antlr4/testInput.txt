@@ -1,1 +1,1 @@
-userId = :userId AND (?timeFrom <= :timeFrom OR timeTo > :timeTo)
+userId = :userId[long] AND (?timeFrom <= :timeFrom[datetime] OR timeTo > :timeTo[~MyEnum])

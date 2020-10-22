@@ -16,11 +16,7 @@ public class HandlerUtils {
 
 	public Long checkAndGetId(final Context ctx) {
 		String s = ctx.pathParam(QueryField.ID);
-		try {
-			return Long.parseLong(s);
-		} catch (NumberFormatException e) {
-			throw new BadRequestException("Parameter has to be of numeric type (Long).");
-		}
+		return convertToLong(s);
 	}
 
 	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final E entityManager, final BasicDao<P, E> dao) {
@@ -87,14 +83,42 @@ public class HandlerUtils {
 		String o = ctx.queryParam(name);
 		Long result = defaultValue;
 		if (o != null)
-			try {
-				result = Long.parseLong(o);
-			} catch (NumberFormatException e) {
-				throw new BadRequestException(String.format("Parameter %s has to be a number", name));
-			}
+			result = convertToLong(o);
 		else if (mandatory)
 			throw new BadRequestException(String.format("Parameter %s is mandatory", name));
 		return result;
+	}
+
+	public long convertToLong(final String s) {
+		try {
+			return Long.parseLong(s);
+		} catch (NumberFormatException e) {
+			throw new BadRequestException("Parameter has to be of a numeric type.");
+		}
+	}
+
+	public float convertToFloat(final String s) {
+		try {
+			return Float.parseFloat(s);
+		} catch (NumberFormatException e) {
+			throw new BadRequestException("Parameter has to be of a numeric type.");
+		}
+	}
+
+	public double convertToDouble(final String s) {
+		try {
+			return Double.parseDouble(s);
+		} catch (NumberFormatException e) {
+			throw new BadRequestException("Parameter has to be of a numeric type.");
+		}
+	}
+
+	public int convertToInt(final String s) {
+		try {
+			return Integer.parseInt(s);
+		} catch (NumberFormatException e) {
+			throw new BadRequestException("Parameter has to be of a numeric type.");
+		}
 	}
 
 	public String getQueryParamAsString(final Context ctx, final String name) {
@@ -131,17 +155,21 @@ public class HandlerUtils {
 		LocalDateTime result = defaultValue;
 
 		if (o != null)
-			try {
-				if (o.endsWith("Z") || o.endsWith("z"))
-					o = o.substring(0, o.length() - 1);
-				result = LocalDateTime.parse(o, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-			} catch (DateTimeParseException e) {
-				throw new BadRequestException(String.format("Parameter %s has to be a dateTime of format '%s'", name,
-						DateTimeFormatter.ISO_LOCAL_DATE_TIME.toString()));
-			}
+			result = convertToLocalDateTime(o);
 		else if (mandatory)
 			throw new BadRequestException(String.format("Parameter %s is mandatory", name));
 		return result;
+	}
+
+	public LocalDateTime convertToLocalDateTime(String o) {
+		try {
+			if (o.endsWith("Z") || o.endsWith("z"))
+				o = o.substring(0, o.length() - 1);
+			return LocalDateTime.parse(o, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		} catch (DateTimeParseException e) {
+			throw new BadRequestException(String.format("Parameter has to be a dateTime of format '%s'",
+					DateTimeFormatter.ISO_LOCAL_DATE_TIME.toString()));
+		}
 	}
 
 	public Boolean getQueryParamAsBoolean(final Context ctx, final String name) {
@@ -157,11 +185,18 @@ public class HandlerUtils {
 		String o = ctx.queryParam(name);
 		Boolean result = defaultValue;
 
-		if (o != null) {
-			String v = o.strip().toLowerCase();
-			return !v.equals("false") || !v.equals("no") || !v.equals("0");
-		} else if (mandatory)
+		if (o != null)
+			return convertToBoolean(o);
+		else if (mandatory)
 			throw new BadRequestException(String.format("Parameter %s is mandatory", name));
 		return result;
+	}
+
+	public boolean convertToBoolean(final String o) {
+		if (o == null)
+			return false;
+
+		String v = o.strip().toLowerCase();
+		return !v.equals("false") || !v.equals("no") || !v.equals("0");
 	}
 }

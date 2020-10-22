@@ -8,6 +8,8 @@ import info.unterrainer.commons.httpserver.antlr.RqlParser.OrContext;
 import info.unterrainer.commons.httpserver.antlr.RqlParser.ParCloseContext;
 import info.unterrainer.commons.httpserver.antlr.RqlParser.ParOpenContext;
 import info.unterrainer.commons.httpserver.antlr.RqlParser.TermContext;
+import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
+import info.unterrainer.commons.httpserver.exceptions.InternalServerErrorException;
 import io.javalin.http.Context;
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +19,7 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 	private final RqlData data;
 	private final HandlerUtils hu;
 	private final Context ctx;
+	private final String enumFqn;
 
 	@Override
 	public String visitAnd(final AndContext ctx) {
@@ -67,7 +70,10 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 		String first = ctx.children.get(0).getText();
 		String operator = ctx.children.get(1).getText();
 		String second = ctx.children.get(2).getText();
-		if (assignTermValues(second, false))
+		String type = second.substring(second.indexOf("[") + 1, second.indexOf("]"));
+		second = second.substring(0, second.indexOf("["));
+
+		if (assignTermValues(second, false, type))
 			data.getParsedCommand()
 					.add(RqlDataElement.builder()
 							.index(data.getParsedCommand().size())
@@ -82,7 +88,10 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 		String first = ctx.children.get(0).getText().substring(1);
 		String operator = ctx.children.get(1).getText();
 		String second = ctx.children.get(2).getText();
-		if (assignTermValues(second, true))
+		String type = second.substring(second.indexOf("[") + 1, second.indexOf("]"));
+		second = second.substring(0, second.indexOf("["));
+
+		if (assignTermValues(second, true, type))
 			data.getParsedCommand()
 					.add(RqlDataElement.builder()
 							.index(data.getParsedCommand().size())
@@ -92,7 +101,7 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 		return super.visitOptTerm(ctx);
 	}
 
-	private boolean assignTermValues(final String paramName, final boolean isOptional) {
+	private boolean assignTermValues(final String paramName, final boolean isOptional, final String type) {
 		String name = paramName.substring(1);
 		String value;
 		if (isOptional)
@@ -101,10 +110,59 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 			value = hu.getQueryParamAsString(ctx, name);
 
 		if (value != null) {
-			data.getParams().put(name, value);
+			data.getParams().put(name, castToType(value, type, paramName));
 			data.getQueryString().put(name, value);
 		} else
 			return false;
 		return true;
+	}
+
+	private Object castToType(final String value, final String type, final String field) {
+		if (type.startsWith("~"))
+			return castToEnum(value, type.substring(1), field);
+		return castToPrimitive(value, type.toLowerCase(), field);
+	}
+
+	private Object castToPrimitive(final String value, final String type, final String field) {
+		try {
+			switch (type) {
+			case "boolean":
+			case "bool":
+				return hu.convertToBoolean(value);
+			case "integer":
+			case "int":
+				return hu.convertToInt(value);
+			case "long":
+			case "lng":
+				return hu.convertToLong(value);
+			case "float":
+				return hu.convertToFloat(value);
+			case "double":
+			case "dbl":
+				return hu.convertToDouble(value);
+			case "datetime":
+				return hu.convertToLocalDateTime(value);
+			default:
+				return value;
+			}
+		} catch (Exception e) {
+			throw new BadRequestException(
+					String.format("RQL-Parser: Value [%s] of field [%s] has to be of type [%s] according to your RQL",
+							value, field, type));
+		}
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Enum castToEnum(final String value, final String type, final String field) {
+		try {
+			final Class<Enum> cl = (Class<Enum>) Class.forName(enumFqn + "." + type);
+			return Enum.valueOf(cl, value);
+		} catch (ClassCastException e) {
+			throw new BadRequestException(String.format(
+					"Value [%s] of field [%s] has to be of type [%s] according to your RQL", value, field, type));
+		} catch (ClassNotFoundException e) {
+			throw new InternalServerErrorException(
+					String.format("The Enum type [%s] you want to cast to is not available", type));
+		}
 	}
 }

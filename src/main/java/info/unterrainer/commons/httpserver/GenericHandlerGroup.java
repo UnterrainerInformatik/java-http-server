@@ -26,8 +26,10 @@ import io.javalin.core.security.Role;
 import io.javalin.http.Context;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 
+@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> implements HandlerGroup {
 
@@ -118,7 +120,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 					interceptorResult = result;
 					break;
 				}
-			} catch (Exception e) {// NOOP}
+			} catch (Exception e) {
+				log.debug("Interceptor threw an exception. Ignoring.", e);
 			}
 
 		DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();

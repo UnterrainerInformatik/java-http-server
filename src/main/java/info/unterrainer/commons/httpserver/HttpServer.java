@@ -60,6 +60,9 @@ public class HttpServer {
 	@Getter
 	@Setter
 	private Consumer<UserDataJson> userAccessInterceptor;
+	@Getter
+	@Setter
+	private String enumLookupFqnForInterceptorParser;
 
 	private HttpServer() {
 	}

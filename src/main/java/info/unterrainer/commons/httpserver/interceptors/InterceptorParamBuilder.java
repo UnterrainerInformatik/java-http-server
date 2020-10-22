@@ -1,11 +1,8 @@
 package info.unterrainer.commons.httpserver.interceptors;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import info.unterrainer.commons.httpserver.GenericHandlerGroupBuilder;
-import info.unterrainer.commons.httpserver.daos.ParamMap;
-import info.unterrainer.commons.httpserver.rql.RqlData;
-import info.unterrainer.commons.httpserver.rql.RqlUtils;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +11,7 @@ import lombok.RequiredArgsConstructor;
 public class InterceptorParamBuilder<P extends BasicJpa, J extends BasicJson, E> {
 
 	private final GenericHandlerGroupBuilder<P, J, E> parent;
-	private final RqlUtils rqlUtils;
-	private final Consumer<InterceptorData> saveInterceptorData;
+	private final BiConsumer<InterceptorData, String> saveInterceptorData;
 
 	private String selectClause = "o";
 	private String joinClause = "";
@@ -37,15 +33,8 @@ public class InterceptorParamBuilder<P extends BasicJpa, J extends BasicJson, E>
 	}
 
 	public GenericHandlerGroupBuilder<P, J, E> build() {
-		RqlData data = rqlUtils.parseRql(query);
-		InterceptorData r = InterceptorData.builder()
-				.selectClause(selectClause)
-				.whereClause(data.getParsedCommandAsString())
-				.joinClause(joinClause)
-				.params(ParamMap.builder().parameters(data.getParams()).build())
-				.partOfQueryString(data.getQueryStringAsString())
-				.build();
-		saveInterceptorData.accept(r);
+		InterceptorData r = InterceptorData.builder().selectClause(selectClause).joinClause(joinClause).build();
+		saveInterceptorData.accept(r, query);
 		return parent;
 	}
 }

@@ -19,6 +19,7 @@ public class RqlUtils {
 
 	private final Context ctx;
 	private final HandlerUtils hu;
+	private final String enumFqn;
 
 	public RqlData parseRql(final String expression) {
 		CharStream in = CharStreams.fromString(expression);
@@ -30,7 +31,7 @@ public class RqlUtils {
 		// System.out.println(tree.toStringTree(parser));
 
 		RqlData data = new RqlData();
-		RqlVisitor Visitor = new RqlVisitor(data, hu, ctx);
+		RqlVisitor Visitor = new RqlVisitor(data, hu, ctx, enumFqn);
 		Visitor.visit(tree);
 		repair(data);
 		return data;
