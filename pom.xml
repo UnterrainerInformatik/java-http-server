@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>info.unterrainer.commons</groupId>
 		<artifactId>parent-pom</artifactId>
-		<version>0.0.28</version>
+		<version>0.1.1</version>
 	</parent>
 
 	<properties>
@@ -25,22 +25,22 @@
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>jre-utils</artifactId>
-			<version>0.0.10</version>
+			<version>0.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>rdb-utils</artifactId>
-			<version>0.0.23</version>
+			<version>0.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>serialization</artifactId>
-			<version>0.0.10</version>
+			<version>0.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.javalin</groupId>
 			<artifactId>javalin</artifactId>
-			<version>3.9.1</version>
+			<version>3.11.2</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.persistence</groupId>
@@ -60,12 +60,12 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-http</artifactId>
-			<version>9.4.30.v20200611</version>
+			<version>9.4.31.v20200723</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.4.30.v20200611</version>
+			<version>9.4.31.v20200723</version>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
