@@ -142,14 +142,22 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 	}
 
 	@Override
+	public ListJson<P> getList(final EntityManager em, final long offset, final long size, final String selectClause,
+			final String joinClause, final String whereClause, final ParamMap params) {
+		return getList(em, offset, size, selectClause, joinClause, whereClause, params, null);
+	}
+
+	@Override
 	public ListJson<P> getList(final EntityManager em, final long offset, final long size, String selectClause,
-			String joinClause, String whereClause, final ParamMap params) {
+			String joinClause, String whereClause, final ParamMap params, String orderByClause) {
 		if (selectClause == null)
 			selectClause = "o";
 		if (whereClause == null)
 			whereClause = "";
 		if (joinClause == null)
 			joinClause = "";
+		if (orderByClause == null)
+			orderByClause = "";
 		ListJson<P> r = new ListJson<>();
 		int s = Integer.MAX_VALUE;
 		if (size < s)
@@ -157,7 +165,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 		int o = Integer.MAX_VALUE;
 		if (offset < o)
 			o = (int) offset;
-		TypedQuery<P> q = getQuery(em, selectClause, joinClause, whereClause, params, type, null, false)
+		TypedQuery<P> q = getQuery(em, selectClause, joinClause, whereClause, params, type, orderByClause, false)
 				.setMaxResults(s)
 				.setFirstResult(o);
 		List<P> qResult = q.getResultList();

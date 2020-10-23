@@ -3,35 +3,46 @@ grammar Rql;
 /*
  * Parser Rules start with lower-case characters.
  */
-eval            : orExpression ;
+eval            : orExpression;
 
-orExpression    : andExpression (or andExpression)* ;
+orExpression    : andExpression (or andExpression)*;
 
-andExpression   : atomExpression (and atomExpression)* ;
+andExpression   : atomExpression (and atomExpression)*;
 
-atomExpression  : atomTerm | (parOpen orExpression parClose) ;
+atomExpression  : atomTerm | (parOpen orExpression parClose);
 
-atomTerm        : optTerm | term ;
+atomTerm        : optTerm | term;
 
-and             : And ;
+and             : And;
 
-or              : Or ;
+or              : Or;
 
-parOpen         : ParOpen ;
+parOpen         : ParOpen;
 
-parClose        : ParClose ;
+parClose        : ParClose;
 
-optTerm         : OptIdentifier Operator JpqlIdentifier ;
-term            : Identifier Operator JpqlIdentifier ;
+optTerm         : optTerm1 optOperator optTerm2;
+optTerm1        : OptIdentifier;
+optOperator     : Operator;
+optTerm2        : JpqlIdentifier;
+
+term            : term1 operator term2;
+term1           : Identifier;
+nullOperator1   : Is;
+nullOperator2   : Is Not;
+nullOperator    : nullOperator1 | nullOperator2;
+operator        : nullOperator | Operator;
+term2           : Null | JpqlIdentifier;
                 
 /*
  * Lexer Rules start with upper-case characters.
  */
-Operator        : ST | SEQ | GT | GEQ | EQ | NEQ | Like | NLike | NullOp | NotNullOp;
+Operator        : ST | SEQ | GT | GEQ | EQ | EQAlt | NEQ | NEQAlt | Like | NLike;
 Like            : L I K E;
 NLike           : Not L I K E;
-NullOp          : Is Null;
-NotNullOp       : Is Not Null;
+Null            : N U L L;
+Is              : I S;
+Not             : N O T;
 And             : A N D;
 Or              : O R;
 ParOpen         : '(';
@@ -63,10 +74,9 @@ fragment GT         : '>';
 fragment SEQ        : '<=';
 fragment GEQ        : '>=';
 fragment EQ         : '=';
+fragment EQAlt      : '==';
 fragment NEQ        : '<>';
-fragment Null       : N U L L;
-fragment Is         : I S;
-fragment Not        : N O T;
+fragment NEQAlt     : '!=';
 fragment UCaseAlpha : 'A'..'Z'; 
 fragment LCaseAlpha : 'a'..'z';
 fragment Alpha      : LCaseAlpha | UCaseAlpha;

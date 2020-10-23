@@ -127,7 +127,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
 
 		ListJson<P> bList = dao.getList(transaction.getManager(), offset, size, interceptorResult.getSelectClause(),
-				interceptorResult.getJoinClause(), interceptorResult.getWhereClause(), interceptorResult.getParams());
+				interceptorResult.getJoinClause(), interceptorResult.getWhereClause(), interceptorResult.getParams(),
+				interceptorResult.getOrderByClause());
 		ListJson<J> jList = new ListJson<>();
 		for (P entry : bList.getEntries())
 			jList.getEntries().add(orikaMapper.map(entry, jsonType));

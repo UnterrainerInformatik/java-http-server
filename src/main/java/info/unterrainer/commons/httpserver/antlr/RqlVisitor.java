@@ -71,9 +71,63 @@ public interface RqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOptTerm(RqlParser.OptTermContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RqlParser#optTerm1}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOptTerm1(RqlParser.OptTerm1Context ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#optOperator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOptOperator(RqlParser.OptOperatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#optTerm2}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOptTerm2(RqlParser.OptTerm2Context ctx);
+	/**
 	 * Visit a parse tree produced by {@link RqlParser#term}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTerm(RqlParser.TermContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#term1}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTerm1(RqlParser.Term1Context ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#nullOperator1}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNullOperator1(RqlParser.NullOperator1Context ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#nullOperator2}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNullOperator2(RqlParser.NullOperator2Context ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#nullOperator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNullOperator(RqlParser.NullOperatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#operator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOperator(RqlParser.OperatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#term2}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTerm2(RqlParser.Term2Context ctx);
 }

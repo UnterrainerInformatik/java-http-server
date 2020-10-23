@@ -108,6 +108,36 @@ public interface RqlListener extends ParseTreeListener {
 	 */
 	void exitOptTerm(RqlParser.OptTermContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RqlParser#optTerm1}.
+	 * @param ctx the parse tree
+	 */
+	void enterOptTerm1(RqlParser.OptTerm1Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#optTerm1}.
+	 * @param ctx the parse tree
+	 */
+	void exitOptTerm1(RqlParser.OptTerm1Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#optOperator}.
+	 * @param ctx the parse tree
+	 */
+	void enterOptOperator(RqlParser.OptOperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#optOperator}.
+	 * @param ctx the parse tree
+	 */
+	void exitOptOperator(RqlParser.OptOperatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#optTerm2}.
+	 * @param ctx the parse tree
+	 */
+	void enterOptTerm2(RqlParser.OptTerm2Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#optTerm2}.
+	 * @param ctx the parse tree
+	 */
+	void exitOptTerm2(RqlParser.OptTerm2Context ctx);
+	/**
 	 * Enter a parse tree produced by {@link RqlParser#term}.
 	 * @param ctx the parse tree
 	 */
@@ -117,4 +147,64 @@ public interface RqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTerm(RqlParser.TermContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#term1}.
+	 * @param ctx the parse tree
+	 */
+	void enterTerm1(RqlParser.Term1Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#term1}.
+	 * @param ctx the parse tree
+	 */
+	void exitTerm1(RqlParser.Term1Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#nullOperator1}.
+	 * @param ctx the parse tree
+	 */
+	void enterNullOperator1(RqlParser.NullOperator1Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#nullOperator1}.
+	 * @param ctx the parse tree
+	 */
+	void exitNullOperator1(RqlParser.NullOperator1Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#nullOperator2}.
+	 * @param ctx the parse tree
+	 */
+	void enterNullOperator2(RqlParser.NullOperator2Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#nullOperator2}.
+	 * @param ctx the parse tree
+	 */
+	void exitNullOperator2(RqlParser.NullOperator2Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#nullOperator}.
+	 * @param ctx the parse tree
+	 */
+	void enterNullOperator(RqlParser.NullOperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#nullOperator}.
+	 * @param ctx the parse tree
+	 */
+	void exitNullOperator(RqlParser.NullOperatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#operator}.
+	 * @param ctx the parse tree
+	 */
+	void enterOperator(RqlParser.OperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#operator}.
+	 * @param ctx the parse tree
+	 */
+	void exitOperator(RqlParser.OperatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#term2}.
+	 * @param ctx the parse tree
+	 */
+	void enterTerm2(RqlParser.Term2Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#term2}.
+	 * @param ctx the parse tree
+	 */
+	void exitTerm2(RqlParser.Term2Context ctx);
 }

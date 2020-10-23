@@ -1,1 +1,1 @@
-userId = :userId[long] AND (?timeFrom <= :timeFrom[datetime] OR timeTo > :timeTo[~MyEnum])
+blummi IS NOT NULL AND userId == :userId[long] AND (?timeFrom <= :timeFrom[datetime] OR timeTo > :timeTo[~MyEnum]) OR blubb != :blubb[bool] OR blah <> :blah[int]

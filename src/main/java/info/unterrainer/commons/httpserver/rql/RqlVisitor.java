@@ -1,5 +1,7 @@
 package info.unterrainer.commons.httpserver.rql;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+
 import info.unterrainer.commons.httpserver.HandlerUtils;
 import info.unterrainer.commons.httpserver.antlr.RqlBaseVisitor;
 import info.unterrainer.commons.httpserver.antlr.RqlParser.AndContext;
@@ -67,41 +69,54 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 
 	@Override
 	public String visitTerm(final TermContext ctx) {
-		String first = ctx.children.get(0).getText();
-		String operator = ctx.children.get(1).getText();
-		String second = ctx.children.get(2).getText();
-		String type = second.substring(second.indexOf("[") + 1, second.indexOf("]"));
-		second = second.substring(0, second.indexOf("["));
-
-		if (assignTermValues(second, false, type))
-			data.getParsedCommand()
-					.add(RqlDataElement.builder()
-							.index(data.getParsedCommand().size())
-							.type(RqlDataType.TERM)
-							.value(first + " " + operator + " " + second)
-							.build());
+		calculateTerm(ctx, ctx.children.get(0).getText(), false);
 		return super.visitTerm(ctx);
 	}
 
 	@Override
 	public String visitOptTerm(final OptTermContext ctx) {
-		String first = ctx.children.get(0).getText().substring(1);
-		String operator = ctx.children.get(1).getText();
-		String second = ctx.children.get(2).getText();
-		String type = second.substring(second.indexOf("[") + 1, second.indexOf("]"));
-		second = second.substring(0, second.indexOf("["));
+		calculateTerm(ctx, ctx.children.get(0).getText().substring(1), true);
+		return super.visitOptTerm(ctx);
+	}
 
-		if (assignTermValues(second, true, type))
+	private void calculateTerm(final ParserRuleContext ctx, final String first, final boolean isOptional) {
+		String operator = fixOperator(ctx.children.get(1).getText().toUpperCase());
+		String second = ctx.children.get(2).getText();
+
+		String type = null;
+		boolean persist = true;
+		if (operator.equalsIgnoreCase("IS") || operator.equalsIgnoreCase("IS NOT"))
+			second = "NULL";
+		else {
+			type = second.substring(second.indexOf("[") + 1, second.indexOf("]"));
+			if (second.indexOf("[") >= 0)
+				second = second.substring(0, second.indexOf("["));
+			persist = assignTermValues(second, isOptional, type, operator);
+		}
+		if (persist)
 			data.getParsedCommand()
 					.add(RqlDataElement.builder()
 							.index(data.getParsedCommand().size())
 							.type(RqlDataType.TERM)
 							.value(first + " " + operator + " " + second)
 							.build());
-		return super.visitOptTerm(ctx);
 	}
 
-	private boolean assignTermValues(final String paramName, final boolean isOptional, final String type) {
+	private String fixOperator(final String op) {
+		switch (op) {
+		case "!=":
+			return "<>";
+		case "==":
+			return "=";
+		case "ISNOT":
+			return "IS NOT";
+		default:
+			return op;
+		}
+	}
+
+	private boolean assignTermValues(final String paramName, final boolean isOptional, final String type,
+			final String operator) {
 		String name = paramName.substring(1);
 		String value;
 		if (isOptional)
@@ -110,6 +125,8 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 			value = hu.getQueryParamAsString(ctx, name);
 
 		if (value != null) {
+			if (operator.equalsIgnoreCase("LIKE"))
+				value = "%" + value + "%";
 			data.getParams().put(name, castToType(value, type, paramName));
 			data.getQueryString().put(name, value);
 		} else
@@ -158,11 +175,13 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 			final Class<Enum> cl = (Class<Enum>) Class.forName(enumFqn + "." + type);
 			return Enum.valueOf(cl, value);
 		} catch (ClassCastException e) {
-			throw new BadRequestException(String.format(
-					"Value [%s] of field [%s] has to be of type [%s] according to your RQL", value, field, type));
+			throw new InternalServerErrorException();
 		} catch (ClassNotFoundException e) {
 			throw new InternalServerErrorException(
 					String.format("The Enum type [%s] you want to cast to is not available", type));
+		} catch (IllegalArgumentException e) {
+			throw new BadRequestException(
+					String.format("Value [%s] of field [%s] has to be of type [%s]", value, field, type));
 		}
 	}
 }
