@@ -18,18 +18,48 @@ public class InterceptorParamBuilder<P extends BasicJpa, J extends BasicJson, E>
 	private String orderByClause = "";
 	private String query = "";
 
+	/**
+	 * This helps you to add something to the select-clause, like 'distinct' or a
+	 * limit.<br>
+	 * The standard table always gets the alias 'o'.
+	 * 
+	 * @param selectClause the clause (Example:
+	 *                     {@code 'DISTINCT ' + ThisJpa.class.getSimpleName + ' AS o'})
+	 * @return itself in order to provide a fluent interface.
+	 */
 	public InterceptorParamBuilder<P, J, E> select(final String selectClause) {
-		this.selectClause = selectClause;
+		this.selectClause = selectClause.trim().toLowerCase().startsWith("select")
+				? selectClause.trim().substring(6).trim()
+				: selectClause.trim();
 		return this;
 	}
 
+	/**
+	 * Here you can specify a special join-clause that will be added to your query
+	 * later on.<br>
+	 * The aliases you give here may be used in all other parts of the query.
+	 *
+	 * @param joinClause the clause (Example:
+	 *                   {@code ' JOIN ' + MyClass.getSimpleName() + ' AS f ON o.fId=f.id'})
+	 * @return itself in order to provide a fluent interface.
+	 */
 	public InterceptorParamBuilder<P, J, E> join(final String joinClause) {
-		this.joinClause = joinClause.startsWith(" ") ? joinClause : " " + joinClause;
+		this.joinClause = " " + joinClause.trim();
 		return this;
 	}
 
+	/**
+	 * Here you can specify a special order-by-clause that will be appended to your
+	 * SQL-query later on.
+	 * <p>
+	 * May or may not start with 'order by', your choice.
+	 *
+	 * @param orderByClause the clause (Example: {@code 'o.name DESC'}
+	 * @return itself in order to provide a fluent interface.
+	 */
 	public InterceptorParamBuilder<P, J, E> orderBy(final String orderByClause) {
-		this.orderByClause = orderByClause.startsWith(" ") ? orderByClause : " " + orderByClause;
+		this.orderByClause = orderByClause.trim().toLowerCase().startsWith("order by") ? " " + orderByClause.trim()
+				: " ORDER BY " + orderByClause.trim();
 		return this;
 	}
 
@@ -52,7 +82,7 @@ public class InterceptorParamBuilder<P extends BasicJpa, J extends BasicJson, E>
 	 * preceded by a '~'.<br>
 	 * {@code Example: 'dbEnumField = :jsonField[~MyEnumClass]'}<br>
 	 * <p>
-	 * - Term operators are: >, <, >=, <=, = or ==, <> or != and LIKE (which
+	 * - Term operators are: {@code >, <, >=, <=, = or ==, <> or != and LIKE} (which
 	 * automatically adds the wildcards like %yourvalue% before going to the
 	 * database).<br>
 	 * - Every term may be optional when you precede the DB-field-name with a
@@ -69,6 +99,12 @@ public class InterceptorParamBuilder<P extends BasicJpa, J extends BasicJson, E>
 		return this;
 	}
 
+	/**
+	 * Builds this Interceptor and returns you to the fluent interface of the
+	 * underlying {@link GenericHandlerGroupBuilder}.
+	 *
+	 * @return the {@link GenericHandlerGroupBuilder} you came from.
+	 */
 	public GenericHandlerGroupBuilder<P, J, E> build() {
 		InterceptorData r = InterceptorData.builder()
 				.selectClause(selectClause)
