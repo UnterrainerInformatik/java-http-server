@@ -22,7 +22,7 @@ public class InterceptorParamBuilder<P extends BasicJpa, J extends BasicJson, E>
 	 * This helps you to add something to the select-clause, like 'distinct' or a
 	 * limit.<br>
 	 * The standard table always gets the alias 'o'.
-	 * 
+	 *
 	 * @param selectClause the clause (Example:
 	 *                     {@code 'DISTINCT ' + ThisJpa.class.getSimpleName + ' AS o'})
 	 * @return itself in order to provide a fluent interface.
@@ -64,7 +64,9 @@ public class InterceptorParamBuilder<P extends BasicJpa, J extends BasicJson, E>
 	}
 
 	/**
-	 * This is where you declare your rules that will construct your query.
+	 * This is where you declare your rules that will construct your query.<br>
+	 * <b>Be sure to have the correct indexes placed on your tables for your queries
+	 * to perform well.</b>
 	 * <p>
 	 * - The operators are 'AND' and 'OR' and you may use parentheses '(' and ')' to
 	 * group your sub-expressions.<br>
