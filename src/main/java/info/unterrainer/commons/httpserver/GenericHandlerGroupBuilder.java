@@ -100,6 +100,15 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 		return this;
 	}
 
+	/**
+	 * Gives you a {@link InterceptorParamBuilder} object that allows you to declare
+	 * an interceptor with minimal code.<br>
+	 * You can specify every important part of it (select-clause, where-clause,
+	 * join-clause and order-by-clause) and utilizes its own parser for the
+	 * where-clause ({@link InterceptorParamBuilder#query(String)}).
+	 * 
+	 * @return
+	 */
 	public InterceptorParamBuilder<P, J, E> getListInterceptor() {
 		return new InterceptorParamBuilder<>(this, (passedData, query) -> {
 			getListInterceptors.add((ctx, hu) -> {
