@@ -12,8 +12,14 @@ This library reduces boilerplate code when setting up a REST-server connected to
 
 Further it has interceptors and extensions allowing you to interact with the process of generating a response for a specific request at any level.
 
+
+
 ## Standard Request-Response Process
 
+![standard-request-response-process-simple](https://github.com/UnterrainerInformatik/java-http-server/raw/master/docs/standard-request-response-process-simple.png)
 
+
+
+## Request-Response Process with Extensions and Interceptors
 
 ![standard-request-response-process](https://github.com/UnterrainerInformatik/java-http-server/raw/master/docs/standard-request-response-process.png)
