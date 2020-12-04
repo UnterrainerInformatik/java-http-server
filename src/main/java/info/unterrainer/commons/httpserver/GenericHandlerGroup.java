@@ -121,7 +121,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 					break;
 				}
 			} catch (Exception e) {
-				log.debug("Interceptor threw an exception. Ignoring.", e);
+				log.debug("Interceptor threw an exception [{}]: [{}]. Ignoring.", e.getClass().getSimpleName(),
+						e.getMessage());
 			}
 
 		DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
