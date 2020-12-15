@@ -17,7 +17,7 @@ public class ParamMap {
 	private Map<String, Object> parameters;
 
 	@Override
-	protected ParamMap clone() throws CloneNotSupportedException {
+	public ParamMap clone() throws CloneNotSupportedException {
 		return new ParamMap(new HashMap<String, Object>(parameters));
 	}
 }
