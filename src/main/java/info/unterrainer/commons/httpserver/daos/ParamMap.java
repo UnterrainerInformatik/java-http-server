@@ -21,6 +21,10 @@ public class ParamMap {
 		return this;
 	}
 
+	public Object get(final String parameterKey) {
+		return parameters.get(parameterKey);
+	}
+
 	@Override
 	public ParamMap clone() {
 		return new ParamMap(new HashMap<String, Object>(parameters));
