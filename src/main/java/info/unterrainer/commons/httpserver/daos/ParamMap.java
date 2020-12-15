@@ -16,6 +16,11 @@ public class ParamMap {
 	@Singular
 	private Map<String, Object> parameters;
 
+	public ParamMap addParameter(final String parameterKey, final Object parameterValue) {
+		parameters.put(parameterKey, parameterValue);
+		return this;
+	}
+
 	@Override
 	public ParamMap clone() throws CloneNotSupportedException {
 		return new ParamMap(new HashMap<String, Object>(parameters));
