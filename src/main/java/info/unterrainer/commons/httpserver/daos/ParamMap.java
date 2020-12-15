@@ -1,7 +1,10 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +26,30 @@ public class ParamMap {
 
 	public Object get(final String parameterKey) {
 		return parameters.get(parameterKey);
+	}
+
+	public Set<Entry<String, Object>> entrySet() {
+		return parameters.entrySet();
+	}
+
+	public Set<String> keySet() {
+		return parameters.keySet();
+	}
+
+	public Collection<Object> valueSet() {
+		return parameters.values();
+	}
+
+	public boolean containsKey(final String parameterKey) {
+		return parameters.containsKey(parameterKey);
+	}
+
+	public boolean containsValue(final Object parameterValue) {
+		return parameters.containsValue(parameterValue);
+	}
+
+	public void clear() {
+		parameters.clear();
 	}
 
 	@Override
