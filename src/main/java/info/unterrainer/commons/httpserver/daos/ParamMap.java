@@ -22,7 +22,7 @@ public class ParamMap {
 	}
 
 	@Override
-	public ParamMap clone() throws CloneNotSupportedException {
+	public ParamMap clone() {
 		return new ParamMap(new HashMap<String, Object>(parameters));
 	}
 }
