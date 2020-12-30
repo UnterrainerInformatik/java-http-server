@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.4" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
+  realizations="true" associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+  <interface id="1" language="java" name="info.unterrainer.commons.httpserver.daos.BasicDao" project="http-server" 
+    file="/http-server/src/main/java/info/unterrainer/commons/httpserver/daos/BasicDao.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="405" width="356" x="269" y="1454"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="2" language="java" name="info.unterrainer.commons.httpserver.daos.DaoTransaction" project="http-server" 
+    file="/http-server/src/main/java/info/unterrainer/commons/httpserver/daos/DaoTransaction.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="99" width="186" x="43" y="1454"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="3" language="java" name="info.unterrainer.commons.httpserver.daos.BasicAsyncDao" project="http-server" 
+    file="/http-server/src/main/java/info/unterrainer/commons/httpserver/daos/BasicAsyncDao.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="351" width="329" x="467" y="1899"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="4" language="java" name="info.unterrainer.commons.httpserver.daos.DaoTransactionManager" 
+    project="http-server" 
+    file="/http-server/src/main/java/info/unterrainer/commons/httpserver/daos/DaoTransactionManager.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="81" width="214" x="1144" y="1454"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="5" language="java" name="info.unterrainer.commons.httpserver.daos.JpqlAsyncDao" project="http-server" 
+    file="/http-server/src/main/java/info/unterrainer/commons/httpserver/daos/JpqlAsyncDao.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="405" width="439" x="665" y="1454"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="6" language="java" name="info.unterrainer.commons.httpserver.daos.JpqlDao" project="http-server" 
+    file="/http-server/src/main/java/info/unterrainer/commons/httpserver/daos/JpqlDao.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="1377" width="492" x="467" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="7" language="java" name="info.unterrainer.commons.httpserver.daos.JpqlTransaction" project="http-server" 
+    file="/http-server/src/main/java/info/unterrainer/commons/httpserver/daos/JpqlTransaction.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="135" width="186" x="43" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="8" language="java" name="info.unterrainer.commons.httpserver.daos.JpqlTransactionManager" 
+    project="http-server" 
+    file="/http-server/src/main/java/info/unterrainer/commons/httpserver/daos/JpqlTransactionManager.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="276" x="1082" y="37"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <generalization id="9">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="1"/>  
+  </generalization>  
+  <realization id="10">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="1"/>  
+  </realization>  
+  <realization id="11">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="3"/>  
+  </realization>  
+  <realization id="12">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="4"/>  
+  </realization>  
+  <realization id="13">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="2"/>  
+  </realization>  
+  <generalization id="14">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>
