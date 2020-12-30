@@ -117,7 +117,8 @@ public class HttpAccessManager implements AccessManager {
 			try {
 				tokenVerifier.verifySignature();
 			} catch (VerificationException e) {
-				throw new UnauthorizedException();
+				throw new UnauthorizedException(
+						"Error verifying token from user with publicKey obtained from keycloak.", e);
 			}
 
 			try {
