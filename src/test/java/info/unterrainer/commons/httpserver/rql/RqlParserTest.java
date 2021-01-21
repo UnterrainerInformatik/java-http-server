@@ -25,22 +25,21 @@ public class RqlParserTest {
 	private RqlUtils rqlUtils;
 
 	private static List<Arguments> provideStringsForRqlUtilTest() {
-		return List.of(
-//				Arguments.of("userId=:userId[long]", "userId = :userId", Map.of("userId", "1234")),
-//				Arguments.of("userId=:userId[long] AND (timeFrom<=:timeFrom[datetime] OR timeTo>:timeTo[datetime])",
-//						"userId = :userId AND (timeFrom <= :timeFrom OR timeTo > :timeTo)",
-//						Map.of("userId", "1234", "timeFrom", "2020-09-13", "timeTo", "2020-10-24")),
-//				Arguments.of(
-//						"startsOn=:startsOn[datetime] AND endsOn=:endsOn[datetime] AND ?isOpen=:isOpen[boolean] AND ?type=:type[string]",
-//						"startsOn = :startsOn AND endsOn = :endsOn AND isOpen = :isOpen AND type = :type",
-//						Map.of("startsOn", "2020-01-01", "endsOn", "2020-02-14", "isOpen", "true", "type", "EVENT")),
-//				Arguments.of("?offset=:offset[long] AND ?size=:size[long]", "offset = :offset AND size = :size",
-//						Map.of("offset", "0", "size", "10")),
-//				Arguments.of(
-//						"scanId = :scanId[long] AND (searchName LIKE :searchString[string] OR name LIKE :searchString[string] OR opcIdString LIKE :searchString[string] OR description LIKE :searchString[string])",
-//						"scanId = :scanId AND (searchName LIKE :searchString OR name LIKE :searchString OR opcIdString LIKE :searchString OR description LIKE :searchString)",
-//						Map.of("scanId", "1", "searchString", "search-string")),
-//				Arguments.of("o.lastedUntil IS NULL", "o.lastedUntil IS NULL", Map.of()),
+		return List.of(Arguments.of("userId=:userId[long]", "userId = :userId", Map.of("userId", "1234")),
+				Arguments.of("userId=:userId[long] AND (timeFrom<=:timeFrom[datetime] OR timeTo>:timeTo[datetime])",
+						"userId = :userId AND (timeFrom <= :timeFrom OR timeTo > :timeTo)",
+						Map.of("userId", "1234", "timeFrom", "2020-09-13", "timeTo", "2020-10-24")),
+				Arguments.of(
+						"startsOn=:startsOn[datetime] AND endsOn=:endsOn[datetime] AND ?isOpen=:isOpen[boolean] AND ?type=:type[string]",
+						"startsOn = :startsOn AND endsOn = :endsOn AND isOpen = :isOpen AND type = :type",
+						Map.of("startsOn", "2020-01-01", "endsOn", "2020-02-14", "isOpen", "true", "type", "EVENT")),
+				Arguments.of("?offset=:offset[long] AND ?size=:size[long]", "offset = :offset AND size = :size",
+						Map.of("offset", "0", "size", "10")),
+				Arguments.of(
+						"scanId = :scanId[long] AND (searchName LIKE :searchString[string] OR name LIKE :searchString[string] OR opcIdString LIKE :searchString[string] OR description LIKE :searchString[string])",
+						"scanId = :scanId AND (searchName LIKE :searchString OR name LIKE :searchString OR opcIdString LIKE :searchString OR description LIKE :searchString)",
+						Map.of("scanId", "1", "searchString", "search-string")),
+				Arguments.of("o.lastedUntil IS NULL", "o.lastedUntil IS NULL", Map.of()),
 				Arguments.of("o.lastedUntil IS NOT NULL", "o.lastedUntil IS NOT NULL", Map.of()),
 				Arguments.of(
 						"scanId = :scanId[long] AND (searchName LIKE :searchString[string] OR ?name LIKE :searchString2[string] OR opcIdString LIKE :searchString[string] OR description LIKE :searchString[string])",
@@ -82,7 +81,13 @@ public class RqlParserTest {
 						Map.of("s1", "a1")),
 				Arguments.of("(?searchName = :s1[string] AND ?name < :s2[string])", "(searchName = :s1 AND name < :s2)",
 						Map.of("s1", "a1", "s2", "a2")),
-				Arguments.of("(?searchName = :s1[string] AND ?name < :s2[string])", "", Map.of()));
+				Arguments.of("(?searchName = :s1[string] AND ?name < :s2[string])", "", Map.of()),
+				Arguments.of("s1 LIKE :s1[string] AND s2 NOT LIKE :s2[string]", "s1 LIKE :s1 AND s2 NOT LIKE :s2",
+						Map.of("s1", "a1", "s2", "a2")),
+				Arguments.of("s1 STARTSWITH :s1[string] AND s2 NOT STARTSWITH :s2[string]",
+						"s1 LIKE :s1 AND s2 NOT LIKE :s2", Map.of("s1", "a1", "s2", "a2")),
+				Arguments.of("s1 ENDSWITH :s1[string] AND s2 NOT ENDSWITH :s2[string]",
+						"s1 LIKE :s1 AND s2 NOT LIKE :s2", Map.of("s1", "a1", "s2", "a2")));
 	}
 
 	@ParameterizedTest

@@ -1,1 +1,1 @@
-blummi IS NOT NULL AND userId == :userId[long] AND (?timeFrom <= :timeFrom[datetime] OR timeTo > :timeTo[~MyEnum]) OR blubb != :blubb[bool] OR blah <> :blah[int]
+blummi IS NOT NULL AND userId == :userId[long] AND (?timeFrom <= :timeFrom[datetime] OR timeTo > :timeTo[~MyEnum]) OR blubb != :blubb[bool] OR blah <> :blah[int] OR wuzi NOT LIKE :wuzi[string] OR zuwi ENDSWITH :zuwi[string] or wasi NOT STARTSWITH :wasi[string]

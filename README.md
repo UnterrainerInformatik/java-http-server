@@ -275,7 +275,7 @@ setParam(stringId, "test")
 
 You may specify a parameter as optional by pre-fixing the database-field name with a question-mark like so:
 
-##### Example 2
+##### Example 2 (optional and LIKE)
 
 ```java
 .getListInterceptor()
@@ -285,7 +285,28 @@ You may specify a parameter as optional by pre-fixing the database-field name wi
 
 Where `scanId` is a numeric mandatory parameter and the rest is checked using the `LIKE` operator but since the parameter `sn` is optional, the usages are as well.
 
+##### Supported Datatypes
 
+```java
+"string"
+"boolean", "bool"
+"integer", "int"
+"long", "lng"
+"float"
+"double", "dbl"
+"datetime"
+```
+
+##### Example 3 (enums)
+
+```java
+.getListInterceptor()
+	.query("endsOn >= :startOn[datetime] AND ?type = :type[~EventType]")
+	.build()
+```
+
+This will cast the `String` in the parameter `type` to a enumeration `EventType`.
+So this works only if you save the String-representation of an enumeration in the database and not the index.
 
 #### Explicit Get-List-Interceptors
 
