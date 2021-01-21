@@ -80,12 +80,12 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 	}
 
 	private void calculateTerm(final ParserRuleContext ctx, final String first, final boolean isOptional) {
-		String operator = fixOperator(ctx.children.get(1).getText().toUpperCase());
+		String operator = ctx.children.get(1).getText().toUpperCase();
 		String second = ctx.children.get(2).getText();
 
 		String type = null;
 		boolean persist = true;
-		if (operator.equalsIgnoreCase("IS") || operator.equalsIgnoreCase("IS NOT"))
+		if (operator.equalsIgnoreCase("IS") || operator.equalsIgnoreCase("ISNOT"))
 			second = "NULL";
 		else {
 			type = second.substring(second.indexOf("[") + 1, second.indexOf("]"));
@@ -98,7 +98,7 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 					.add(RqlDataElement.builder()
 							.index(data.getParsedCommand().size())
 							.type(RqlDataType.TERM)
-							.value(first + " " + operator + " " + second)
+							.value(first + " " + fixOperator(operator) + " " + second)
 							.build());
 	}
 
@@ -110,13 +110,23 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 			return "=";
 		case "ISNOT":
 			return "IS NOT";
+		case "NOTLIKE":
+			return "NOT LIKE";
+		case "STARTSWITH":
+			return "LIKE";
+		case "NOTSTARTSWITH":
+			return "NOT LIKE";
+		case "ENDSWITH":
+			return "LIKE";
+		case "NOTENDSWITH":
+			return "NOT LIKE";
 		default:
 			return op;
 		}
 	}
 
 	private boolean assignTermValues(final String paramName, final boolean isOptional, final String type,
-			final String operator) {
+			final String oldOperator) {
 		String name = paramName.substring(1);
 		String value;
 		if (isOptional)
@@ -125,8 +135,20 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 			value = hu.getQueryParamAsString(ctx, name);
 
 		if (value != null) {
-			if (operator.equalsIgnoreCase("LIKE"))
+			switch (oldOperator.toUpperCase()) {
+			case "LIKE":
+			case "NOTLIKE":
 				value = "%" + value + "%";
+				break;
+			case "STARTSWITH":
+			case "NOTSTARTSWITH":
+				value = value + "%";
+				break;
+			case "ENDSWITH":
+			case "NOTENDSWITH":
+				value = "%" + value;
+				break;
+			}
 			data.getParams().put(name, castToType(value, type, paramName));
 			data.getQueryString().put(name, value);
 		} else

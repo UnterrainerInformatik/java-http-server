@@ -188,6 +188,46 @@ public interface RqlListener extends ParseTreeListener {
 	 */
 	void exitNullOperator(RqlParser.NullOperatorContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RqlParser#nLike}.
+	 * @param ctx the parse tree
+	 */
+	void enterNLike(RqlParser.NLikeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#nLike}.
+	 * @param ctx the parse tree
+	 */
+	void exitNLike(RqlParser.NLikeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#nStartsWith}.
+	 * @param ctx the parse tree
+	 */
+	void enterNStartsWith(RqlParser.NStartsWithContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#nStartsWith}.
+	 * @param ctx the parse tree
+	 */
+	void exitNStartsWith(RqlParser.NStartsWithContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#nEndsWith}.
+	 * @param ctx the parse tree
+	 */
+	void enterNEndsWith(RqlParser.NEndsWithContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#nEndsWith}.
+	 * @param ctx the parse tree
+	 */
+	void exitNEndsWith(RqlParser.NEndsWithContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RqlParser#negatableOperator}.
+	 * @param ctx the parse tree
+	 */
+	void enterNegatableOperator(RqlParser.NegatableOperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RqlParser#negatableOperator}.
+	 * @param ctx the parse tree
+	 */
+	void exitNegatableOperator(RqlParser.NegatableOperatorContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RqlParser#operator}.
 	 * @param ctx the parse tree
 	 */

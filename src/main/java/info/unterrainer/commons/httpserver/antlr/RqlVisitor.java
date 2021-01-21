@@ -119,6 +119,30 @@ public interface RqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitNullOperator(RqlParser.NullOperatorContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RqlParser#nLike}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNLike(RqlParser.NLikeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#nStartsWith}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNStartsWith(RqlParser.NStartsWithContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#nEndsWith}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNEndsWith(RqlParser.NEndsWithContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RqlParser#negatableOperator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNegatableOperator(RqlParser.NegatableOperatorContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RqlParser#operator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
