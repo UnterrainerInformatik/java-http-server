@@ -297,6 +297,25 @@ Where `scanId` is a numeric mandatory parameter and the rest is checked using th
 "datetime"
 ```
 
+##### Supported Operators
+
+```java
+"==", "="
+"<>", "!="
+"<"
+">"
+"<="
+">="
+"IS NULL"
+"IS NOT NULL"
+"LIKE" 				(string only)
+"NOT LIKE" 			(string only)
+"STARTSWITH" 		(string only)
+"NOT STARTSWITH" 	(string only)
+"ENDSWITH" 			(string only)
+"NOT ENDSWITH" 		(string only)
+```
+
 ##### Example 3 (enums)
 
 ```java
