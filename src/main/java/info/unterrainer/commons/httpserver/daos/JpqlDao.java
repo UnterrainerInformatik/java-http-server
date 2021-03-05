@@ -1,7 +1,6 @@
 package info.unterrainer.commons.httpserver.daos;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -13,6 +12,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import info.unterrainer.commons.httpserver.jsons.ListJson;
+import info.unterrainer.commons.jreutils.DateUtils;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +47,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 
 	@Override
 	public P create(final EntityManager em, final P entity) {
-		LocalDateTime time = LocalDateTime.now(ZoneOffset.UTC);
+		LocalDateTime time = DateUtils.nowUtc();
 		entity.setCreatedOn(time);
 		entity.setEditedOn(time);
 		em.persist(entity);
@@ -61,7 +61,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 
 	@Override
 	public P update(final EntityManager em, final P entity) {
-		LocalDateTime time = LocalDateTime.now(ZoneOffset.UTC);
+		LocalDateTime time = DateUtils.nowUtc();
 		entity.setEditedOn(time);
 		return em.merge(entity);
 	}
