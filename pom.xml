@@ -17,7 +17,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.1.23</version>
+	<version>0.1.24</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
@@ -25,17 +25,17 @@
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>jre-utils</artifactId>
-			<version>0.1.4</version>
+			<version>0.1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>rdb-utils</artifactId>
-			<version>0.1.4</version>
+			<version>0.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>serialization</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.javalin</groupId>
