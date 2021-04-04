@@ -76,9 +76,11 @@ public class HttpServer {
 		this.appVersionFqns = new ArrayList<>(List.of(Optional.ofNullable(appVersionFqns).orElse(new String[0])));
 		if (!this.appVersionFqns.contains(VERSION_FQN))
 			this.appVersionFqns.add(VERSION_FQN);
-		if (executorService == null)
-			this.executorService = new ThreadPoolExecutor(1, 200, 0L, TimeUnit.MILLISECONDS,
+		if (executorService == null) {
+			this.executorService = new ThreadPoolExecutor(200, 200, 100L, TimeUnit.MILLISECONDS,
 					new LinkedBlockingQueue<Runnable>());
+			((ThreadPoolExecutor) this.executorService).allowCoreThreadTimeOut(true);
+		}
 		if (applicationName == null)
 			throw new IllegalArgumentException("The application-name cannot be null");
 		this.jsonMapper = jsonMapper;
