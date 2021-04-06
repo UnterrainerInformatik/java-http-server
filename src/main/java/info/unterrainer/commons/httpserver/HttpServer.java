@@ -77,7 +77,7 @@ public class HttpServer {
 		if (!this.appVersionFqns.contains(VERSION_FQN))
 			this.appVersionFqns.add(VERSION_FQN);
 		if (executorService == null) {
-			this.executorService = new ThreadPoolExecutor(200, 200, 100L, TimeUnit.MILLISECONDS,
+			this.executorService = new ThreadPoolExecutor(200, 200, 60L, TimeUnit.SECONDS,
 					new LinkedBlockingQueue<Runnable>());
 			((ThreadPoolExecutor) this.executorService).allowCoreThreadTimeOut(true);
 		}
