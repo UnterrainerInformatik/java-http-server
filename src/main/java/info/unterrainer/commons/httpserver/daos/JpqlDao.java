@@ -406,6 +406,39 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 		return nOf(getQuery(em, "", whereClause, params, lockPessimistic), count);
 	}
 
+	public P lastOf() {
+		return lastOf(false);
+	}
+
+	public P lastOf(final boolean lockPessimistic) {
+		return lastOf(null, null, lockPessimistic);
+	}
+
+	public P lastOf(final EntityManager em) {
+		return lastOf(em, false);
+	}
+
+	public P lastOf(final EntityManager em, final boolean lockPessimistic) {
+		return lastOf(em, null, null, lockPessimistic);
+	}
+
+	public P lastOf(final String whereClause, final ParamMap params) {
+		return lastOf(whereClause, params, false);
+	}
+
+	public P lastOf(final String whereClause, final ParamMap params, final boolean lockPessimistic) {
+		return Transactions.withNewTransactionReturning(emf, em -> lastOf(em, whereClause, params, lockPessimistic));
+	}
+
+	public P lastOf(final EntityManager em, final String whereClause, final ParamMap params) {
+		return lastOf(em, whereClause, params, false);
+	}
+
+	public P lastOf(final EntityManager em, final String whereClause, final ParamMap params,
+			final boolean lockPessimistic) {
+		return firstOf(getQuery(em, "o", "", whereClause, params, type, "o.id DESC", lockPessimistic));
+	}
+
 	public List<P> lastNOf(final String whereClause, final long count, final ParamMap params) {
 		return lastNOf(whereClause, count, params, false);
 	}
