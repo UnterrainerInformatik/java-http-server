@@ -4,8 +4,8 @@
 
 	<parent>
 		<groupId>info.unterrainer.commons</groupId>
-		<artifactId>parent-pom</artifactId>
-		<version>0.1.5</version>
+		<artifactId>parent-javalin-pom</artifactId>
+		<version>0.0.4</version>
 	</parent>
 
 	<properties>
@@ -17,7 +17,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.2.1</version>
+	<version>0.2.3</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
@@ -38,11 +38,6 @@
 			<version>0.1.2</version>
 		</dependency>
 		<dependency>
-			<groupId>io.javalin</groupId>
-			<artifactId>javalin</artifactId>
-			<version>3.13.4</version>
-		</dependency>
-		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>javax.persistence-api</artifactId>
 			<version>2.2</version>
@@ -56,16 +51,6 @@
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
 			<version>4.8-1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-http</artifactId>
-			<version>9.4.38.v20210224</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>9.4.38.v20210224</version>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
