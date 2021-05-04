@@ -52,8 +52,7 @@ public class HttpAccessManager implements AccessManager {
 
 	@Override
 	public void manage(final Handler handler, final Context ctx, final Set<Role> permittedRoles) throws Exception {
-		checkAccess(ctx, permittedRoles,
-				((HttpServer) ctx.attribute(Attribute.JAVALIN_SERVER)).getUserAccessInterceptor());
+		checkAccess(ctx, permittedRoles);
 		handler.handle(ctx);
 	}
 
@@ -101,10 +100,9 @@ public class HttpAccessManager implements AccessManager {
 		}
 	}
 
-	private void checkAccess(final Context ctx, final Set<Role> permittedRoles,
-			final Consumer<UserDataJson> userAccessInterceptor) {
+	private void checkAccess(final Context ctx, final Set<Role> permittedRoles) {
 		try {
-			TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx, userAccessInterceptor);
+			TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx);
 
 			if (permittedRoles.isEmpty() || permittedRoles.contains(DefaultRole.OPEN) && permittedRoles.size() == 1)
 				return;
@@ -146,8 +144,7 @@ public class HttpAccessManager implements AccessManager {
 		return false;
 	}
 
-	private TokenVerifier<AccessToken> persistUserInfoInContext(final Context ctx,
-			final Consumer<UserDataJson> userAccessInterceptor) {
+	private TokenVerifier<AccessToken> persistUserInfoInContext(final Context ctx) {
 		String authorizationHeader = ctx.header(HttpHeader.AUTHORIZATION.asString());
 
 		if (authorizationHeader == null || authorizationHeader.isBlank())
@@ -177,18 +174,21 @@ public class HttpAccessManager implements AccessManager {
 				clientRoles = token.getResourceAccess().get(key).getRoles();
 			ctx.attribute(Attribute.USER_CLIENT_ROLES, clientRoles);
 
-			userAccessInterceptor.accept(UserDataJson.builder()
-					.userName(userName)
-					.givenName(token.getGivenName())
-					.client(token.getIssuedFor())
-					.familyName(token.getFamilyName())
-					.email(token.getEmail())
-					.emailVerified(token.getEmailVerified())
-					.realmRoles(token.getRealmAccess().getRoles())
-					.clientRoles(clientRoles)
-					.isActive(token.isActive())
-					.isBearer(token.getType().equalsIgnoreCase("bearer"))
-					.build());
+			Consumer<UserDataJson> userAccessInterceptor = ((HttpServer) ctx.attribute(Attribute.JAVALIN_SERVER))
+					.getUserAccessInterceptor();
+			if (userAccessInterceptor != null)
+				userAccessInterceptor.accept(UserDataJson.builder()
+						.userName(userName)
+						.givenName(token.getGivenName())
+						.client(token.getIssuedFor())
+						.familyName(token.getFamilyName())
+						.email(token.getEmail())
+						.emailVerified(token.getEmailVerified())
+						.realmRoles(token.getRealmAccess().getRoles())
+						.clientRoles(clientRoles)
+						.isActive(token.isActive())
+						.isBearer(token.getType().equalsIgnoreCase("bearer"))
+						.build());
 
 			if (!token.isActive()) {
 				setTokenRejectionReason(ctx, "Token is inactive.");
