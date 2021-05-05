@@ -168,6 +168,9 @@ public class HttpAccessManager implements AccessManager {
 			ctx.attribute(Attribute.USER_EMAIL_VERIFIED, token.getEmailVerified());
 			ctx.attribute(Attribute.USER_REALM_ROLES, token.getRealmAccess().getRoles());
 
+			String tenant = (String) token.getOtherClaims().get("tenant");
+			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANT, tenant);
+
 			Set<String> clientRoles = Set.of();
 			String key = token.getIssuedFor();
 			if (token.getResourceAccess().containsKey(key))
@@ -185,6 +188,7 @@ public class HttpAccessManager implements AccessManager {
 						.email(token.getEmail())
 						.emailVerified(token.getEmailVerified())
 						.realmRoles(token.getRealmAccess().getRoles())
+						.tenant(tenant)
 						.clientRoles(clientRoles)
 						.isActive(token.isActive())
 						.isBearer(token.getType().equalsIgnoreCase("bearer"))
