@@ -8,6 +8,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.security.PublicKey;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -170,6 +171,7 @@ public class HttpAccessManager implements AccessManager {
 
 			String tenant = (String) token.getOtherClaims().get("tenant");
 			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANT, tenant);
+			ctx.attribute(Attribute.USER_TENANT_SET, createTenantSetFrom(tenant));
 
 			Set<String> clientRoles = Set.of();
 			String key = token.getIssuedFor();
@@ -213,6 +215,20 @@ public class HttpAccessManager implements AccessManager {
 			setTokenRejectionReason(ctx, "Token was checked and deemed invalid.");
 			return null;
 		}
+	}
+
+	private Object createTenantSetFrom(final String tenant) {
+		Set<String> tenantSet = new HashSet<>();
+		if (tenant == null || tenant.isBlank())
+			return tenantSet;
+
+		String[] tenants = tenant.split(",");
+		for (String t : tenants) {
+			if (t.isBlank())
+				continue;
+			tenantSet.add(t.trim());
+		}
+		return tenantSet;
 	}
 
 	private void setTokenRejectionReason(final Context ctx, final String reason) {
