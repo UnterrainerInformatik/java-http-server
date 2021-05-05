@@ -46,6 +46,11 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 	private final LinkedHashMap<Endpoint, Role[]> accessRoles;
 	private final ExecutorService executorService;
 	private final HandlerUtils hu = new HandlerUtils();
+	private final String tenantIdRowName;
+	private final BasicDao<? extends BasicJpa, E> tenantDao;
+	private final Class<? extends BasicJpa> tenantJpaType;
+	private final String fieldRowName;
+	private final String tenantRowName;
 
 	@Override
 	public void addHandlers(final HttpServer server) {

@@ -39,6 +39,12 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	private List<GetListInterceptor> getListInterceptors = new ArrayList<>();
 	private ExecutorService executorService;
 
+	private String tenantIdRowName;
+	private String tenantRowName;
+	private String tenantFieldRowName;
+	private BasicDao<? extends BasicJpa, E> tenantDao;
+	private Class<? extends BasicJpa> tenantJpaType;
+
 	HandlerExtensions<P, J, E> extensions = new HandlerExtensions<>();
 	private LinkedHashMap<Endpoint, Role[]> accessRoles = new LinkedHashMap<>();
 
@@ -51,7 +57,8 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 			executorService = server.executorService;
 		GenericHandlerGroup<P, J, E> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType,
 				daoTransactionManager, jsonMapper, orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors,
-				extensions, accessRoles, executorService);
+				extensions, accessRoles, executorService, tenantIdRowName, tenantDao, tenantJpaType, tenantFieldRowName,
+				tenantRowName);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
 	}
@@ -62,6 +69,21 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 
 	public GenericHandlerGroupBuilder<P, J, E> addRoleFor(final Endpoint endpoint, final Role... roles) {
 		accessRoles.put(endpoint, roles);
+		return this;
+	}
+
+	public GenericHandlerGroupBuilder<P, J, E> isMultiTenantEnabledByIdRow(final String tenantIdRowName) {
+		this.tenantIdRowName = tenantIdRowName;
+		return this;
+	}
+
+	public <TP extends BasicJpa> GenericHandlerGroupBuilder<P, J, E> isMultiTenantEnabledByTable(
+			final BasicDao<TP, E> tenantDao, final Class<TP> tenantJpaType, final String fieldRowName,
+			final String tenantRowName) {
+		this.tenantDao = tenantDao;
+		this.tenantJpaType = tenantJpaType;
+		this.tenantFieldRowName = fieldRowName;
+		this.tenantRowName = tenantRowName;
 		return this;
 	}
 
