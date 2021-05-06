@@ -1,7 +1,6 @@
 package info.unterrainer.commons.httpserver.daos;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
@@ -31,13 +30,16 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 	}
 
 	@Override
-	public ListJson<P> getList(final long offset, final long size) {
-		return Transactions.withNewTransactionReturning(emf, em -> getList(em, offset, size));
-	}
-
-	@Override
-	public ListJson<P> getList(final long offset, final long size, final String whereClause, final ParamMap params) {
-		return Transactions.withNewTransactionReturning(emf, em -> getList(em, offset, size, whereClause, params));
+	public ListJson<P> getList(final EntityManager em, final long offset, final long size, final String selectClause,
+			final String joinClause, final String whereClause, final ParamMap params, final String orderByClause) {
+		return query().entityManager(em)
+				.select(selectClause)
+				.where(whereClause)
+				.join(joinClause)
+				.orderBy(orderByClause)
+				.parameters(params)
+				.build()
+				.getList(offset, size);
 	}
 
 	@Override
@@ -69,25 +71,26 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 	@Override
 	public UpsertResult<P> upsert(final String whereClause, final ParamMap params, final P entity) {
 		return Transactions.withNewTransactionReturning(emf,
-				em -> upsert(em, getQuery(em, "", whereClause, params), entity));
+				em -> upsert(em, query().entityManager(em).where(whereClause).parameters(params).build(), entity));
 	}
 
 	@Override
 	public UpsertResult<P> upsert(final EntityManager em, final String whereClause, final ParamMap params,
 			final P entity) {
-		return upsert(em, getQuery(em, "", whereClause, params), entity);
+		return upsert(em, query().entityManager(em).where(whereClause).parameters(params).build(), entity);
 	}
 
 	@Override
-	public UpsertResult<P> upsert(final TypedQuery<P> query, final P entity) {
+	public UpsertResult<P> upsert(final info.unterrainer.commons.httpserver.daos.Query<P, P> query, final P entity) {
 		return Transactions.withNewTransactionReturning(emf, em -> upsert(em, query, entity));
 	}
 
 	@Override
-	public UpsertResult<P> upsert(final EntityManager em, final TypedQuery<P> query, final P entity) {
+	public UpsertResult<P> upsert(final EntityManager em,
+			final info.unterrainer.commons.httpserver.daos.Query<P, P> query, final P entity) {
 		boolean wasInserted = false;
 		boolean wasUpdated = false;
-		P e = firstOf(query);
+		P e = query.getFirst();
 		if (e == null) {
 			e = create(em, entity);
 			wasInserted = true;
@@ -117,137 +120,37 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 	@Override
 	public P getById(final EntityManager em, final Long id) {
 		try {
-			return getQuery(em, "", "o.id = :id", ParamMap.builder().parameter("id", id).build()).setParameter("id", id)
-					.getSingleResult();
+			return query().entityManager(em).where("o.id=:id").addParam("id", id).build().getSingle();
 		} catch (NoResultException e) {
 			return null;
 		}
 	}
 
 	@Override
-	public ListJson<P> getList(final EntityManager em, final long offset, final long size) {
-		return getList(em, offset, size, "", null);
+	public <T> QueryBuilder<P, T> query(final Class<T> resultType) {
+		return new QueryBuilder<>(emf, this, resultType);
 	}
 
 	@Override
-	public ListJson<P> getList(final EntityManager em, final long offset, final long size, final String whereClause,
-			final ParamMap params) {
-		return getList(em, offset, size, null, whereClause, params);
+	public QueryBuilder<P, P> query() {
+		return new QueryBuilder<>(emf, this, type);
 	}
 
 	@Override
-	public ListJson<P> getList(final EntityManager em, final long offset, final long size, final String joinClause,
-			final String whereClause, final ParamMap params) {
-		return getList(em, offset, size, "o", joinClause, whereClause, params);
+	public CountQueryBuilder<P, P> countQuery() {
+		return new CountQueryBuilder<>(emf, this);
 	}
 
-	@Override
-	public ListJson<P> getList(final EntityManager em, final long offset, final long size, final String selectClause,
-			final String joinClause, final String whereClause, final ParamMap params) {
-		return getList(em, offset, size, selectClause, joinClause, whereClause, params, null);
-	}
-
-	@Override
-	public ListJson<P> getList(final EntityManager em, final long offset, final long size, String selectClause,
-			String joinClause, String whereClause, final ParamMap params, String orderByClause) {
-		if (selectClause == null)
-			selectClause = "o";
-		if (whereClause == null)
-			whereClause = "";
-		if (joinClause == null)
-			joinClause = "";
-		if (orderByClause == null)
-			orderByClause = "";
-		ListJson<P> r = new ListJson<>();
-		int s = Integer.MAX_VALUE;
-		if (size < s)
-			s = (int) size;
-		int o = Integer.MAX_VALUE;
-		if (offset < o)
-			o = (int) offset;
-		TypedQuery<P> q = getQuery(em, selectClause, joinClause, whereClause, params, type, orderByClause, false)
-				.setMaxResults(s)
-				.setFirstResult(o);
-		List<P> qResult = q.getResultList();
-		Query cq = getCountQuery(em, selectClause, joinClause, whereClause, params);
-		Long cqResult = (Long) cq.getSingleResult();
-		r.setEntries(qResult);
-		r.setCount(cqResult);
-		return r;
-	}
-
-	public TypedQuery<P> getQuery() {
-		return Transactions.withNewTransactionReturning(emf, em -> getQuery(em, false));
-	}
-
-	public TypedQuery<P> getQuery(final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf, em -> getQuery(em, lockPessimistic));
-	}
-
-	public TypedQuery<P> getQuery(final EntityManager em) {
-		return getQuery(em, "", "", null, false);
-	}
-
-	public TypedQuery<P> getQuery(final EntityManager em, final boolean lockPessimistic) {
-		return getQuery(em, "", "", null, lockPessimistic);
-	}
-
-	public TypedQuery<P> getQuery(final String joinClause, final String whereClause, final ParamMap params) {
-		return Transactions.withNewTransactionReturning(emf,
-				em -> getQuery(em, joinClause, whereClause, params, false));
-	}
-
-	public TypedQuery<P> getQuery(final String joinClause, final String whereClause, final ParamMap params,
-			final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf,
-				em -> getQuery(em, joinClause, whereClause, params, lockPessimistic));
-	}
-
-	public TypedQuery<P> getQuery(final EntityManager em, final String joinClause, final String whereClause,
-			final ParamMap params) {
-		return getQuery(em, "o", joinClause, whereClause, params, type, "o.id ASC", false);
-	}
-
-	public TypedQuery<P> getQuery(final EntityManager em, final String joinClause, final String whereClause,
-			final ParamMap params, final boolean lockPessimistic) {
-		return getQuery(em, "o", joinClause, whereClause, params, type, "o.id ASC", lockPessimistic);
-	}
-
-	public <T> TypedQuery<T> getQuery(final String selectClause, final Class<T> type, final String orderBy) {
-		return Transactions.withNewTransactionReturning(emf, em -> getQuery(em, selectClause, type, orderBy));
-	}
-
-	public <T> TypedQuery<T> getQuery(final String selectClause, final Class<T> type, final String orderBy,
-			final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf, em -> getQuery(em, selectClause, type, orderBy, false));
-	}
-
-	public <T> TypedQuery<T> getQuery(final EntityManager em, final String selectClause, final Class<T> type,
-			final String orderBy) {
-		return getQuery(em, selectClause, "", "", null, type, orderBy, false);
-	}
-
-	public <T> TypedQuery<T> getQuery(final EntityManager em, final String selectClause, final Class<T> type,
-			final String orderBy, final boolean lockPessimistic) {
-		return getQuery(em, selectClause, "", "", null, type, orderBy, lockPessimistic);
-	}
-
-	public <T> TypedQuery<T> getQuery(final String selectClause, final String joinClause, final String whereClause,
-			final ParamMap params, final Class<T> type) {
-		return Transactions.withNewTransactionReturning(emf,
-				em -> getQuery(em, selectClause, joinClause, whereClause, params, type, "o.id ASC", false));
-	}
-
-	public <T> TypedQuery<T> getQuery(final String selectClause, final String joinClause, final String whereClause,
-			final ParamMap params, final Class<T> type, final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf,
-				em -> getQuery(em, selectClause, joinClause, whereClause, params, type, "o.id ASC", lockPessimistic));
-	}
-
-	public <T> TypedQuery<T> getQuery(final EntityManager em, final String selectClause, final String joinClause,
+	<T> TypedQuery<T> getQuery(final EntityManager em, final String selectClause, final String joinClause,
 			final String whereClause, final ParamMap params, final Class<T> type, final String orderBy,
 			final boolean lockPessimistic) {
-		String query = "SELECT " + selectClause + " FROM %s AS o";
+		String query = "SELECT ";
+		if (selectClause == null || selectClause.isBlank())
+			query += "o";
+		else
+			query += selectClause;
+		query += " FROM %s AS o";
+
 		if (joinClause != null && !joinClause.isBlank())
 			query += " " + joinClause;
 		if (whereClause != null && !whereClause.isBlank())
@@ -263,7 +166,12 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 				msg += "\\n  " + p.getKey() + ": " + p.getValue();
 		log.debug(msg);
 
-		TypedQuery<T> q = em.createQuery(query, type);
+		@SuppressWarnings("unchecked")
+		Class<T> t = (Class<T>) this.type;
+		if (type != null)
+			t = type;
+
+		TypedQuery<T> q = em.createQuery(query, t);
 		if (lockPessimistic)
 			q.setLockMode(LockModeType.PESSIMISTIC_WRITE);
 		if (params != null)
@@ -272,7 +180,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 		return q;
 	}
 
-	public Query getCountQuery(final EntityManager em, final String selectClause, final String joinClause,
+	Query getCountQuery(final EntityManager em, final String selectClause, final String joinClause,
 			final String whereClause, final ParamMap params) {
 		String query = "SELECT COUNT(" + selectClause + ") FROM %s AS o";
 		if (joinClause != null && !joinClause.isBlank())
@@ -284,215 +192,5 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 			for (Entry<String, Object> e : params.getParameters().entrySet())
 				q.setParameter(e.getKey(), e.getValue());
 		return q;
-	}
-
-	public P firstOf() {
-		return firstOf(false);
-	}
-
-	public P firstOf(final boolean lockPessimistic) {
-		return firstOf(null, null, lockPessimistic);
-	}
-
-	public P firstOf(final EntityManager em) {
-		return firstOf(em, false);
-	}
-
-	public P firstOf(final EntityManager em, final boolean lockPessimistic) {
-		return firstOf(em, null, null, lockPessimistic);
-	}
-
-	public P firstOf(final String whereClause, final ParamMap params) {
-		return firstOf(whereClause, params, false);
-	}
-
-	public P firstOf(final String whereClause, final ParamMap params, final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf, em -> firstOf(em, whereClause, params, lockPessimistic));
-	}
-
-	public P firstOf(final EntityManager em, final String whereClause, final ParamMap params) {
-		return firstOf(em, whereClause, params, false);
-	}
-
-	public P firstOf(final EntityManager em, final String whereClause, final ParamMap params,
-			final boolean lockPessimistic) {
-		return firstOf(getQuery(em, "", whereClause, params, lockPessimistic));
-	}
-
-	public P firstOf(final TypedQuery<P> query) {
-		List<P> r = query.setMaxResults(1).getResultList();
-		if (r.size() == 1) {
-			P jpa = r.get(0);
-			return jpa;
-		}
-		return null;
-	}
-
-	public <T> T singleOf(final String selectClause, final String whereClause, final ParamMap params,
-			final Class<T> type) {
-		return singleOf(selectClause, whereClause, params, type, false);
-	}
-
-	public <T> T singleOf(final String selectClause, final String whereClause, final ParamMap params,
-			final Class<T> type, final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf,
-				em -> singleOf(em, selectClause, whereClause, params, type, lockPessimistic));
-	}
-
-	public <T> T singleOf(final EntityManager em, final String selectClause, final String whereClause,
-			final ParamMap params, final Class<T> type) {
-		return singleOf(em, selectClause, whereClause, params, type, false);
-	}
-
-	public <T> T singleOf(final EntityManager em, final String selectClause, final String whereClause,
-			final ParamMap params, final Class<T> type, final boolean lockPessimistic) {
-		return singleOf(getQuery(em, selectClause, "", whereClause, params, type, null, lockPessimistic));
-	}
-
-	public <T> T singleOf(final TypedQuery<T> query) {
-		return query.getSingleResult();
-	}
-
-	public List<P> listOf(final String whereClause, final ParamMap params) {
-		return Transactions.withNewTransactionReturning(emf, em -> listOf(em, whereClause, params));
-	}
-
-	public List<P> listOf(final EntityManager em, final String whereClause, final ParamMap params) {
-		return listOf(getQuery(em, "", whereClause, params));
-	}
-
-	public List<P> listOf(final TypedQuery<P> query) {
-		return query.getResultList();
-	}
-
-	public List<P> reverseListOf(final String whereClause, final ParamMap params) {
-		return Transactions.withNewTransactionReturning(emf, em -> reverseListOf(em, whereClause, params, false));
-	}
-
-	public List<P> reverseListOf(final String whereClause, final ParamMap params, final boolean lockPessimistric) {
-		return Transactions.withNewTransactionReturning(emf,
-				em -> reverseListOf(em, whereClause, params, lockPessimistric));
-	}
-
-	public List<P> reverseListOf(final EntityManager em, final String whereClause, final ParamMap params) {
-		return reverseListOf(em, whereClause, params, false);
-	}
-
-	public List<P> reverseListOf(final EntityManager em, final String whereClause, final ParamMap params,
-			final boolean lockPessimistic) {
-		return reverseListOf(getQuery(em, "o", "", whereClause, params, type, "o.id DESC", lockPessimistic));
-	}
-
-	public List<P> reverseListOf(final TypedQuery<P> query) {
-		return query.getResultList();
-	}
-
-	public List<P> firstNOf(final String whereClause, final long count, final ParamMap params) {
-		return Transactions.withNewTransactionReturning(emf, em -> firstNOf(em, whereClause, count, params, false));
-	}
-
-	public List<P> firstNOf(final String whereClause, final long count, final ParamMap params,
-			final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf,
-				em -> firstNOf(em, whereClause, count, params, lockPessimistic));
-	}
-
-	public List<P> firstNOf(final EntityManager em, final String whereClause, final long count, final ParamMap params) {
-		return firstNOf(em, whereClause, count, params, false);
-	}
-
-	public List<P> firstNOf(final EntityManager em, final String whereClause, final long count, final ParamMap params,
-			final boolean lockPessimistic) {
-		return nOf(getQuery(em, "", whereClause, params, lockPessimistic), count);
-	}
-
-	public P lastOf() {
-		return lastOf(false);
-	}
-
-	public P lastOf(final boolean lockPessimistic) {
-		return lastOf(null, null, lockPessimistic);
-	}
-
-	public P lastOf(final EntityManager em) {
-		return lastOf(em, false);
-	}
-
-	public P lastOf(final EntityManager em, final boolean lockPessimistic) {
-		return lastOf(em, null, null, lockPessimistic);
-	}
-
-	public P lastOf(final String whereClause, final ParamMap params) {
-		return lastOf(whereClause, params, false);
-	}
-
-	public P lastOf(final String whereClause, final ParamMap params, final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf, em -> lastOf(em, whereClause, params, lockPessimistic));
-	}
-
-	public P lastOf(final EntityManager em, final String whereClause, final ParamMap params) {
-		return lastOf(em, whereClause, params, false);
-	}
-
-	public P lastOf(final EntityManager em, final String whereClause, final ParamMap params,
-			final boolean lockPessimistic) {
-		return firstOf(getQuery(em, "o", "", whereClause, params, type, "o.id DESC", lockPessimistic));
-	}
-
-	public List<P> lastNOf(final String whereClause, final long count, final ParamMap params) {
-		return lastNOf(whereClause, count, params, false);
-	}
-
-	public List<P> lastNOf(final String whereClause, final long count, final ParamMap params,
-			final boolean lockPessimistic) {
-		return Transactions.withNewTransactionReturning(emf,
-				em -> lastNOf(em, whereClause, count, params, lockPessimistic));
-	}
-
-	public List<P> lastNOf(final EntityManager em, final String whereClause, final long count, final ParamMap params) {
-		return lastNOf(em, whereClause, count, params, false);
-	}
-
-	public List<P> lastNOf(final EntityManager em, final String whereClause, final long count, final ParamMap params,
-			final boolean lockPessimistic) {
-		return nOf(getQuery(em, "o", "", whereClause, params, type, "o.id DESC", lockPessimistic), count);
-	}
-
-	public List<P> nOf(final String whereClause, final long count, final ParamMap params,
-			final OrderByMap orderByFields) {
-		return Transactions.withNewTransactionReturning(emf, em -> nOf(em, whereClause, count, params, orderByFields));
-	}
-
-	public List<P> nOf(final EntityManager em, final String whereClause, final long count, final ParamMap params,
-			final OrderByMap orderByFields) {
-		return nOf(em, whereClause, count, params, orderByFields, false);
-	}
-
-	public List<P> nOf(final EntityManager em, final String whereClause, final long count, final ParamMap params,
-			final OrderByMap orderByFields, final boolean lockPessimistic) {
-		String orderBy = "";
-		for (Entry<String, Boolean> entry : orderByFields.getOrderByFields().entrySet()) {
-
-			if (!orderBy.isEmpty())
-				orderBy += ",";
-
-			orderBy += "o." + entry.getKey();
-
-			if (entry.getValue())
-				orderBy += " DESC";
-			else
-				orderBy += " ASC";
-		}
-		if (orderBy.isEmpty())
-			orderBy = "o.id ASC";
-		return nOf(getQuery(em, "o", "", whereClause, params, type, orderBy, lockPessimistic), count);
-	}
-
-	public List<P> nOf(final TypedQuery<P> query, final long count) {
-		int s = Integer.MAX_VALUE;
-		if (count < s)
-			s = (int) count;
-		query.setMaxResults(s);
-		return query.getResultList();
 	}
 }
