@@ -1,6 +1,7 @@
 package info.unterrainer.commons.httpserver.daos;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
@@ -39,7 +40,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 				.orderBy(orderByClause)
 				.parameters(params)
 				.build()
-				.getList(offset, size);
+				.getListJson(offset, size);
 	}
 
 	@Override
@@ -120,7 +121,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 	@Override
 	public P getById(final EntityManager em, final Long id) {
 		try {
-			return query().entityManager(em).where("o.id=:id").addParam("id", id).build().getSingle();
+			return query().entityManager(em).where("o.id = :id").addParam("id", id).build().getSingle();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -142,7 +143,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 	}
 
 	<T> TypedQuery<T> getQuery(final EntityManager em, final String selectClause, final String joinClause,
-			final String whereClause, final ParamMap params, final Class<T> type, final String orderBy,
+			final String whereClause, final Map<String, Object> params, final Class<T> type, final String orderBy,
 			final boolean lockPessimistic) {
 		String query = "SELECT ";
 		if (selectClause == null || selectClause.isBlank())
@@ -162,7 +163,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 
 		String msg = query;
 		if (params != null)
-			for (Entry<String, Object> p : params.getParameters().entrySet())
+			for (Entry<String, Object> p : params.entrySet())
 				msg += "\\n  " + p.getKey() + ": " + p.getValue();
 		log.debug(msg);
 
@@ -175,13 +176,13 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 		if (lockPessimistic)
 			q.setLockMode(LockModeType.PESSIMISTIC_WRITE);
 		if (params != null)
-			for (Entry<String, Object> e : params.getParameters().entrySet())
+			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
 		return q;
 	}
 
 	Query getCountQuery(final EntityManager em, final String selectClause, final String joinClause,
-			final String whereClause, final ParamMap params) {
+			final String whereClause, final Map<String, Object> params) {
 		String query = "SELECT COUNT(" + selectClause + ") FROM %s AS o";
 		if (joinClause != null && !joinClause.isBlank())
 			query += " " + joinClause;
@@ -189,7 +190,7 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 			query += " WHERE " + whereClause;
 		Query q = em.createQuery(String.format(query, this.type.getSimpleName()));
 		if (params != null)
-			for (Entry<String, Object> e : params.getParameters().entrySet())
+			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
 		return q;
 	}

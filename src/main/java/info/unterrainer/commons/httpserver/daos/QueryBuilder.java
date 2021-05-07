@@ -1,9 +1,9 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 
-import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
 public class QueryBuilder<P extends BasicJpa, T> extends BasicQueryBuilder<P, T, QueryBuilder<P, T>> {
@@ -16,25 +16,19 @@ public class QueryBuilder<P extends BasicJpa, T> extends BasicQueryBuilder<P, T,
 	}
 
 	public Query<P, T> build() {
-		TypedQuery<T> q;
-		if (entityManager != null) {
-			q = dao.getQuery(entityManager, selectClause, joinClause, whereClause, parameters, resultType,
-					orderByClause, lockPessimistic);
-			javax.persistence.Query cq = new CountQueryBuilder<P, T>(emf, dao).entityManager(entityManager)
-					.select(selectClause)
-					.join(joinClause)
-					.where(whereClause)
-					.build();
-			return new Query<>(dao, q, cq);
-		} else {
-			q = Transactions.withNewTransactionReturning(emf, em -> dao.getQuery(entityManager, selectClause,
-					joinClause, whereClause, parameters, resultType, orderByClause, lockPessimistic));
-			javax.persistence.Query cq = new CountQueryBuilder<P, T>(emf, dao).entityManager(entityManager)
-					.select(selectClause)
-					.join(joinClause)
-					.where(whereClause)
-					.build();
-			return new Query<>(dao, q, cq);
-		}
+		return new Query<>(emf, this);
+	}
+
+	TypedQuery<T> getTypedQuery(final EntityManager em) {
+		return dao.getQuery(entityManager, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
+				lockPessimistic);
+	}
+
+	javax.persistence.Query getCountQuery(final EntityManager em) {
+		return new CountQueryBuilder<P, T>(emf, dao).entityManager(entityManager)
+				.select(selectClause)
+				.join(joinClause)
+				.where(whereClause)
+				.build();
 	}
 }

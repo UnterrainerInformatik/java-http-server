@@ -1,5 +1,8 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -20,7 +23,7 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	protected String orderByClause = "o.id ASC";
 	protected boolean lockPessimistic = false;
 
-	protected ParamMap parameters = ParamMap.builder().build();
+	protected Map<String, Object> parameters = new HashMap<>();
 
 	/**
 	 * Sets a custom {@link EntityManager}.
@@ -135,14 +138,33 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	}
 
 	/**
-	 * Clears the order-by-clause and resets it to default.
-	 * <p>
-	 * Default is the empty string.
+	 * Clears the order-by-clause and resets it to an empty string, thus effectively
+	 * clearing the order.
 	 *
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	public R clearOrderBy() {
+		return orderBy("");
+	}
+
+	/**
+	 * Sets the order-by-clause to the standard-order, which is {@code "o.id ASC"}
+	 * and since this is the default as well, this effectively resets it to default.
+	 *
+	 * @return an instance of this builder to provide a fluent interface
+	 */
+	public R setStandardOrder() {
 		return orderBy(null);
+	}
+
+	/**
+	 * Sets the order-by-clause to the reversed standard-order, which is
+	 * {@code "o.id DESC"}.
+	 *
+	 * @return an instance of this builder to provide a fluent interface
+	 */
+	public R setReversedStandardOrder() {
+		return orderBy("o.id DESC");
 	}
 
 	/**
@@ -167,9 +189,9 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	 */
 	@SuppressWarnings("unchecked")
 	public R parameters(final ParamMap params) {
-		parameters = params;
+		parameters = params.getParameters();
 		if (this.parameters == null)
-			parameters = ParamMap.builder().build();
+			parameters = new HashMap<>();
 		return (R) this;
 	}
 
@@ -182,7 +204,7 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	 */
 	@SuppressWarnings("unchecked")
 	public R addParam(final String paramKey, final Object paramValue) {
-		parameters.addParameter(paramKey, paramValue);
+		parameters.put(paramKey, paramValue);
 		return (R) this;
 	}
 
@@ -206,6 +228,9 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 
 	/**
 	 * Adds an ASC-segment to the order-by-clause.
+	 * <p>
+	 * Since the standard-order is {@code "o.id ASC"} it is advised to call
+	 * {@link #clearOrderBy()} first.
 	 *
 	 * @param field the name of the field ("o.id" or "o.createdOn" for example)
 	 * @return an instance of this builder to provide a fluent interface
@@ -222,6 +247,9 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 
 	/**
 	 * Adds an DESC-segment to the order-by-clause.
+	 * <p>
+	 * Since the standard-order is {@code "o.id ASC"} it is advised to call
+	 * {@link #clearOrderBy()} first.
 	 *
 	 * @param field the name of the field ("o.id" or "o.createdOn" for example)
 	 * @return an instance of this builder to provide a fluent interface

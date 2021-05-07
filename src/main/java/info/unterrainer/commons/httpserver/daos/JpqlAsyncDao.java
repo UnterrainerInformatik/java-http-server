@@ -103,7 +103,7 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends JpqlDao<P> implements
 				isFirst = false;
 			} else
 				sb.append("OR ");
-			sb.append("state=:state");
+			sb.append("state = :state");
 			sb.append(i);
 			sb.append(" ");
 		}
