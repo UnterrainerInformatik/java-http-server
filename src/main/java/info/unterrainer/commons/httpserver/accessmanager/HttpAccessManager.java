@@ -8,6 +8,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.security.PublicKey;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -52,8 +53,7 @@ public class HttpAccessManager implements AccessManager {
 
 	@Override
 	public void manage(final Handler handler, final Context ctx, final Set<Role> permittedRoles) throws Exception {
-		checkAccess(ctx, permittedRoles,
-				((HttpServer) ctx.attribute(Attribute.JAVALIN_SERVER)).getUserAccessInterceptor());
+		checkAccess(ctx, permittedRoles);
 		handler.handle(ctx);
 	}
 
@@ -101,10 +101,9 @@ public class HttpAccessManager implements AccessManager {
 		}
 	}
 
-	private void checkAccess(final Context ctx, final Set<Role> permittedRoles,
-			final Consumer<UserDataJson> userAccessInterceptor) {
+	private void checkAccess(final Context ctx, final Set<Role> permittedRoles) {
 		try {
-			TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx, userAccessInterceptor);
+			TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(ctx);
 
 			if (permittedRoles.isEmpty() || permittedRoles.contains(DefaultRole.OPEN) && permittedRoles.size() == 1)
 				return;
@@ -146,8 +145,7 @@ public class HttpAccessManager implements AccessManager {
 		return false;
 	}
 
-	private TokenVerifier<AccessToken> persistUserInfoInContext(final Context ctx,
-			final Consumer<UserDataJson> userAccessInterceptor) {
+	private TokenVerifier<AccessToken> persistUserInfoInContext(final Context ctx) {
 		String authorizationHeader = ctx.header(HttpHeader.AUTHORIZATION.asString());
 
 		if (authorizationHeader == null || authorizationHeader.isBlank())
@@ -171,24 +169,32 @@ public class HttpAccessManager implements AccessManager {
 			ctx.attribute(Attribute.USER_EMAIL_VERIFIED, token.getEmailVerified());
 			ctx.attribute(Attribute.USER_REALM_ROLES, token.getRealmAccess().getRoles());
 
+			String tenant = (String) token.getOtherClaims().get("tenant");
+			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANT, tenant);
+			ctx.attribute(Attribute.USER_TENANT_SET, createTenantSetFrom(tenant));
+
 			Set<String> clientRoles = Set.of();
 			String key = token.getIssuedFor();
 			if (token.getResourceAccess().containsKey(key))
 				clientRoles = token.getResourceAccess().get(key).getRoles();
 			ctx.attribute(Attribute.USER_CLIENT_ROLES, clientRoles);
 
-			userAccessInterceptor.accept(UserDataJson.builder()
-					.userName(userName)
-					.givenName(token.getGivenName())
-					.client(token.getIssuedFor())
-					.familyName(token.getFamilyName())
-					.email(token.getEmail())
-					.emailVerified(token.getEmailVerified())
-					.realmRoles(token.getRealmAccess().getRoles())
-					.clientRoles(clientRoles)
-					.isActive(token.isActive())
-					.isBearer(token.getType().equalsIgnoreCase("bearer"))
-					.build());
+			Consumer<UserDataJson> userAccessInterceptor = ((HttpServer) ctx.attribute(Attribute.JAVALIN_SERVER))
+					.getUserAccessInterceptor();
+			if (userAccessInterceptor != null)
+				userAccessInterceptor.accept(UserDataJson.builder()
+						.userName(userName)
+						.givenName(token.getGivenName())
+						.client(token.getIssuedFor())
+						.familyName(token.getFamilyName())
+						.email(token.getEmail())
+						.emailVerified(token.getEmailVerified())
+						.realmRoles(token.getRealmAccess().getRoles())
+						.tenant(tenant)
+						.clientRoles(clientRoles)
+						.isActive(token.isActive())
+						.isBearer(token.getType().equalsIgnoreCase("bearer"))
+						.build());
 
 			if (!token.isActive()) {
 				setTokenRejectionReason(ctx, "Token is inactive.");
@@ -209,6 +215,20 @@ public class HttpAccessManager implements AccessManager {
 			setTokenRejectionReason(ctx, "Token was checked and deemed invalid.");
 			return null;
 		}
+	}
+
+	private Object createTenantSetFrom(final String tenant) {
+		Set<String> tenantSet = new HashSet<>();
+		if (tenant == null || tenant.isBlank())
+			return tenantSet;
+
+		String[] tenants = tenant.split(",");
+		for (String t : tenants) {
+			if (t.isBlank())
+				continue;
+			tenantSet.add(t.trim());
+		}
+		return tenantSet;
 	}
 
 	private void setTokenRejectionReason(final Context ctx, final String reason) {

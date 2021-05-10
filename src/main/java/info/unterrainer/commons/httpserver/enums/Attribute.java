@@ -15,6 +15,8 @@ public class Attribute {
 	public static final String USER_CLIENT = "user_client";
 	public static final String USER_CLIENT_ROLES = "user_client_roles";
 	public static final String USER_REALM_ROLES = "user_realm_roles";
+	public static final String USER_CLIENT_ATTRIBUTE_TENANT = "user_client_attribute_tenant";
+	public static final String USER_TENANT_SET = "user_tenant_set";
 
 	public static final String KEYCLOAK_TOKEN_REJECTION_REASON = "kc_token_rejection_reason";
 }
