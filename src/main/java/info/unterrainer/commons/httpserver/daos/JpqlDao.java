@@ -3,6 +3,7 @@ package info.unterrainer.commons.httpserver.daos;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -15,6 +16,7 @@ import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.jreutils.DateUtils;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
+import info.unterrainer.commons.rdbutils.enums.AsyncState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -138,13 +140,80 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 	}
 
 	@Override
-	public CountQueryBuilder<P, P> countQuery() {
+	public CountQueryBuilder<P> countQuery() {
 		return new CountQueryBuilder<>(emf, this);
+	}
+
+	private boolean isSet(final String str) {
+		return str != null && !str.isBlank();
+	}
+
+	private boolean isSet(final Set<?> set) {
+		return set != null && !set.isEmpty();
+	}
+
+	private String buildWhereClause(final String whereClause, final Set<AsyncState> asyncStates) {
+		String r = "";
+		if (!isSet(whereClause) && !isSet(asyncStates))
+			return r;
+
+		r = " WHERE ";
+		if (isSet(whereClause) && !isSet(asyncStates))
+			r += whereClause;
+
+		if (!isSet(whereClause) && isSet(asyncStates))
+			r += addAsyncStatesToWhereClause(asyncStates);
+
+		if (isSet(whereClause) && isSet(asyncStates))
+			r += "( " + whereClause + " ) AND ( " + addAsyncStatesToWhereClause(asyncStates) + " )";
+
+		return r;
+	}
+
+	private String addAsyncStatesToWhereClause(final Set<AsyncState> asyncStates) {
+		StringBuilder sb = new StringBuilder();
+		boolean isFirst = true;
+
+		for (int i = 0; i < asyncStates.size(); i++) {
+			if (isFirst)
+				isFirst = false;
+			else
+				sb.append(" OR ");
+			sb.append("state = :state");
+			sb.append(i);
+		}
+
+		return sb.toString();
+	}
+
+	private <T> TypedQuery<T> addAsyncStatesParamsToQuery(final Set<AsyncState> asyncStates,
+			final TypedQuery<T> query) {
+
+		if (!isSet(asyncStates))
+			return query;
+
+		int count = 0;
+		for (AsyncState state : asyncStates)
+			query.setParameter("state" + count++, state);
+
+		return query;
+	}
+
+	private Query addAsyncStatesParamsToQuery(final Set<AsyncState> asyncStates, final Query query) {
+
+		if (!isSet(asyncStates))
+			return query;
+
+		int count = 0;
+		for (AsyncState state : asyncStates)
+			query.setParameter("state" + count++, state);
+
+		return query;
 	}
 
 	<T> TypedQuery<T> getQuery(final EntityManager em, final String selectClause, final String joinClause,
 			final String whereClause, final Map<String, Object> params, final Class<T> type, final String orderBy,
-			final boolean lockPessimistic) {
+			final boolean lockPessimistic, final Set<AsyncState> asyncStates) {
 		String query = "SELECT ";
 		if (selectClause == null || selectClause.isBlank())
 			query += "o";
@@ -154,9 +223,12 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 
 		if (joinClause != null && !joinClause.isBlank())
 			query += " " + joinClause;
-		if (whereClause != null && !whereClause.isBlank())
-			query += " WHERE " + whereClause;
-		if (orderBy != null && !orderBy.isBlank())
+
+		query += buildWhereClause(whereClause, asyncStates);
+
+		if (orderBy == null)
+			query += " ORDER BY o.id ASC";
+		else if (!orderBy.isBlank())
 			query += " ORDER BY " + orderBy;
 
 		query = String.format(query, this.type.getSimpleName());
@@ -172,9 +244,12 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 		if (type != null)
 			t = type;
 
+		if (query.contains("nullo.id"))
+			System.out.println("");
 		TypedQuery<T> q = em.createQuery(query, t);
 		if (lockPessimistic)
 			q.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+		q = addAsyncStatesParamsToQuery(asyncStates, q);
 		if (params != null)
 			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
@@ -182,13 +257,15 @@ public class JpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManager> {
 	}
 
 	Query getCountQuery(final EntityManager em, final String selectClause, final String joinClause,
-			final String whereClause, final Map<String, Object> params) {
+			final String whereClause, final Map<String, Object> params, final Set<AsyncState> asyncStates) {
 		String query = "SELECT COUNT(" + selectClause + ") FROM %s AS o";
 		if (joinClause != null && !joinClause.isBlank())
 			query += " " + joinClause;
-		if (whereClause != null && !whereClause.isBlank())
-			query += " WHERE " + whereClause;
+		query += buildWhereClause(whereClause, asyncStates);
+
 		Query q = em.createQuery(String.format(query, this.type.getSimpleName()));
+
+		q = addAsyncStatesParamsToQuery(asyncStates, q);
 		if (params != null)
 			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());

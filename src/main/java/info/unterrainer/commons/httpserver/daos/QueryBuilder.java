@@ -8,11 +8,8 @@ import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
 public class QueryBuilder<P extends BasicJpa, T> extends BasicQueryBuilder<P, T, QueryBuilder<P, T>> {
 
-	private final Class<T> resultType;
-
 	QueryBuilder(final EntityManagerFactory emf, final JpqlDao<P> dao, final Class<T> resultType) {
-		super(emf, dao);
-		this.resultType = resultType;
+		super(emf, dao, resultType);
 	}
 
 	public Query<P, T> build() {
@@ -20,15 +17,11 @@ public class QueryBuilder<P extends BasicJpa, T> extends BasicQueryBuilder<P, T,
 	}
 
 	TypedQuery<T> getTypedQuery(final EntityManager em) {
-		return dao.getQuery(entityManager, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
-				lockPessimistic);
+		return dao.getQuery(em, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
+				lockPessimistic, null);
 	}
 
 	javax.persistence.Query getCountQuery(final EntityManager em) {
-		return new CountQueryBuilder<P, T>(emf, dao).entityManager(entityManager)
-				.select(selectClause)
-				.join(joinClause)
-				.where(whereClause)
-				.build();
+		return dao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null);
 	}
 }

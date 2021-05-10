@@ -22,10 +22,23 @@ public class Query<P extends BasicJpa, T> {
 	protected final EntityManagerFactory emf;
 	protected final QueryBuilder<P, T> builder;
 
-	private <V> V wrap(final Function<EntityManager, V> func) {
+	private <V> V withEntityManager(final Function<EntityManager, V> func) {
 		if (builder.entityManager == null)
 			return Transactions.withNewTransactionReturning(emf, em -> func.apply(em));
 		return func.apply(builder.entityManager);
+	}
+
+	private List<T> internalGetList(final EntityManager em, final long offset, final long size) {
+		int s = Integer.MAX_VALUE;
+		if (size < s)
+			s = (int) size;
+		int o = Integer.MAX_VALUE;
+		if (offset < o)
+			o = (int) offset;
+		TypedQuery<T> query = builder.getTypedQuery(em);
+		query.setFirstResult(o);
+		query.setMaxResults(s);
+		return query.getResultList();
 	}
 
 	/**
@@ -36,12 +49,7 @@ public class Query<P extends BasicJpa, T> {
 	 * @return a {@link ListJson} containing the rows as specified
 	 */
 	public ListJson<T> getListJson() {
-		return wrap(em -> {
-			ListJson<T> r = new ListJson<>();
-			r.setEntries(getList(em));
-			r.setCount((Long) builder.getCountQuery(em).getSingleResult());
-			return r;
-		});
+		return getListJson(0, Long.MAX_VALUE);
 	}
 
 	/**
@@ -55,10 +63,12 @@ public class Query<P extends BasicJpa, T> {
 	 * @return a {@link ListJson} containing the rows as specified
 	 */
 	public ListJson<T> getListJson(final long offset, final long size) {
-		ListJson<T> r = new ListJson<>();
-		r.setEntries(getList(offset, size));
-		r.setCount((Long) countQuery.getSingleResult());
-		return r;
+		return withEntityManager(em -> {
+			ListJson<T> r = new ListJson<>();
+			r.setEntries(internalGetList(em, offset, size));
+			r.setCount((Long) builder.getCountQuery(em).getSingleResult());
+			return r;
+		});
 	}
 
 	/**
@@ -94,7 +104,10 @@ public class Query<P extends BasicJpa, T> {
 	 * @throws NonUniqueResultException if more than one result
 	 */
 	public T getSingle() {
-		return typedQuery.getSingleResult();
+		return withEntityManager(em -> {
+			TypedQuery<T> typedQuery = builder.getTypedQuery(em);
+			return typedQuery.getSingleResult();
+		});
 	}
 
 	/**
@@ -103,11 +116,7 @@ public class Query<P extends BasicJpa, T> {
 	 * @return the list of result-rows as JPAs
 	 */
 	public List<T> getList() {
-		return wrap(em -> getList(em));
-	}
-
-	private List<T> getList(final EntityManager em) {
-		return getList(0, Long.MAX_VALUE);
+		return withEntityManager(em -> internalGetList(em, 0, Long.MAX_VALUE));
 	}
 
 	/**
@@ -118,20 +127,7 @@ public class Query<P extends BasicJpa, T> {
 	 * @return a list containing the rows as specified
 	 */
 	public List<T> getList(final long offset, final long size) {
-		return wrap(em -> getList(em, offset, size));
-	}
-
-	private List<T> getList(final EntityManager em, final long offset, final long size) {
-		int s = Integer.MAX_VALUE;
-		if (size < s)
-			s = (int) size;
-		int o = Integer.MAX_VALUE;
-		if (offset < o)
-			o = (int) offset;
-		TypedQuery<T> query = builder.getTypedQuery(em);
-		query.setFirstResult(o);
-		query.setMaxResults(s);
-		return query.getResultList();
+		return withEntityManager(em -> internalGetList(em, offset, size));
 	}
 
 	/**
@@ -145,7 +141,7 @@ public class Query<P extends BasicJpa, T> {
 	 * @return the reversed list of result-rows as JPAs
 	 */
 	public List<T> getListReversed() {
-		List<T> l = typedQuery.getResultList();
+		List<T> l = getList();
 		Collections.reverse(l);
 		return l;
 	}

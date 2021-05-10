@@ -15,12 +15,13 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 
 	protected final EntityManagerFactory emf;
 	protected final JpqlDao<P> dao;
+	protected final Class<T> resultType;
 
 	protected EntityManager entityManager;
 	protected String selectClause = "o";
 	protected String joinClause;
 	protected String whereClause;
-	protected String orderByClause = "o.id ASC";
+	protected String orderByClause;
 	protected boolean lockPessimistic = false;
 
 	protected Map<String, Object> parameters = new HashMap<>();
@@ -95,7 +96,7 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	/**
 	 * Adds an 'AND' part to the where-clause.
 	 * <p>
-	 * For example: .and("o.loggedIn=:loggedIn");
+	 * For example: .and("o.loggedIn = :loggedIn");
 	 *
 	 * @param andWhereClause the clause to add
 	 * @return an instance of this builder to provide a fluent interface
@@ -112,7 +113,7 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	/**
 	 * Adds an 'OR' part to the where-clause.
 	 * <p>
-	 * For example: .or("o.loggedIn=:loggedIn");
+	 * For example: .or("o.loggedIn = :loggedIn");
 	 *
 	 * @param orWhereClause the clause to add
 	 * @return an instance of this builder to provide a fluent interface
@@ -124,27 +125,6 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 		else
 			whereClause += " OR " + orWhereClause;
 		return (R) this;
-	}
-
-	/**
-	 * Clears the where-clause and resets it to default.
-	 * <p>
-	 * Default is the empty string.
-	 *
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	public R clearWhere() {
-		return where(null);
-	}
-
-	/**
-	 * Clears the order-by-clause and resets it to an empty string, thus effectively
-	 * clearing the order.
-	 *
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	public R clearOrderBy() {
-		return orderBy("");
 	}
 
 	/**
@@ -189,6 +169,8 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	 */
 	@SuppressWarnings("unchecked")
 	public R parameters(final ParamMap params) {
+		if (params == null)
+			return (R) this;
 		parameters = params.getParameters();
 		if (this.parameters == null)
 			parameters = new HashMap<>();
@@ -221,16 +203,11 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	@SuppressWarnings("unchecked")
 	public R orderBy(final String orderByClause) {
 		this.orderByClause = orderByClause;
-		if (this.orderByClause == null)
-			this.orderByClause = "o.id ASC";
 		return (R) this;
 	}
 
 	/**
 	 * Adds an ASC-segment to the order-by-clause.
-	 * <p>
-	 * Since the standard-order is {@code "o.id ASC"} it is advised to call
-	 * {@link #clearOrderBy()} first.
 	 *
 	 * @param field the name of the field ("o.id" or "o.createdOn" for example)
 	 * @return an instance of this builder to provide a fluent interface
@@ -240,16 +217,13 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 		if (orderByClause == null || orderByClause.isBlank())
 			orderByClause = field;
 		else
-			orderByClause = ", " + field;
+			orderByClause += ", " + field;
 		orderByClause += " ASC";
 		return (R) this;
 	}
 
 	/**
 	 * Adds an DESC-segment to the order-by-clause.
-	 * <p>
-	 * Since the standard-order is {@code "o.id ASC"} it is advised to call
-	 * {@link #clearOrderBy()} first.
 	 *
 	 * @param field the name of the field ("o.id" or "o.createdOn" for example)
 	 * @return an instance of this builder to provide a fluent interface
@@ -259,7 +233,7 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 		if (orderByClause == null || orderByClause.isBlank())
 			orderByClause = field;
 		else
-			orderByClause = ", " + field;
+			orderByClause += ", " + field;
 		orderByClause += " DESC";
 		return (R) this;
 	}

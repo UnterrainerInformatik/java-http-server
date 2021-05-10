@@ -26,7 +26,7 @@ public interface BasicDao<P extends BasicJpa, E> {
 
 	QueryBuilder<P, P> query();
 
-	CountQueryBuilder<P, P> countQuery();
+	CountQueryBuilder<P> countQuery();
 
 	P create(E em, P entity);
 
