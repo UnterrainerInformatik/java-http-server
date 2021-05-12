@@ -11,7 +11,8 @@ import javax.persistence.TypedQuery;
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
 
-public class QueryAsyncBuilder<P extends BasicAsyncJpa, T> extends QueryBuilder<P, T> {
+public class QueryAsyncBuilder<P extends BasicAsyncJpa, T> extends BasicQueryBuilder<P, T, QueryAsyncBuilder<P, T>>
+		implements QueryInterface<P, T> {
 
 	private Set<AsyncState> asyncStates = new HashSet<>();
 
@@ -19,7 +20,8 @@ public class QueryAsyncBuilder<P extends BasicAsyncJpa, T> extends QueryBuilder<
 		super(emf, dao, resultType);
 	}
 
-	public Query<P, T> buildAsync() {
+	@Override
+	public Query<P, T> build() {
 		return new Query<>(emf, this);
 	}
 
@@ -44,13 +46,23 @@ public class QueryAsyncBuilder<P extends BasicAsyncJpa, T> extends QueryBuilder<
 	}
 
 	@Override
-	TypedQuery<T> getTypedQuery(final EntityManager em) {
+	public TypedQuery<T> getTypedQuery(final EntityManager em) {
 		return dao.getQuery(em, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
 				lockPessimistic, asyncStates);
 	}
 
 	@Override
-	javax.persistence.Query getCountQuery(final EntityManager em) {
+	public javax.persistence.Query getCountQuery(final EntityManager em) {
 		return dao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, asyncStates);
+	}
+
+	@Override
+	public EntityManager getEntityManager() {
+		return entityManager;
+	}
+
+	@Override
+	public BasicJpqlDao<P> getDao() {
+		return dao;
 	}
 }

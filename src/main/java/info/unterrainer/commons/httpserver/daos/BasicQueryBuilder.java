@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilder<P, T, R>> {
 
 	protected final EntityManagerFactory emf;
-	protected final JpqlDao<P> dao;
+	protected final BasicJpqlDao<P> dao;
 	protected final Class<T> resultType;
 
 	protected EntityManager entityManager;

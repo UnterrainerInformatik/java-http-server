@@ -1,5 +1,7 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import javax.persistence.TypedQuery;
+
 import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
@@ -16,17 +18,11 @@ public interface BasicDao<P extends BasicJpa, E> {
 
 	UpsertResult<P> upsert(String whereClause, ParamMap params, P entity);
 
-	UpsertResult<P> upsert(Query<P, P> query, P entity);
+	UpsertResult<P> upsert(TypedQuery<P> query, P entity);
 
 	void delete(Long id);
 
 	P getById(E em, Long id);
-
-	<T> QueryBuilder<P, T> query(Class<T> resultType);
-
-	QueryBuilder<P, P> query();
-
-	CountQueryBuilder<P> countQuery();
 
 	P create(E em, P entity);
 
@@ -34,7 +30,7 @@ public interface BasicDao<P extends BasicJpa, E> {
 
 	UpsertResult<P> upsert(E em, String whereClause, ParamMap params, P entity);
 
-	UpsertResult<P> upsert(E em, Query<P, P> query, P entity);
+	UpsertResult<P> upsert(E em, TypedQuery<P> query, P entity);
 
 	void delete(E em, Long id);
 }
