@@ -37,10 +37,13 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 	public ListJson<P> getList(final EntityManager em, final long offset, final long size, final String selectClause,
 			final String joinClause, final String whereClause, final ParamMap params, final String orderByClause) {
 		ListJson<P> r = new ListJson<>();
-		r.setEntries(getList(em, getQuery(em, selectClause, joinClause, whereClause, params.getParameters(), type,
-				orderByClause, false, null), offset, size));
-		r.setCount((Long) getCountQuery(em, selectClause, joinClause, whereClause, params.getParameters(), null)
-				.getSingleResult());
+		r.setEntries(
+				getList(em,
+						getQuery(em, selectClause, joinClause, whereClause,
+								params == null ? null : params.getParameters(), type, orderByClause, false, null),
+						offset, size));
+		r.setCount((Long) getCountQuery(em, selectClause, joinClause, whereClause,
+				params == null ? null : params.getParameters(), null).getSingleResult());
 		return r;
 	}
 
@@ -84,15 +87,15 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 
 	@Override
 	public UpsertResult<P> upsert(final String whereClause, final ParamMap params, final P entity) {
-		return Transactions.withNewTransactionReturning(emf, em -> upsert(em,
-				getQuery(em, "o", null, whereClause, params.getParameters(), type, null, false, null), entity));
+		return Transactions.withNewTransactionReturning(emf, em -> upsert(em, getQuery(em, "o", null, whereClause,
+				params == null ? null : params.getParameters(), type, null, false, null), entity));
 	}
 
 	@Override
 	public UpsertResult<P> upsert(final EntityManager em, final String whereClause, final ParamMap params,
 			final P entity) {
-		return upsert(em, getQuery(em, "o", null, whereClause, params.getParameters(), type, null, false, null),
-				entity);
+		return upsert(em, getQuery(em, "o", null, whereClause, params == null ? null : params.getParameters(), type,
+				null, false, null), entity);
 	}
 
 	@Override
