@@ -27,4 +27,26 @@
 		</createTable>
 	</changeSet>
 
+	<changeSet author="GUN" id="1.1">
+		<createTable tableName="tenant"
+			remarks="Contains all tenants.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true"
+					primaryKeyName="pk_tenant" unique="true"
+					uniqueConstraintName="uc_tenant_id" />
+			</column>
+
+			<column name="name" type="varchar(300)">
+				<constraints nullable="true" />
+			</column>
+
+			<column name="createdOn" type="TIMESTAMP(6)">
+				<constraints nullable="true" />
+			</column>
+			<column name="editedOn" type="TIMESTAMP(6)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+
 </databaseChangeLog>
