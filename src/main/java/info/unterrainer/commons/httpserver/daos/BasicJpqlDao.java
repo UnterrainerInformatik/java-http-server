@@ -252,8 +252,6 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		if (type != null)
 			t = type;
 
-		if (query.contains("nullo.id"))
-			System.out.println("");
 		TypedQuery<T> q = em.createQuery(query, t);
 		if (lockPessimistic)
 			q.setLockMode(LockModeType.PESSIMISTIC_WRITE);
@@ -262,6 +260,20 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
 		return q;
+	}
+
+	private boolean isAllowed(final info.unterrainer.commons.httpserver.daos.QueryBuilder query,
+			final EntityManager em) {
+		String tenantReferenceField = "testId";
+		String tenantIdField = "tenantId";
+		Long tenantId = 55L;
+		BasicJpa tenantJpa = null;
+		getQuery(em, "o",
+				"RIGHT JOIN " + tenantJpa.getClass().getSimpleName() + " tenantTable on o.id = tenantTable."
+						+ tenantReferenceField,
+				"tenantTable." + tenantReferenceField + " IS NULL OR tenantTable." + tenantIdField + " = :tenantId",
+				null, type, null, false, null);
+		return true;
 	}
 
 	Query getCountQuery(final EntityManager em, final String selectClause, final String joinClause,
