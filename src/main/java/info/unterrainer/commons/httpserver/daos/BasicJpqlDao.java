@@ -130,14 +130,14 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 	}
 
 	@Override
-	public void delete(final Long id) {
+	public void _delete(final Long id) {
 		Transactions.withNewTransaction(emf, em -> {
-			delete(em, id);
+			_delete(em, id);
 		});
 	}
 
 	@Override
-	public void delete(final EntityManager em, final Long id) {
+	public void _delete(final EntityManager em, final Long id) {
 		em.createQuery(String.format("DELETE FROM %s AS o WHERE o.id = :id", type.getSimpleName()))
 				.setParameter("id", id)
 				.executeUpdate();

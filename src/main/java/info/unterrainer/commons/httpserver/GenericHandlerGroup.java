@@ -201,7 +201,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		DaoTransaction<E> transaction = daoTransactionManager.beginTransaction();
 
 		id = extensions.runPreDelete(ctx, transaction.getManager(), id, executorService);
-		dao.delete(id);
+		dao._delete(id);
 		ctx.status(204);
 		extensions.runPostDelete(ctx, transaction.getManager(), id, executorService);
 

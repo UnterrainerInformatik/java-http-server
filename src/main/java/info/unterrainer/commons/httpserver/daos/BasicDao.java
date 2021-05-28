@@ -20,7 +20,7 @@ public interface BasicDao<P extends BasicJpa, E> {
 
 	UpsertResult<P> upsert(TypedQuery<P> query, P entity);
 
-	void delete(Long id);
+	void _delete(Long id);
 
 	P _getById(E em, Long id);
 
@@ -32,5 +32,5 @@ public interface BasicDao<P extends BasicJpa, E> {
 
 	UpsertResult<P> upsert(E em, TypedQuery<P> query, P entity);
 
-	void delete(E em, Long id);
+	void _delete(E em, Long id);
 }

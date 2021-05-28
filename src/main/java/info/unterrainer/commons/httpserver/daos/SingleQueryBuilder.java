@@ -17,4 +17,12 @@ public class SingleQueryBuilder<P extends BasicJpa, T>
 			return dao._getById(id);
 		return dao._getById(entityManager, id);
 	}
+
+	public void delete() {
+		if (entityManager == null) {
+			dao._delete(id);
+			return;
+		}
+		dao._delete(entityManager, id);
+	}
 }
