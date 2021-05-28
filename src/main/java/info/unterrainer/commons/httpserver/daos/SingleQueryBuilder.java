@@ -1,12 +1,16 @@
 package info.unterrainer.commons.httpserver.daos;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public class SingleQueryBuilder<P extends BasicJpa, T> extends BasicSingleQueryBuilder<P, T, SingleQueryBuilder<P, T>> {
+@RequiredArgsConstructor
+public class SingleQueryBuilder<P extends BasicJpa, T>
+		extends BasicQueryEntityManagerBuilder<P, T, SingleQueryBuilder<P, T>> {
 
-	SingleQueryBuilder(final JpqlDao<P> dao, final Long id) {
-		super(dao, id);
-	}
+	@Getter
+	protected final BasicJpqlDao<P> dao;
+	protected final Long id;
 
 	public P get() {
 		if (entityManager == null)

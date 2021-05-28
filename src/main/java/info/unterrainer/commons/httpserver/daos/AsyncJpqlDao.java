@@ -76,7 +76,7 @@ public class AsyncJpqlDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 * @param id the ID to fetch.
 	 * @return the element with the given ID or null, if there was no such thing
 	 */
-	public AsyncSingleQueryBuilder<P, P> select(final Long id) {
-		return new AsyncSingleQueryBuilder<>(this, id);
+	public SingleQueryBuilder<P, P> select(final Long id) {
+		return new SingleQueryBuilder<>(this, id);
 	}
 }
