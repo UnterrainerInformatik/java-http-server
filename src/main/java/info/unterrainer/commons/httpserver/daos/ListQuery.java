@@ -17,7 +17,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class Dml<P extends BasicJpa, T> {
+public class ListQuery<P extends BasicJpa, T> {
 
 	protected final EntityManagerFactory emf;
 	protected final QueryInterface<P, T> builder;

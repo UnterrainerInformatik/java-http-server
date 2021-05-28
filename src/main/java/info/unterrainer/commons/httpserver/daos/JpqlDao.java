@@ -23,8 +23,8 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> implements Basi
 	 *
 	 * @return a query-builder
 	 */
-	public SelectQueryBuilder<P, P> select() {
-		return new SelectQueryBuilder<>(emf, this, type);
+	public ListQueryBuilder<P, P> select() {
+		return new ListQueryBuilder<>(emf, this, type);
 	}
 
 	/**
@@ -35,8 +35,8 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> implements Basi
 	 * @param resultType the type the result will be
 	 * @return a query-builder
 	 */
-	public <T> SelectQueryBuilder<P, T> select(final Class<T> resultType) {
-		return new SelectQueryBuilder<>(emf, this, resultType);
+	public <T> ListQueryBuilder<P, T> select(final Class<T> resultType) {
+		return new ListQueryBuilder<>(emf, this, resultType);
 	}
 
 	/**
@@ -50,8 +50,8 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> implements Basi
 	 * @param resultType   the type the result will be
 	 * @return a query-builder
 	 */
-	public <T> SelectQueryBuilder<P, T> select(final String selectClause, final Class<T> resultType) {
-		SelectQueryBuilder<P, T> b = new SelectQueryBuilder<>(emf, this, resultType);
+	public <T> ListQueryBuilder<P, T> select(final String selectClause, final Class<T> resultType) {
+		ListQueryBuilder<P, T> b = new ListQueryBuilder<>(emf, this, resultType);
 		b.setSelect(selectClause);
 		return b;
 	}
@@ -65,9 +65,19 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> implements Basi
 	 *                     a "SELECT o")
 	 * @return a query-builder
 	 */
-	public <T> SelectQueryBuilder<P, P> select(final String selectClause) {
-		SelectQueryBuilder<P, P> b = new SelectQueryBuilder<>(emf, this, type);
+	public ListQueryBuilder<P, P> select(final String selectClause) {
+		ListQueryBuilder<P, P> b = new ListQueryBuilder<>(emf, this, type);
 		b.setSelect(selectClause);
 		return b;
+	}
+
+	/**
+	 * Get an element by ID.
+	 *
+	 * @param id the ID to fetch.
+	 * @return the element with the given ID or null, if there was no such thing
+	 */
+	public SingleQueryBuilder<P, P> select(final Long id) {
+		return new SingleQueryBuilder<>(this, id);
 	}
 }

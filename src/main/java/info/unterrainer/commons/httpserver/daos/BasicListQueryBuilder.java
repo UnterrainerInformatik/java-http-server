@@ -5,19 +5,22 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class BasicSelectQueryBuilder<P extends BasicJpa, T, R extends BasicSelectQueryBuilder<P, T, R>> {
+public class BasicListQueryBuilder<P extends BasicJpa, T, R extends BasicListQueryBuilder<P, T, R>>
+		extends BasicQueryEntityManagerBuilder<P, T, R> {
 
 	protected final EntityManagerFactory emf;
+	@Getter
 	protected final BasicJpqlDao<P> dao;
 	protected final Class<T> resultType;
 
-	protected EntityManager entityManager;
 	protected String selectClause = "o";
 	protected String joinClause;
 	protected String whereClause;
@@ -26,25 +29,19 @@ public class BasicSelectQueryBuilder<P extends BasicJpa, T, R extends BasicSelec
 
 	protected Map<String, Object> parameters = new HashMap<>();
 
-	/**
-	 * Sets a custom {@link EntityManager}.
-	 * <p>
-	 * Default is to create one when creating the query.<br>
-	 * To reset it to default, set it to null.
-	 *
-	 * @param em an {@link EntityManager}
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R entityManager(final EntityManager em) {
-		entityManager = em;
-		return (R) this;
-	}
-
 	void setSelect(final String selectClause) {
 		this.selectClause = selectClause;
 		if (this.selectClause == null || this.selectClause.isBlank())
 			this.selectClause = "o";
+	}
+
+	public TypedQuery<T> getTypedQuery(final EntityManager em) {
+		return dao.getQuery(em, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
+				lockPessimistic, null);
+	}
+
+	public javax.persistence.Query getCountQuery(final EntityManager em) {
+		return dao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null);
 	}
 
 	/**

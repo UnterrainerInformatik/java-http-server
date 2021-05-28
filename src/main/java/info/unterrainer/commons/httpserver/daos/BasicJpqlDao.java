@@ -29,8 +29,8 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 	protected final Class<P> type;
 
 	@Override
-	public P getById(final Long id) {
-		return Transactions.withNewTransactionReturning(emf, em -> getById(em, id));
+	public P _getById(final Long id) {
+		return Transactions.withNewTransactionReturning(emf, em -> _getById(em, id));
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 	}
 
 	@Override
-	public P getById(final EntityManager em, final Long id) {
+	public P _getById(final EntityManager em, final Long id) {
 		try {
 			return getQuery(em, "o", null, "o.id = :id", Map.of("id", id), type, null, false, null).getSingleResult();
 		} catch (NoResultException e) {
@@ -262,7 +262,7 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		return q;
 	}
 
-	private boolean isAllowed(final info.unterrainer.commons.httpserver.daos.SelectQueryBuilder query,
+	private boolean isAllowed(final info.unterrainer.commons.httpserver.daos.ListQueryBuilder query,
 			final EntityManager em) {
 		String tenantReferenceField = "testId";
 		String tenantIdField = "tenantId";

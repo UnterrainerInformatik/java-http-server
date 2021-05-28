@@ -7,7 +7,7 @@ import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
 public interface BasicDao<P extends BasicJpa, E> {
 
-	P getById(Long id);
+	P _getById(Long id);
 
 	P create(P entity);
 
@@ -22,7 +22,7 @@ public interface BasicDao<P extends BasicJpa, E> {
 
 	void delete(Long id);
 
-	P getById(E em, Long id);
+	P _getById(E em, Long id);
 
 	P create(E em, P entity);
 

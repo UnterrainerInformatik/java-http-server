@@ -5,9 +5,9 @@ import javax.persistence.EntityManagerFactory;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
-public class SelectCountQueryBuilder<P extends BasicJpa> extends BasicSelectQueryBuilder<P, Long, SelectCountQueryBuilder<P>> {
+public class CountQueryBuilder<P extends BasicJpa> extends BasicListQueryBuilder<P, Long, CountQueryBuilder<P>> {
 
-	SelectCountQueryBuilder(final EntityManagerFactory emf, final JpqlDao<P> dao) {
+	CountQueryBuilder(final EntityManagerFactory emf, final JpqlDao<P> dao) {
 		super(emf, dao, Long.class);
 	}
 

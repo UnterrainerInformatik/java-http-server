@@ -11,8 +11,6 @@ interface QueryInterface<P extends BasicJpa, T> {
 
 	BasicJpqlDao<P> getDao();
 
-	SelectQuery<P, T> build();
-
 	TypedQuery<T> getTypedQuery(final EntityManager em);
 
 	javax.persistence.Query getCountQuery(final EntityManager em);

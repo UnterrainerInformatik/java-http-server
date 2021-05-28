@@ -4,7 +4,7 @@ import javax.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
 
-public class JpqlAsyncDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
+public class AsyncJpqlDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 
 	/**
 	 * Generates a DAO that lets you build and execute queries.
@@ -12,7 +12,7 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 * @param emf  the {@link EntityManagerFactory} to use
 	 * @param type the return-type of the query (the underlying JPA)
 	 */
-	public JpqlAsyncDao(final EntityManagerFactory emf, final Class<P> type) {
+	public AsyncJpqlDao(final EntityManagerFactory emf, final Class<P> type) {
 		super(emf, type);
 	}
 
@@ -22,8 +22,8 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 *
 	 * @return a query-builder
 	 */
-	public SelectAsyncQueryBuilder<P, P> select() {
-		return new SelectAsyncQueryBuilder<>(emf, this, type);
+	public AsyncListQueryBuilder<P, P> select() {
+		return new AsyncListQueryBuilder<>(emf, this, type);
 	}
 
 	/**
@@ -34,8 +34,8 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 * @param resultType the type the result will be
 	 * @return a query-builder
 	 */
-	public <T> SelectAsyncQueryBuilder<P, T> select(final Class<T> resultType) {
-		return new SelectAsyncQueryBuilder<>(emf, this, resultType);
+	public <T> AsyncListQueryBuilder<P, T> select(final Class<T> resultType) {
+		return new AsyncListQueryBuilder<>(emf, this, resultType);
 	}
 
 	/**
@@ -49,8 +49,8 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 * @param resultType   the type the result will be
 	 * @return a query-builder
 	 */
-	public <T> SelectAsyncQueryBuilder<P, T> select(final String selectClause, final Class<T> resultType) {
-		SelectAsyncQueryBuilder<P, T> b = new SelectAsyncQueryBuilder<>(emf, this, resultType);
+	public <T> AsyncListQueryBuilder<P, T> select(final String selectClause, final Class<T> resultType) {
+		AsyncListQueryBuilder<P, T> b = new AsyncListQueryBuilder<>(emf, this, resultType);
 		b.setSelect(selectClause);
 		return b;
 	}
@@ -64,9 +64,19 @@ public class JpqlAsyncDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 *                     a "SELECT o")
 	 * @return a query-builder
 	 */
-	public <T> SelectAsyncQueryBuilder<P, P> select(final String selectClause) {
-		SelectAsyncQueryBuilder<P, P> b = new SelectAsyncQueryBuilder<>(emf, this, type);
+	public AsyncListQueryBuilder<P, P> select(final String selectClause) {
+		AsyncListQueryBuilder<P, P> b = new AsyncListQueryBuilder<>(emf, this, type);
 		b.setSelect(selectClause);
 		return b;
+	}
+
+	/**
+	 * Get an element by ID.
+	 *
+	 * @param id the ID to fetch.
+	 * @return the element with the given ID or null, if there was no such thing
+	 */
+	public AsyncSingleQueryBuilder<P, P> select(final Long id) {
+		return new AsyncSingleQueryBuilder<>(this, id);
 	}
 }
