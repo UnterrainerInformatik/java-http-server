@@ -6,16 +6,16 @@ import javax.persistence.TypedQuery;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
-public class QueryBuilder<P extends BasicJpa, T> extends BasicQueryBuilder<P, T, QueryBuilder<P, T>>
+public class SelectQueryBuilder<P extends BasicJpa, T> extends BasicSelectQueryBuilder<P, T, SelectQueryBuilder<P, T>>
 		implements QueryInterface<P, T> {
 
-	QueryBuilder(final EntityManagerFactory emf, final JpqlDao<P> dao, final Class<T> resultType) {
+	SelectQueryBuilder(final EntityManagerFactory emf, final JpqlDao<P> dao, final Class<T> resultType) {
 		super(emf, dao, resultType);
 	}
 
 	@Override
-	public Query<P, T> build() {
-		return new Query<>(emf, this);
+	public SelectQuery<P, T> build() {
+		return new SelectQuery<>(emf, this);
 	}
 
 	@Override

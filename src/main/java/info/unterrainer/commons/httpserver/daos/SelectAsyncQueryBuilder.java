@@ -11,18 +11,18 @@ import javax.persistence.TypedQuery;
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
 
-public class QueryAsyncBuilder<P extends BasicAsyncJpa, T> extends BasicQueryBuilder<P, T, QueryAsyncBuilder<P, T>>
+public class SelectAsyncQueryBuilder<P extends BasicAsyncJpa, T> extends BasicSelectQueryBuilder<P, T, SelectAsyncQueryBuilder<P, T>>
 		implements QueryInterface<P, T> {
 
 	private Set<AsyncState> asyncStates = new HashSet<>();
 
-	QueryAsyncBuilder(final EntityManagerFactory emf, final JpqlAsyncDao<P> dao, final Class<T> resultType) {
+	SelectAsyncQueryBuilder(final EntityManagerFactory emf, final JpqlAsyncDao<P> dao, final Class<T> resultType) {
 		super(emf, dao, resultType);
 	}
 
 	@Override
-	public Query<P, T> build() {
-		return new Query<>(emf, this);
+	public SelectQuery<P, T> build() {
+		return new SelectQuery<>(emf, this);
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class QueryAsyncBuilder<P extends BasicAsyncJpa, T> extends BasicQueryBui
 	 * @param asyncStates a single or number of AsyncState values
 	 * @return an instance of this builder to provide a fluent interface
 	 */
-	public QueryAsyncBuilder<P, T> asyncStateOf(final AsyncState... asyncStates) {
+	public SelectAsyncQueryBuilder<P, T> asyncStateOf(final AsyncState... asyncStates) {
 		this.asyncStates.addAll(Arrays.asList(asyncStates));
 		return this;
 	}

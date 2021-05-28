@@ -11,7 +11,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilder<P, T, R>> {
+public class BasicSelectQueryBuilder<P extends BasicJpa, T, R extends BasicSelectQueryBuilder<P, T, R>> {
 
 	protected final EntityManagerFactory emf;
 	protected final BasicJpqlDao<P> dao;
@@ -41,22 +41,10 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 		return (R) this;
 	}
 
-	/**
-	 * Sets a custom select-clause.
-	 * <p>
-	 * Default is "o"<br>
-	 * To reset it to default, set it to null.<br>
-	 * To completely delete it, set it to an empty string.
-	 *
-	 * @param selectClause the new clause
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R select(final String selectClause) {
+	void setSelect(final String selectClause) {
 		this.selectClause = selectClause;
 		if (this.selectClause == null || this.selectClause.isBlank())
 			this.selectClause = "o";
-		return (R) this;
 	}
 
 	/**

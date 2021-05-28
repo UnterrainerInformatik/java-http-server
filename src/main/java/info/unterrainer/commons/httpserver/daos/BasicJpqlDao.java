@@ -262,7 +262,7 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		return q;
 	}
 
-	private boolean isAllowed(final info.unterrainer.commons.httpserver.daos.QueryBuilder query,
+	private boolean isAllowed(final info.unterrainer.commons.httpserver.daos.SelectQueryBuilder query,
 			final EntityManager em) {
 		String tenantReferenceField = "testId";
 		String tenantIdField = "tenantId";
