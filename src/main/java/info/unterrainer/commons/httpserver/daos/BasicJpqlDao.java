@@ -103,13 +103,29 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		return Transactions.withNewTransactionReturning(emf, em -> upsert(em, query, entity));
 	}
 
-	private P getFirst(final EntityManager em, final TypedQuery<P> query) {
-		List<P> r = getList(em, query, 0, 1);
+	private <T> T getFirst(final EntityManager em, final TypedQuery<T> query) {
+		List<T> r = getList(em, query, 0, 1);
 		if (r.size() == 1) {
-			P jpa = r.get(0);
+			T jpa = r.get(0);
 			return jpa;
 		}
 		return null;
+	}
+
+	public <T> UpsertResult<P> _upsert(final EntityManager em, final TypedQuery<T> query, final P entity) {
+		boolean wasInserted = false;
+		boolean wasUpdated = false;
+		T e = getFirst(em, query);
+		if (e == null) {
+			e = create(em, entity);
+			wasInserted = true;
+		} else {
+			entity.setId(e.getId());
+			entity.setCreatedOn(e.getCreatedOn());
+			e = update(em, entity);
+			wasUpdated = true;
+		}
+		return UpsertResult.<P>builder().wasInserted(wasInserted).wasUpdated(wasUpdated).jpa(e).build();
 	}
 
 	@Override

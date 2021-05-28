@@ -132,4 +132,8 @@ public class ListQuery<P extends BasicJpa, T> {
 		Collections.reverse(l);
 		return l;
 	}
+
+	public UpsertResult<P> upsert(final P entity) {
+		return withEntityManager(em -> builder.getDao()._upsert(em, builder.getTypedQuery(em), entity));
+	}
 }
