@@ -13,5 +13,7 @@ interface QueryInterface<P extends BasicJpa, T> {
 
 	TypedQuery<T> getTypedQuery(final EntityManager em);
 
+	TypedQuery<T> getDeleteQuery(final EntityManager em);
+
 	javax.persistence.Query getCountQuery(final EntityManager em);
 }

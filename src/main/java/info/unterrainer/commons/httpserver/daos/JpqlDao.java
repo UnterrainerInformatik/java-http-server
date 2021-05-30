@@ -23,8 +23,8 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> implements Basi
 	 *
 	 * @return a query-builder
 	 */
-	public ListQueryBuilder<P, P> select() {
-		return new ListQueryBuilder<>(emf, this, type);
+	public JpaListQueryBuilder<P> select() {
+		return new JpaListQueryBuilder<>(emf, this, type);
 	}
 
 	/**
@@ -65,8 +65,8 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> implements Basi
 	 *                     a "SELECT o")
 	 * @return a query-builder
 	 */
-	public ListQueryBuilder<P, P> select(final String selectClause) {
-		ListQueryBuilder<P, P> b = new ListQueryBuilder<>(emf, this, type);
+	public JpaListQueryBuilder<P> select(final String selectClause) {
+		JpaListQueryBuilder<P> b = new JpaListQueryBuilder<>(emf, this, type);
 		b.setSelect(selectClause);
 		return b;
 	}
@@ -79,5 +79,25 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> implements Basi
 	 */
 	public SingleQueryBuilder<P, P> select(final Long id) {
 		return new SingleQueryBuilder<>(this, id);
+	}
+
+	/**
+	 * Insert the given entity.
+	 *
+	 * @param entity to insert.
+	 * @return the entity after inserting
+	 */
+	public InsertQueryBuilder<P> insert(final P entity) {
+		return new InsertQueryBuilder<>(this, entity);
+	}
+
+	/**
+	 * Update the given entity.
+	 *
+	 * @param entity to update.
+	 * @return the entity after updating
+	 */
+	public UpdateQueryBuilder<P> update(final P entity) {
+		return new UpdateQueryBuilder<>(this, entity);
 	}
 }

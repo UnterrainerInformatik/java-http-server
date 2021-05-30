@@ -79,4 +79,24 @@ public class AsyncJpqlDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	public SingleQueryBuilder<P, P> select(final Long id) {
 		return new SingleQueryBuilder<>(this, id);
 	}
+
+	/**
+	 * Insert the given entity.
+	 *
+	 * @param entity to insert.
+	 * @return the entity after inserting
+	 */
+	public InsertQueryBuilder<P> insert(final P entity) {
+		return new InsertQueryBuilder<>(this, entity);
+	}
+
+	/**
+	 * Update the given entity.
+	 *
+	 * @param entity to update.
+	 * @return the entity after updating
+	 */
+	public UpdateQueryBuilder<P> update(final P entity) {
+		return new UpdateQueryBuilder<>(this, entity);
+	}
 }

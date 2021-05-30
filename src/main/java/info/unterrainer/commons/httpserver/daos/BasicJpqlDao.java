@@ -28,13 +28,11 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 	protected final EntityManagerFactory emf;
 	protected final Class<P> type;
 
-	@Override
-	public P _getById(final Long id) {
+	P _getById(final Long id) {
 		return Transactions.withNewTransactionReturning(emf, em -> _getById(em, id));
 	}
 
-	@Override
-	public ListJson<P> getList(final EntityManager em, final long offset, final long size, final String selectClause,
+	ListJson<P> getList(final EntityManager em, final long offset, final long size, final String selectClause,
 			final String joinClause, final String whereClause, final ParamMap params, final String orderByClause) {
 		ListJson<P> r = new ListJson<>();
 		r.setEntries(
@@ -47,13 +45,11 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		return r;
 	}
 
-	@Override
-	public P create(final P entity) {
+	P create(final P entity) {
 		return Transactions.withNewTransactionReturning(emf, em -> create(em, entity));
 	}
 
-	@Override
-	public P create(final EntityManager em, final P entity) {
+	P create(final EntityManager em, final P entity) {
 		LocalDateTime time = DateUtils.nowUtc();
 		entity.setCreatedOn(time);
 		entity.setEditedOn(time);
@@ -61,19 +57,17 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		return entity;
 	}
 
-	@Override
-	public P update(final P entity) {
-		return Transactions.withNewTransactionReturning(emf, em -> update(em, entity));
+	P _update(final P entity) {
+		return Transactions.withNewTransactionReturning(emf, em -> _update(em, entity));
 	}
 
-	@Override
-	public P update(final EntityManager em, final P entity) {
+	P _update(final EntityManager em, final P entity) {
 		LocalDateTime time = DateUtils.nowUtc();
 		entity.setEditedOn(time);
 		return em.merge(entity);
 	}
 
-	public <T> List<T> getList(final EntityManager em, final TypedQuery<T> query, final long offset, final long size) {
+	<T> List<T> getList(final EntityManager em, final TypedQuery<T> query, final long offset, final long size) {
 		int s = Integer.MAX_VALUE;
 		if (size < s)
 			s = (int) size;
@@ -85,24 +79,6 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		return query.getResultList();
 	}
 
-	@Override
-	public UpsertResult<P> upsert(final String whereClause, final ParamMap params, final P entity) {
-		return Transactions.withNewTransactionReturning(emf, em -> upsert(em, getQuery(em, "o", null, whereClause,
-				params == null ? null : params.getParameters(), type, null, false, null), entity));
-	}
-
-	@Override
-	public UpsertResult<P> upsert(final EntityManager em, final String whereClause, final ParamMap params,
-			final P entity) {
-		return upsert(em, getQuery(em, "o", null, whereClause, params == null ? null : params.getParameters(), type,
-				null, false, null), entity);
-	}
-
-	@Override
-	public UpsertResult<P> upsert(final TypedQuery<P> query, final P entity) {
-		return Transactions.withNewTransactionReturning(emf, em -> upsert(em, query, entity));
-	}
-
 	private <T> T getFirst(final EntityManager em, final TypedQuery<T> query) {
 		List<T> r = getList(em, query, 0, 1);
 		if (r.size() == 1) {
@@ -112,24 +88,7 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		return null;
 	}
 
-	public <T> UpsertResult<P> _upsert(final EntityManager em, final TypedQuery<T> query, final P entity) {
-		boolean wasInserted = false;
-		boolean wasUpdated = false;
-		T e = getFirst(em, query);
-		if (e == null) {
-			e = create(em, entity);
-			wasInserted = true;
-		} else {
-			entity.setId(e.getId());
-			entity.setCreatedOn(e.getCreatedOn());
-			e = update(em, entity);
-			wasUpdated = true;
-		}
-		return UpsertResult.<P>builder().wasInserted(wasInserted).wasUpdated(wasUpdated).jpa(e).build();
-	}
-
-	@Override
-	public UpsertResult<P> upsert(final EntityManager em, final TypedQuery<P> query, final P entity) {
+	UpsertResult<P> _upsert(final EntityManager em, final TypedQuery<P> query, final P entity) {
 		boolean wasInserted = false;
 		boolean wasUpdated = false;
 		P e = getFirst(em, query);
@@ -139,28 +98,25 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		} else {
 			entity.setId(e.getId());
 			entity.setCreatedOn(e.getCreatedOn());
-			e = update(em, entity);
+			e = _update(em, entity);
 			wasUpdated = true;
 		}
 		return UpsertResult.<P>builder().wasInserted(wasInserted).wasUpdated(wasUpdated).jpa(e).build();
 	}
 
-	@Override
-	public void _delete(final Long id) {
+	void _delete(final Long id) {
 		Transactions.withNewTransaction(emf, em -> {
 			_delete(em, id);
 		});
 	}
 
-	@Override
-	public void _delete(final EntityManager em, final Long id) {
+	void _delete(final EntityManager em, final Long id) {
 		em.createQuery(String.format("DELETE FROM %s AS o WHERE o.id = :id", type.getSimpleName()))
 				.setParameter("id", id)
 				.executeUpdate();
 	}
 
-	@Override
-	public P _getById(final EntityManager em, final Long id) {
+	P _getById(final EntityManager em, final Long id) {
 		try {
 			return getQuery(em, "o", null, "o.id = :id", Map.of("id", id), type, null, false, null).getSingleResult();
 		} catch (NoResultException e) {
@@ -272,6 +228,33 @@ public class BasicJpqlDao<P extends BasicJpa> implements BasicDao<P, EntityManag
 		if (lockPessimistic)
 			q.setLockMode(LockModeType.PESSIMISTIC_WRITE);
 		q = addAsyncStatesParamsToQuery(asyncStates, q);
+		if (params != null)
+			for (Entry<String, Object> e : params.entrySet())
+				q.setParameter(e.getKey(), e.getValue());
+		return q;
+	}
+
+	<T> TypedQuery<T> getDeleteQuery(final EntityManager em, final String joinClause, final String whereClause,
+			final Map<String, Object> params) {
+		String query = "DELETE FROM  %s AS o";
+
+		if (joinClause != null && !joinClause.isBlank())
+			query += " " + joinClause;
+
+		query += buildWhereClause(whereClause, null);
+
+		query = String.format(query, this.type.getSimpleName());
+
+		String msg = query;
+		if (params != null)
+			for (Entry<String, Object> p : params.entrySet())
+				msg += "\\n  " + p.getKey() + ": " + p.getValue();
+		log.debug(msg);
+
+		@SuppressWarnings("unchecked")
+		Class<T> t = (Class<T>) this.type;
+
+		TypedQuery<T> q = em.createQuery(query, t);
 		if (params != null)
 			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
