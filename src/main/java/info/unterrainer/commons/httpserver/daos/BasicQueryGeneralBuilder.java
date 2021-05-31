@@ -51,40 +51,6 @@ public class BasicQueryGeneralBuilder<P extends BasicJpa, T, R extends BasicQuer
 	}
 
 	/**
-	 * Adds an 'AND' part to the where-clause.
-	 * <p>
-	 * For example: .and("o.loggedIn = :loggedIn");
-	 *
-	 * @param andWhereClause the clause to add
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R and(final String andWhereClause) {
-		if (whereClause == null || whereClause.isBlank())
-			whereClause = andWhereClause;
-		else
-			whereClause += " AND " + andWhereClause;
-		return (R) this;
-	}
-
-	/**
-	 * Adds an 'OR' part to the where-clause.
-	 * <p>
-	 * For example: .or("o.loggedIn = :loggedIn");
-	 *
-	 * @param orWhereClause the clause to add
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R or(final String orWhereClause) {
-		if (whereClause == null || whereClause.isBlank())
-			whereClause = orWhereClause;
-		else
-			whereClause += " OR " + orWhereClause;
-		return (R) this;
-	}
-
-	/**
 	 * Clears the parameters and resets them to default.
 	 * <p>
 	 * Default is an empty map.

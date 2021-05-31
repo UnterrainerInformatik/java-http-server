@@ -29,10 +29,6 @@ configuration = MyProgramConfiguration.read();
 EntityManagerFactory emf = 
     dbUtils.createAutoclosingEntityManagerFactory(MyProgram.class, "my-server");
 
-// Create a JpqlTransactionManager which will be used to maintain transactions
-// throughout the server.
-JpqlTransactionManager jpqlTransactionManager = new JpqlTransactionManager(emf);
-
 // Create the server.
 HttpServer server = HttpServer.builder()
     .applicationName("my-rest-server")
@@ -115,9 +111,8 @@ And lastly, update the server-code so that we expose the endpoint.
 // Last line here is the creation of the server ending with ".build()"
 
 // Register a custom handler for the resource 'user'.
-server.handlerGroupFor(UserJpa.class, UserJson.class, jpqlTransactionManager)
+server.handlerGroupFor(UserJpa.class, UserJson.class, new JpqlDao<UserJpa>(emf, UserJpa.class))
     .path("users")
-    .dao(new JpqlDao<UserJpa>(emf, UserJpa.class))
     .endpoints(Endpoint.ALL)
     .addRoleFor(Endpoint.ALL, RoleBuilder.open())
     .getListInterceptor()
@@ -182,9 +177,8 @@ If you have long-running operations, you better choose an async-extension point.
 #### Example
 
 ```java
-server.handlerGroupFor(SomeSingletonJpa.class, SomeSingletonJson.class, jpqlTransactionManager)
+server.handlerGroupFor(SomeSingletonJpa.class, SomeSingletonJson.class, new JpqlAsyncDao<SomeSingletonJpa>(emf, SomeSingletonJpa.class))
     .path("cmd/somesingleton")
-    .dao(new JpqlAsyncDao<SomeSingletonJpa>(emf, SomeSingletonJpa.class))
     .endpoints(Endpoint.ALL)
     .addRoleFor(Endpoint.ALL, RoleBuilder.open())
     .extension()
@@ -212,9 +206,8 @@ Run in their own context, detached from the request-response-process and therefo
 #### Example
 
 ```java
-server.handlerGroupFor(SubscriptionJpa.class, SubscriptionJson.class, jpqlTransactionManager)
+server.handlerGroupFor(SubscriptionJpa.class, SubscriptionJson.class, subscriptionDao)
     .path("/subscriptions")
-    .dao(subscriptionDao)
     .endpoints(Endpoint.ALL)
     .addRoleFor(Endpoint.ALL, RoleBuilder.open())
     .extension()
@@ -253,9 +246,8 @@ Be cautious when using those and be sure to have the right indexes on your datab
 ##### Example 1
 
 ```java
-server.handlerGroupFor(SubscriptionJpa.class, SubscriptionJson.class, jpqlTransactionManager)
+server.handlerGroupFor(SubscriptionJpa.class, SubscriptionJson.class, subscriptionDao)
     .path("/subscriptions")
-    .dao(subscriptionDao)
     .endpoints(Endpoint.ALL)
     .addRoleFor(Endpoint.ALL, RoleBuilder.open())
     .getListInterceptor()
@@ -353,9 +345,8 @@ public class InterceptorData {
 ##### Example
 
 ```java
-server.handlerGroupFor(SubscriptionJpa.class, SubscriptionJson.class, jpqlTransactionManager)
+server.handlerGroupFor(SubscriptionJpa.class, SubscriptionJson.class, subscriptionDao)
     .path("/subscriptions")
-    .dao(subscriptionDao)
     .endpoints(Endpoint.ALL)
     .addRoleFor(Endpoint.ALL, RoleBuilder.open())
     .getListInterceptor(subscriptionInterceptor::select)
@@ -375,5 +366,58 @@ public InterceptorData select(final Context ctx, final HandlerUtils hu) {
     ...
 ```
 
+#### Business-Logic SQL Queries
 
+In order to keep SQL-queries somewhat consistent and because of my deep aversion of Criteria queries, I've used the following 'query language' you can get calling every `JpqlDao<JpaType>`.
+
+##### Examples
+
+```java
+// Insert...
+userDao.insert(entity).execute();
+userDao.insert(entity).entityManager(em).execute();
+
+// Full-Update...
+userDao.update(entity).execute();
+userDao.update(entity).entityManager(em).execute();
+
+// Single-Result Query...
+SingleQueryBuilder<NexusUserJpa, NexusUserJpa> single = userDao.select(32L);
+single.delete();
+NexusUserJpa en = single.get();
+
+// List-Result Query...
+JpaListQuery<NexusUserJpa> query;
+query = userDao.select().build();
+query = userDao.select().entityManager(em).build();
+query = userDao.select().where("o.id = :id").addParam("id", 32L).build();
+query = userDao.select()
+    .where("o.priority > :priority AND o.enabled = :enabled AND userId IS NOT NULL")
+    .addParam("priority", 10L)
+    .addParam("enabled", true)
+    .desc("o.priority")
+    .lockPessimistic()
+    .build();
+query = userDao.select("o")
+    .join("LEFT JOIN GroupJpa g ON g.id = o.groupId")
+    .where("g.enabled = :enabled")
+    .addParam("enabled", true)
+    .build();
+
+// Delete all list-results.
+query.delete();
+
+// Upsert first element of list-results.
+query.upsert(entity);
+
+// Various ways to get some or all entities from the list-results.
+NexusUserJpa a = query.getFirst();
+List<NexusUserJpa> b = query.getList();
+List<NexusUserJpa> c = query.getList(0, 10);
+ListJson<NexusUserJpa> d = query.getListJson();
+ListJson<NexusUserJpa> e = query.getListJson(10, 10);
+List<NexusUserJpa> f = query.getListReversed();
+List<NexusUserJpa> g = query.getN(22);
+NexusUserJpa h = query.getSingle();
+```
 
