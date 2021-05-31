@@ -6,8 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-import info.unterrainer.commons.httpserver.daos.BasicDao;
-import info.unterrainer.commons.httpserver.daos.DaoTransactionManager;
+import info.unterrainer.commons.httpserver.daos.CoreDao;
 import info.unterrainer.commons.httpserver.daos.ParamMap;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.interceptors.InterceptorData;
@@ -28,10 +27,9 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson, E> {
 
 	private final HttpServer server;
-	private BasicDao<P, E> dao;
 	private final Class<P> jpaType;
 	private final Class<J> jsonType;
-	private final DaoTransactionManager<E> daoTransactionManager;
+	private final CoreDao<P, E> dao;
 	private JsonMapper jsonMapper;
 	private MapperFactory orikaFactory;
 	private String path;
@@ -42,7 +40,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	private String tenantIdRowName;
 	private String tenantRowName;
 	private String tenantFieldRowName;
-	private BasicDao<? extends BasicJpa, E> tenantDao;
+	private CoreDao<? extends BasicJpa, E> tenantDao;
 	private Class<? extends BasicJpa> tenantJpaType;
 
 	HandlerExtensions<P, J, E> extensions = new HandlerExtensions<>();
@@ -56,8 +54,8 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 		if (executorService == null)
 			executorService = server.executorService;
 		GenericHandlerGroup<P, J, E> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType,
-				daoTransactionManager, jsonMapper, orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors,
-				extensions, accessRoles, executorService, tenantIdRowName, tenantDao, tenantJpaType, tenantFieldRowName,
+				jsonMapper, orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors, extensions,
+				accessRoles, executorService, tenantIdRowName, tenantDao, tenantJpaType, tenantFieldRowName,
 				tenantRowName);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
@@ -78,17 +76,12 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	}
 
 	public <TP extends BasicJpa> GenericHandlerGroupBuilder<P, J, E> isMultiTenantEnabledByTable(
-			final BasicDao<TP, E> tenantDao, final Class<TP> tenantJpaType, final String fieldRowName,
+			final CoreDao<TP, E> tenantDao, final Class<TP> tenantJpaType, final String fieldRowName,
 			final String tenantRowName) {
 		this.tenantDao = tenantDao;
 		this.tenantJpaType = tenantJpaType;
 		this.tenantFieldRowName = fieldRowName;
 		this.tenantRowName = tenantRowName;
-		return this;
-	}
-
-	public GenericHandlerGroupBuilder<P, J, E> dao(final BasicDao<P, E> dao) {
-		this.dao = dao;
 		return this;
 	}
 
