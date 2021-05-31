@@ -18,7 +18,7 @@ public class JpaListQuery<P extends BasicJpa> extends ListQuery<P, P> {
 	 * you've passed by specifying an {@link EntityManager} in the query.
 	 *
 	 * @param entity the entity to update with, or create.
-	 * @return an {@link UpdateResult} that will tell you if there was an insert or
+	 * @return an {@link UpsertResult} that will tell you if there was an insert or
 	 *         update, and if it was an update, what the old values were
 	 */
 	public UpsertResult<P> upsert(final P entity) {
