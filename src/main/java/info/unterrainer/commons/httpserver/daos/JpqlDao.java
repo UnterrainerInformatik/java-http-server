@@ -1,11 +1,10 @@
 package info.unterrainer.commons.httpserver.daos;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
-public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> implements BasicDao<P, EntityManager> {
+public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> {
 
 	/**
 	 * Generates a DAO that lets you build and execute queries.

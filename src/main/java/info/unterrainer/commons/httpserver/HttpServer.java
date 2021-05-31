@@ -16,7 +16,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 
 import info.unterrainer.commons.httpserver.accessmanager.HttpAccessManager;
-import info.unterrainer.commons.httpserver.daos.DaoTransactionManager;
+import info.unterrainer.commons.httpserver.daos.CoreDaoProvider;
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.ResponseType;
 import info.unterrainer.commons.httpserver.exceptions.HttpException;
@@ -98,8 +98,8 @@ public class HttpServer {
 	}
 
 	public <P extends BasicJpa, J extends BasicJson, E> GenericHandlerGroupBuilder<P, J, E> handlerGroupFor(
-			final Class<P> jpaType, final Class<J> jsonType, final DaoTransactionManager<E> daoTransactionManager) {
-		return new GenericHandlerGroupBuilder<>(this, jpaType, jsonType, daoTransactionManager);
+			final Class<P> jpaType, final Class<J> jsonType, final CoreDaoProvider<P, E> coreDaoProvider) {
+		return new GenericHandlerGroupBuilder<>(this, jpaType, jsonType, coreDaoProvider.getCoreDao());
 	}
 
 	private void create() {

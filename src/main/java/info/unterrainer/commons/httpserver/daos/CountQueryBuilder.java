@@ -13,9 +13,11 @@ public class CountQueryBuilder<P extends BasicJpa> extends BasicListQueryBuilder
 
 	public Long build() {
 		if (entityManager != null)
-			return (Long) dao.getCountQuery(entityManager, selectClause, joinClause, whereClause, parameters, null)
+			return (Long) dao.coreDao
+					.getCountQuery(entityManager, selectClause, joinClause, whereClause, parameters, null)
 					.getSingleResult();
 		return (Long) Transactions.withNewTransactionReturning(emf,
-				em -> dao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null).getSingleResult());
+				em -> dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null)
+						.getSingleResult());
 	}
 }

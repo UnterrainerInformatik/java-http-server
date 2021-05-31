@@ -31,7 +31,7 @@ public class SingleQueryBuilder<P extends BasicJpa, T>
 	 */
 	public P get() {
 		return withEntityManager(
-				em -> dao.getQuery(em, "o", null, "o.id = :id", Map.of("id", id), dao.type, null, false, null)
+				em -> dao.coreDao.getQuery(em, "o", null, "o.id = :id", Map.of("id", id), dao.type, null, false, null)
 						.getSingleResult());
 	}
 

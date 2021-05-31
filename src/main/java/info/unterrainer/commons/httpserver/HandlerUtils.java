@@ -4,7 +4,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import info.unterrainer.commons.httpserver.daos.BasicDao;
+import info.unterrainer.commons.httpserver.daos.CoreDao;
+import info.unterrainer.commons.httpserver.daos.DaoTransaction;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
@@ -19,20 +20,25 @@ public class HandlerUtils {
 		return convertToLong(s);
 	}
 
-	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final E entityManager, final BasicDao<P, E> dao) {
+	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final E manager, final CoreDao<P, E> dao) {
 		Long id = checkAndGetId(ctx);
-		P jpa = dao._getById(entityManager, id);
+		P jpa = dao.getById(manager, id);
 		if (jpa == null)
 			throw new NotFoundException();
 		return jpa;
 	}
 
-	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final BasicDao<P, E> dao) {
+	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final CoreDao<P, E> dao) {
 		Long id = checkAndGetId(ctx);
-		P jpa = dao._getById(id);
-		if (jpa == null)
-			throw new NotFoundException();
-		return jpa;
+		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction();
+		try {
+			P jpa = dao.getById(transaction.getManager(), id);
+			if (jpa == null)
+				throw new NotFoundException();
+			return jpa;
+		} finally {
+			transaction.end();
+		}
 	}
 
 	public <J> void setPaginationParamsFor(final ListJson<J> jList, final long offset, final long pageSize,
