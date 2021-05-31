@@ -27,4 +27,58 @@
 		</createTable>
 	</changeSet>
 
+	<changeSet author="GUN" id="1.1">
+		<createTable tableName="tenant"
+			remarks="Contains all tenants.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true"
+					primaryKeyName="pk_tenant" unique="true"
+					uniqueConstraintName="uc_tenant_id" />
+			</column>
+
+			<column name="name" type="varchar(300)">
+				<constraints nullable="true" />
+			</column>
+
+			<column name="createdOn" type="TIMESTAMP(6)">
+				<constraints nullable="true" />
+			</column>
+			<column name="editedOn" type="TIMESTAMP(6)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="GUN" id="1.2">
+		<createTable tableName="test_permission"
+			remarks="Contains tenant-ids for test-entries.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true"
+					primaryKeyName="pk_test_permission" unique="true"
+					uniqueConstraintName="uc_test_permission_id" />
+			</column>
+
+			<column name="testId" type="BIGINT">
+				<constraints nullable="true" />
+			</column>
+
+			<column name="tenantId" type="BIGINT">
+				<constraints nullable="true" />
+			</column>
+			
+			<column name="createdOn" type="TIMESTAMP(6)">
+				<constraints nullable="true" />
+			</column>
+			<column name="editedOn" type="TIMESTAMP(6)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+		
+		<addForeignKeyConstraint
+			baseColumnNames="testId" baseTableName="test_permission"
+			constraintName="fk_test_permission_test_id"
+			referencedColumnNames="id" referencedTableName="test"
+			onDelete="CASCADE" onUpdate="RESTRICT" />
+	</changeSet>
+	
 </databaseChangeLog>

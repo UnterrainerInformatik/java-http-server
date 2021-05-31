@@ -1,130 +1,46 @@
 package info.unterrainer.commons.httpserver.daos;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilder<P, T, R>> {
+public class BasicListQueryBuilder<P extends BasicJpa, T, R extends BasicListQueryBuilder<P, T, R>>
+		extends BasicQueryGeneralBuilder<P, T, R> {
 
 	protected final EntityManagerFactory emf;
+	@Getter
 	protected final BasicJpqlDao<P> dao;
 	protected final Class<T> resultType;
 
-	protected EntityManager entityManager;
 	protected String selectClause = "o";
-	protected String joinClause;
-	protected String whereClause;
 	protected String orderByClause;
 	protected boolean lockPessimistic = false;
 
-	protected Map<String, Object> parameters = new HashMap<>();
-
-	/**
-	 * Sets a custom {@link EntityManager}.
-	 * <p>
-	 * Default is to create one when creating the query.<br>
-	 * To reset it to default, set it to null.
-	 *
-	 * @param em an {@link EntityManager}
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R entityManager(final EntityManager em) {
-		entityManager = em;
-		return (R) this;
-	}
-
-	/**
-	 * Sets a custom select-clause.
-	 * <p>
-	 * Default is "o"<br>
-	 * To reset it to default, set it to null.<br>
-	 * To completely delete it, set it to an empty string.
-	 *
-	 * @param selectClause the new clause
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R select(final String selectClause) {
+	void setSelect(final String selectClause) {
 		this.selectClause = selectClause;
 		if (this.selectClause == null || this.selectClause.isBlank())
 			this.selectClause = "o";
-		return (R) this;
 	}
 
-	/**
-	 * Sets a custom join-clause.
-	 * <p>
-	 * Default is ""<br>
-	 * To reset it to default, set it to null or directly to an empty string.
-	 *
-	 * @param joinClause the new clause
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R join(final String joinClause) {
-		this.joinClause = joinClause;
-		if (this.joinClause == null)
-			this.joinClause = "";
-		return (R) this;
+	public TypedQuery<T> getTypedQuery(final EntityManager em) {
+		return dao.coreDao.getQuery(em, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
+				lockPessimistic, null);
 	}
 
-	/**
-	 * Sets a custom where-clause.
-	 * <p>
-	 * Default is ""<br>
-	 * To reset it to default, set it to null or directly to an empty string.
-	 *
-	 * @param whereClause the new clause
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R where(final String whereClause) {
-		this.whereClause = whereClause;
-		if (this.whereClause == null)
-			this.whereClause = "";
-		return (R) this;
+	public TypedQuery<T> getDeleteQuery(final EntityManager em) {
+		return dao.coreDao.getDeleteQuery(em, joinClause, whereClause, parameters);
 	}
 
-	/**
-	 * Adds an 'AND' part to the where-clause.
-	 * <p>
-	 * For example: .and("o.loggedIn = :loggedIn");
-	 *
-	 * @param andWhereClause the clause to add
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R and(final String andWhereClause) {
-		if (whereClause == null || whereClause.isBlank())
-			whereClause = andWhereClause;
-		else
-			whereClause += " AND " + andWhereClause;
-		return (R) this;
-	}
-
-	/**
-	 * Adds an 'OR' part to the where-clause.
-	 * <p>
-	 * For example: .or("o.loggedIn = :loggedIn");
-	 *
-	 * @param orWhereClause the clause to add
-	 * @return an instance of this builder to provide a fluent interface
-	 */
-	@SuppressWarnings("unchecked")
-	public R or(final String orWhereClause) {
-		if (whereClause == null || whereClause.isBlank())
-			whereClause = orWhereClause;
-		else
-			whereClause += " OR " + orWhereClause;
-		return (R) this;
+	public javax.persistence.Query getCountQuery(final EntityManager em) {
+		return dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null);
 	}
 
 	/**
@@ -154,6 +70,7 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	 *
 	 * @return an instance of this builder to provide a fluent interface
 	 */
+	@Override
 	public R clearParameters() {
 		return parameters(null);
 	}
@@ -167,6 +84,7 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	 * @param params the new {@link ParamMap}
 	 * @return an instance of this builder to provide a fluent interface
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public R parameters(final ParamMap params) {
 		if (params == null)
@@ -184,6 +102,7 @@ public class BasicQueryBuilder<P extends BasicJpa, T, R extends BasicQueryBuilde
 	 * @param paramValue the value of the parameter
 	 * @return an instance of this builder to provide a fluent interface
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public R addParam(final String paramKey, final Object paramValue) {
 		parameters.put(paramKey, paramValue);

@@ -5,7 +5,7 @@ import javax.persistence.EntityManagerFactory;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
-public class CountQueryBuilder<P extends BasicJpa> extends BasicQueryBuilder<P, Long, CountQueryBuilder<P>> {
+public class CountQueryBuilder<P extends BasicJpa> extends BasicListQueryBuilder<P, Long, CountQueryBuilder<P>> {
 
 	CountQueryBuilder(final EntityManagerFactory emf, final JpqlDao<P> dao) {
 		super(emf, dao, Long.class);
@@ -13,9 +13,11 @@ public class CountQueryBuilder<P extends BasicJpa> extends BasicQueryBuilder<P, 
 
 	public Long build() {
 		if (entityManager != null)
-			return (Long) dao.getCountQuery(entityManager, selectClause, joinClause, whereClause, parameters, null)
+			return (Long) dao.coreDao
+					.getCountQuery(entityManager, selectClause, joinClause, whereClause, parameters, null)
 					.getSingleResult();
 		return (Long) Transactions.withNewTransactionReturning(emf,
-				em -> dao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null).getSingleResult());
+				em -> dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null)
+						.getSingleResult());
 	}
 }

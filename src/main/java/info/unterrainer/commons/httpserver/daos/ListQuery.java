@@ -17,12 +17,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class Query<P extends BasicJpa, T> {
+public class ListQuery<P extends BasicJpa, T> {
 
 	protected final EntityManagerFactory emf;
 	protected final QueryInterface<P, T> builder;
 
-	private <V> V withEntityManager(final Function<EntityManager, V> func) {
+	protected <V> V withEntityManager(final Function<EntityManager, V> func) {
 		if (builder.getEntityManager() == null)
 			return Transactions.withNewTransactionReturning(emf, em -> func.apply(em));
 		return func.apply(builder.getEntityManager());
@@ -131,5 +131,19 @@ public class Query<P extends BasicJpa, T> {
 		List<T> l = getList();
 		Collections.reverse(l);
 		return l;
+	}
+
+	/**
+	 * Make a real DELETE-query deleting the selected items from the database.
+	 * <p>
+	 * As this will result in a real SQL delete-query, it doesn't really care about
+	 * your SELECT or ORDER BY clauses as well as your locking (is always a
+	 * write-lock).
+	 */
+	public void delete() {
+		withEntityManager(em -> {
+			builder.getDeleteQuery(em).executeUpdate();
+			return null;
+		});
 	}
 }
