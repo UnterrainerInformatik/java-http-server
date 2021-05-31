@@ -170,18 +170,16 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		return query.getResultList();
 	}
 
-	private boolean isAllowed(final info.unterrainer.commons.httpserver.daos.ListQueryBuilder query,
-			final EntityManager em) {
-		String tenantReferenceField = "testId";
-		String tenantIdField = "tenantId";
-		Long tenantId = 55L;
-		BasicJpa tenantJpa = null;
-		getQuery(em, "o",
-				"RIGHT JOIN " + tenantJpa.getClass().getSimpleName() + " tenantTable on o.id = tenantTable."
-						+ tenantReferenceField,
-				"tenantTable." + tenantReferenceField + " IS NULL OR tenantTable." + tenantIdField + " = :tenantId",
-				null, type, null, false, null);
-		return true;
+	private boolean isAllowed(final EntityManager em, final TenantData tenantData) {
+		TypedQuery<Long> query = getQuery(em, "o.id",
+				"RIGHT JOIN " + tenantData.getJpa().getClass().getSimpleName() + " tenantTable on o.id = tenantTable."
+						+ tenantData.getReferenceField(),
+				"tenantTable." + tenantData.getReferenceField() + " IS NULL OR tenantTable." + tenantData.getIdField()
+						+ " = :tenantId",
+				null, Long.class, null, false, null);
+		query.setMaxResults(1);
+		List<Long> list = query.getResultList();
+		return list != null && list.size() > 0;
 	}
 
 	private boolean isSet(final String str) {

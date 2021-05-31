@@ -22,6 +22,6 @@ public class JpaListQuery<P extends BasicJpa> extends ListQuery<P, P> {
 	 *         update, and if it was an update, what the old values were
 	 */
 	public UpsertResult<P> upsert(final P entity) {
-		return withEntityManager(em -> builder.getDao()._upsert(em, builder.getTypedQuery(em), entity));
+		return withEntityManager(em -> builder.getDao().upsert(em, builder.getTypedQuery(em), entity));
 	}
 }
