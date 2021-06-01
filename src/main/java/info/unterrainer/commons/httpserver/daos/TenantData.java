@@ -10,8 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 public class TenantData {
 
-	private BasicJpa jpa;
+	private Class<? extends BasicJpa> type;
 	private String referenceField;
 	private String idField;
-	private Long id;
 }

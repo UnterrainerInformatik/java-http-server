@@ -15,8 +15,10 @@ public class Attribute {
 	public static final String USER_CLIENT = "user_client";
 	public static final String USER_CLIENT_ROLES = "user_client_roles";
 	public static final String USER_REALM_ROLES = "user_realm_roles";
-	public static final String USER_CLIENT_ATTRIBUTE_TENANT = "user_client_attribute_tenant";
-	public static final String USER_TENANT_SET = "user_tenant_set";
+	public static final String USER_CLIENT_ATTRIBUTE_TENANTS_READ = "user_client_attribute_tenants_read";
+	public static final String USER_CLIENT_ATTRIBUTE_TENANTS_WRITE = "user_client_attribute_tenants_write";
+	public static final String USER_TENANTS_READ_SET = "user_tenant_read_set";
+	public static final String USER_TENANTS_WRITE_SET = "user_tenant_write_set";
 
 	public static final String KEYCLOAK_TOKEN_REJECTION_REASON = "kc_token_rejection_reason";
 }

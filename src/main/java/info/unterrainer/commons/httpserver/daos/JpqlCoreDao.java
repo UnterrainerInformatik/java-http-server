@@ -1,6 +1,7 @@
 package info.unterrainer.commons.httpserver.daos;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,6 +26,8 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 	protected final Class<P> type;
 	@Getter
 	protected JpqlTransactionManager transactionManager;
+	@Getter
+	protected TenantData tenantData;
 
 	public JpqlCoreDao(final EntityManagerFactory emf, final Class<P> type) {
 		super();
@@ -34,8 +37,11 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 	}
 
 	@Override
-	public P create(final EntityManager em, final P entity) {
+	public P create(final EntityManager em, final P entity, final Set<Long> tenantIds) {
 		LocalDateTime time = DateUtils.nowUtc();
+
+		if (hasTenantData())create entries...
+
 		entity.setCreatedOn(time);
 		entity.setEditedOn(time);
 		em.persist(entity);
@@ -43,16 +49,23 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 	}
 
 	@Override
-	public void delete(final EntityManager em, final Long id) {
-		em.createQuery(String.format("DELETE FROM %s AS o WHERE o.id = :id", type.getSimpleName()))
-				.setParameter("id", id)
-				.executeUpdate();
+	public void delete(final EntityManager em, final Long id, final Set<Long> tenantIds) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("id", id);
+		params = addTenantParams(params, tenantIds);
+		Query query = em.createQuery(
+				String.format("DELETE FROM %s AS o " + addTenantJoin(null) + " WHERE " + addTenantWhere("o.id = :id"),
+						type.getSimpleName()));
+		for (Entry<String, Object> entry : params.entrySet())
+			query.setParameter(entry.getKey(), entry.getValue());
+		query.executeUpdate();
 	}
 
 	@Override
-	public P getById(final EntityManager em, final Long id) {
+	public P getById(final EntityManager em, final Long id, final Set<Long> tenantIds) {
 		try {
-			return getQuery(em, "o", null, "o.id = :id", Map.of("id", id), type, null, false, null).getSingleResult();
+			return getQuery(em, "o", null, "o.id = :id", Map.of("id", id), type, null, false, null, tenantIds)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
@@ -60,28 +73,27 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 
 	@Override
 	public ListJson<P> getList(final EntityManager em, final Long offset, final Long size, final String selectClause,
-			final String joinClause, final String whereClause, final ParamMap params, final String orderByClause) {
+			final String joinClause, final String whereClause, final ParamMap params, final String orderByClause,
+			final Set<Long> tenantIds) {
 		ListJson<P> r = new ListJson<>();
-		r.setEntries(
-				getList(em,
-						getQuery(em, selectClause, joinClause, whereClause,
-								params == null ? null : params.getParameters(), type, orderByClause, false, null),
-						offset, size));
+		r.setEntries(getList(em, getQuery(em, selectClause, joinClause, whereClause,
+				params == null ? null : params.getParameters(), type, orderByClause, false, null, tenantIds), offset,
+				size));
 		r.setCount((Long) getCountQuery(em, selectClause, joinClause, whereClause,
-				params == null ? null : params.getParameters(), null).getSingleResult());
+				params == null ? null : params.getParameters(), null, tenantIds).getSingleResult());
 		return r;
 	}
 
 	@Override
-	public P update(final EntityManager em, final P entity) {
+	public P update(final EntityManager em, final P entity, final Set<Long> tenantIds) {
 		LocalDateTime time = DateUtils.nowUtc();
 		entity.setEditedOn(time);
 		return em.merge(entity);
 	}
 
-	<T> TypedQuery<T> getQuery(final EntityManager em, final String selectClause, final String joinClause,
-			final String whereClause, final Map<String, Object> params, final Class<T> type, final String orderBy,
-			final boolean lockPessimistic, final Set<AsyncState> asyncStates) {
+	<T> TypedQuery<T> getQuery(final EntityManager em, final String selectClause, String joinClause, String whereClause,
+			Map<String, Object> params, final Class<T> type, final String orderBy, final boolean lockPessimistic,
+			final Set<AsyncState> asyncStates, final Set<Long> tenantIds) {
 		String query = "SELECT ";
 		if (selectClause == null || selectClause.isBlank())
 			query += "o";
@@ -89,9 +101,11 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 			query += selectClause;
 		query += " FROM %s AS o";
 
+		joinClause = addTenantJoin(joinClause);
 		if (joinClause != null && !joinClause.isBlank())
 			query += " " + joinClause;
 
+		whereClause = addTenantWhere(whereClause);
 		query += buildWhereClause(whereClause, asyncStates);
 
 		if (orderBy == null)
@@ -110,20 +124,25 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		if (lockPessimistic)
 			q.setLockMode(LockModeType.PESSIMISTIC_WRITE);
 		q = addAsyncStatesParamsToQuery(asyncStates, q);
+
+		params = addTenantParams(params, tenantIds);
 		if (params != null)
 			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
 		return q;
 	}
 
-	<T> TypedQuery<T> getDeleteQuery(final EntityManager em, final String joinClause, final String whereClause,
-			final Map<String, Object> params) {
+	<T> TypedQuery<T> getDeleteQuery(final EntityManager em, String joinClause, String whereClause,
+			Map<String, Object> params, final Set<Long> tenantIds) {
 		String query = "DELETE FROM  %s AS o";
 
+		joinClause = addTenantJoin(joinClause);
 		if (joinClause != null && !joinClause.isBlank())
 			query += " " + joinClause;
 
+		whereClause = addTenantWhere(whereClause);
 		query += buildWhereClause(whereClause, null);
+		params = addTenantParams(params, tenantIds);
 
 		query = String.format(query, this.type.getSimpleName());
 
@@ -137,17 +156,22 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		return q;
 	}
 
-	Query getCountQuery(final EntityManager em, final String selectClause, final String joinClause,
-			final String whereClause, final Map<String, Object> params, final Set<AsyncState> asyncStates) {
+	Query getCountQuery(final EntityManager em, final String selectClause, String joinClause, String whereClause,
+			Map<String, Object> params, final Set<AsyncState> asyncStates, final Set<Long> tenantIds) {
 		String query = "SELECT COUNT(";
 		if (selectClause == null || selectClause.isBlank())
 			query += "o.id";
 		else
 			query += selectClause;
 		query += ") FROM %s AS o";
+
+		joinClause = addTenantJoin(joinClause);
 		if (joinClause != null && !joinClause.isBlank())
 			query += " " + joinClause;
+
+		whereClause = addTenantWhere(whereClause);
 		query += buildWhereClause(whereClause, asyncStates);
+		params = addTenantParams(params, tenantIds);
 
 		Query q = em.createQuery(String.format(query, this.type.getSimpleName()));
 
@@ -170,16 +194,50 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		return query.getResultList();
 	}
 
-	private boolean isAllowed(final EntityManager em, final TenantData tenantData) {
-		TypedQuery<Long> query = getQuery(em, "o.id",
-				"RIGHT JOIN " + tenantData.getJpa().getClass().getSimpleName() + " tenantTable on o.id = tenantTable."
-						+ tenantData.getReferenceField(),
-				"tenantTable." + tenantData.getReferenceField() + " IS NULL OR tenantTable." + tenantData.getIdField()
-						+ " = :tenantId",
-				null, Long.class, null, false, null);
+	private boolean isAllowed(final EntityManager em, final Set<Long> tenantIds) {
+		if (!hasTenantData() || tenantIds == null || tenantIds.contains(null))
+			return true;
+		TypedQuery<Long> query = getQuery(em, "o.id", null, null, null, Long.class, null, false, null, tenantIds);
 		query.setMaxResults(1);
 		List<Long> list = query.getResultList();
 		return list != null && list.size() > 0;
+	}
+
+	private String addTenantJoin(final String joinClause) {
+		if (!hasTenantData())
+			return joinClause;
+
+		String r = joinClause;
+		if (joinClause == null || joinClause.isBlank())
+			r = "";
+
+		r += String.format(" LEFT JOIN %s tenantTable on o.id = tenantTable.%s", tenantData.getType().getSimpleName(),
+				tenantData.getReferenceField());
+		return r;
+	}
+
+	private String addTenantWhere(final String whereClause) {
+		if (!hasTenantData())
+			return whereClause;
+
+		String r = "";
+		if (whereClause != null && !whereClause.isBlank())
+			r = "( " + whereClause + ") AND ";
+
+		r += String.format("( tenantTable.%1$s IS NULL OR tenantTable.%1$s IN (:tenantIds) )", tenantData.getIdField());
+		return r;
+	}
+
+	private Map<String, Object> addTenantParams(final Map<String, Object> map, final Set<Long> tenantIds) {
+		if (!hasTenantData() || tenantIds.isEmpty())
+			return map;
+		map.put("tenantIds", tenantIds);
+		return map;
+	}
+
+	private boolean hasTenantData() {
+		return tenantData != null && tenantData.getType() != null && tenantData.getReferenceField() != null
+				&& tenantData.getIdField() != null;
 	}
 
 	private boolean isSet(final String str) {

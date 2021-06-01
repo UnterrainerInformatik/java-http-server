@@ -169,9 +169,13 @@ public class HttpAccessManager implements AccessManager {
 			ctx.attribute(Attribute.USER_EMAIL_VERIFIED, token.getEmailVerified());
 			ctx.attribute(Attribute.USER_REALM_ROLES, token.getRealmAccess().getRoles());
 
-			String tenant = (String) token.getOtherClaims().get("tenant");
-			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANT, tenant);
-			ctx.attribute(Attribute.USER_TENANT_SET, createTenantSetFrom(tenant));
+			String readTenants = (String) token.getOtherClaims().get("tenants_read");
+			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANTS_READ, readTenants);
+			ctx.attribute(Attribute.USER_TENANTS_READ_SET, createTenantSetFrom(readTenants));
+
+			String writeTenants = (String) token.getOtherClaims().get("tenants_write");
+			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANTS_WRITE, writeTenants);
+			ctx.attribute(Attribute.USER_TENANTS_WRITE_SET, createTenantSetFrom(writeTenants));
 
 			Set<String> clientRoles = Set.of();
 			String key = token.getIssuedFor();
@@ -190,7 +194,7 @@ public class HttpAccessManager implements AccessManager {
 						.email(token.getEmail())
 						.emailVerified(token.getEmailVerified())
 						.realmRoles(token.getRealmAccess().getRoles())
-						.tenant(tenant)
+						.tenant(readTenants)
 						.clientRoles(clientRoles)
 						.isActive(token.isActive())
 						.isBearer(token.getType().equalsIgnoreCase("bearer"))
@@ -218,7 +222,7 @@ public class HttpAccessManager implements AccessManager {
 	}
 
 	private Object createTenantSetFrom(final String tenant) {
-		Set<String> tenantSet = new HashSet<>();
+		Set<Long> tenantSet = new HashSet<>();
 		if (tenant == null || tenant.isBlank())
 			return tenantSet;
 
@@ -226,7 +230,11 @@ public class HttpAccessManager implements AccessManager {
 		for (String t : tenants) {
 			if (t.isBlank())
 				continue;
-			tenantSet.add(t.trim());
+			try {
+				tenantSet.add(Long.parseLong(t.trim()));
+			} catch (NumberFormatException e) {
+				// NOOP
+			}
 		}
 		return tenantSet;
 	}
