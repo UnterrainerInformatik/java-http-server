@@ -58,7 +58,7 @@
 					uniqueConstraintName="uc_test_permission_id" />
 			</column>
 
-			<column name="testId" type="BIGINT">
+			<column name="referenceId" type="BIGINT">
 				<constraints nullable="true" />
 			</column>
 
@@ -75,8 +75,8 @@
 		</createTable>
 		
 		<addForeignKeyConstraint
-			baseColumnNames="testId" baseTableName="test_permission"
-			constraintName="fk_test_permission_test_id"
+			baseColumnNames="referenceId" baseTableName="test_permission"
+			constraintName="fk_test_permission_reference_id"
 			referencedColumnNames="id" referencedTableName="test"
 			onDelete="CASCADE" onUpdate="RESTRICT" />
 	</changeSet>

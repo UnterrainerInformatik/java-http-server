@@ -421,3 +421,87 @@ List<NexusUserJpa> g = query.getN(22);
 NexusUserJpa h = query.getSingle();
 ```
 
+#### Tenant Capability
+
+The system allows to save different tennants within the same tables, in order to ease development.
+
+This is done on a per-DAO basis (per -table so to say), as there has to be a separate table holding permission-data regarding the tenant-IDs and corresponding reference-IDs.
+
+```bash
+--- Person
+id		(Long)
+name	(String)
+
+--- Person_Permission
+id				(Long)
+referenceId		(Long)
+tenantId		(Long)
+
+----------------------------------------
+--- Person
+1	Peter
+2	Paul
+3	Mary
+
+--- Person_Permission
+1	1	1
+2	2	1
+2	3	2
+```
+
+When a user having tenantId=1 associated will query the full list of Persons, he will inevitably receive 'Peter and Paul', whereas another user associated with tennantId=2 would receive 'Mary'.
+
+##### Data-Side
+
+To enable this feature, you have to generate a special DAO that is linked to the corresponding permissions-DAO by specifying the JPA-type of the permission-DAO and both the name of the reference-ID and tenant-ID field (all that is explained in the constructor of the DAO).
+
+So you have to create the appropriate permission-table, a permission-JPA for the table.
+
+##### User-Side
+
+In order to query those tables accordingly, your querying user has to be associated with a tenant-ID.
+
+In fact there are TWO associations with multiple tenant-IDs there.
+The `tenant_read` set, used to determine if a user can see (and therefore modify or delete) a row, and the `tenant_write` set, used to determine how many and which permission-rows there are to write when creating a new row in the main-table.
+
+###### Setting permissions in the DAO
+
+On the DAO-level (if you do DB stuff on the server) you may specify those freely using the according setters in the query-builders of the DAO. When using the DAO you will only have to specify a single set of tenant-IDs since you know how you're planning on using those yourself (if you will create a row, then the tenant-ID set is equivalent to the `tenant_write` set; if you will only query, then specify a tenant-ID set equivalent to the `tenant_read` set).
+
+###### Setting permissions via KeyCloak
+
+In KeyCloak you have to specify both sets per user and the system will pick the appropriate set when manipulating or querying the database.
+
+This is done by settings User-Attributes.
+
+```bash
+User: Psilo / Attributes
+-- tenant_read:		1,3
+-- tenant_write:	1
+```
+
+On KeyCloak-Setup, be advised that you have to specify an Attribute-Mapper for both attributes (`Clients-><ClientName>->Mappers, create with name=tenants_read/tenants_write, User Attribute=<name>, Token Claim Name=<name>, Claim JSON Type=String`).
+
+That set up, the Attribute values will be passed on into the JWT token and parsed by Http-Server (the data will be copied to the Context.Attribute Object from where you may retrieve them at any time during a request).
+The system will decide automatically which set to use, so that in this example the user `Psilo` will be able to see rows that have the permission for tenant-ID 1 or 3, but when creating a row, it will only write a permission for tenant-ID 1.
+
+##### Example
+
+```java
+// Passing the TestPermissionJpa class enables the tenant-capability.
+// The TestPermissionJpa has a getReferenceId() and getTenantId() method
+// as required by the default setting.
+server.handlerGroupFor(TestJpa.class, TestJson.class,
+	new JpqlDao<>(emf, TestJpa.class, TestPermissionJpa.class))
+.path("/tenanttests")
+.endpoints(Endpoint.ALL)
+.jsonMapper(mapper)
+.addRoleFor(Endpoint.ALL, RoleBuilder.authenticated())...
+
+// The next example sets up tenant-capability using a JPA that has a
+// getRefId() and a getTId() method (not default).
+server.handlerGroupFor(TestJpa.class, TestJson.class,
+	new JpqlDao<>(emf, TestJpa.class, TestPermissionJpa.class, "refId", "tId"))
+.path("/tenanttests")
+```
+

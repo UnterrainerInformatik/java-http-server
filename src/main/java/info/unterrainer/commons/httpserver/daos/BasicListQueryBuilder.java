@@ -12,13 +12,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class BasicListQueryBuilder<P extends BasicJpa, T, R extends BasicListQueryBuilder<P, T, R>>
-		extends BasicQueryGeneralBuilder<P, T, R> {
+public class BasicListQueryBuilder<P extends BasicJpa, X, R extends BasicListQueryBuilder<P, X, R>>
+		extends BasicQueryGeneralBuilder<P, X, R> {
 
 	protected final EntityManagerFactory emf;
 	@Getter
 	protected final BasicJpqlDao<P> dao;
-	protected final Class<T> resultType;
+	protected final Class<X> resultType;
 
 	protected String selectClause = "o";
 	protected String orderByClause;
@@ -30,17 +30,13 @@ public class BasicListQueryBuilder<P extends BasicJpa, T, R extends BasicListQue
 			this.selectClause = "o";
 	}
 
-	public TypedQuery<T> getTypedQuery(final EntityManager em) {
+	public TypedQuery<X> getTypedQuery(final EntityManager em) {
 		return dao.coreDao.getQuery(em, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
-				lockPessimistic, null);
-	}
-
-	public TypedQuery<T> getDeleteQuery(final EntityManager em) {
-		return dao.coreDao.getDeleteQuery(em, joinClause, whereClause, parameters);
+				lockPessimistic, null, tenantIds);
 	}
 
 	public javax.persistence.Query getCountQuery(final EntityManager em) {
-		return dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null);
+		return dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null, tenantIds);
 	}
 
 	/**

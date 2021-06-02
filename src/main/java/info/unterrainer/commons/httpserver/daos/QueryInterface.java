@@ -1,5 +1,7 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -13,7 +15,7 @@ interface QueryInterface<P extends BasicJpa, T> {
 
 	TypedQuery<T> getTypedQuery(final EntityManager em);
 
-	TypedQuery<T> getDeleteQuery(final EntityManager em);
-
 	javax.persistence.Query getCountQuery(final EntityManager em);
+
+	Set<Long> getTenantIds();
 }

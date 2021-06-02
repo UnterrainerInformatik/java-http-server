@@ -30,9 +30,9 @@ public class SingleQueryBuilder<P extends BasicJpa, T>
 	 * @return the selected entity
 	 */
 	public P get() {
-		return withEntityManager(
-				em -> dao.coreDao.getQuery(em, "o", null, "o.id = :id", Map.of("id", id), dao.type, null, false, null)
-						.getSingleResult());
+		return withEntityManager(em -> dao.coreDao
+				.getQuery(em, "o", null, "o.id = :id", Map.of("id", id), dao.type, null, false, null, tenantIds)
+				.getSingleResult());
 	}
 
 	/**
@@ -40,9 +40,7 @@ public class SingleQueryBuilder<P extends BasicJpa, T>
 	 */
 	public void delete() {
 		withEntityManager(em -> {
-			em.createQuery(String.format("DELETE FROM %s AS o WHERE o.id = :id", dao.type.getSimpleName()))
-					.setParameter("id", id)
-					.executeUpdate();
+			dao.coreDao.delete(em, id, tenantIds);
 			return null;
 		});
 	}

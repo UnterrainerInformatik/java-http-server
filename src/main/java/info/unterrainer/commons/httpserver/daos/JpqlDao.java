@@ -8,6 +8,45 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> {
 
 	/**
 	 * Generates a DAO that lets you build and execute queries.
+	 * <p>
+	 * This dao has a tenant-permission table attached and may retrieve and write
+	 * data per tenant.
+	 * <p>
+	 * {@code tenantReferenceFieldName} defaults to {@code referenceId}<br>
+	 * {@code tenantReferenceFieldName} defaults to {@code tenantId}
+	 *
+	 * @param emf           the {@link EntityManagerFactory} to use
+	 * @param type          the return-type of the query (the underlying JPA)
+	 * @param tenantJpaType the JPA of the tenant-permission table associated
+	 */
+	public JpqlDao(final EntityManagerFactory emf, final Class<P> type, final Class<? extends BasicJpa> tenantJpaType) {
+		super(emf, type);
+		this.coreDao.tenantData = new TenantData(tenantJpaType);
+	}
+
+	/**
+	 * Generates a DAO that lets you build and execute queries.
+	 * <p>
+	 * This dao has a tenant-permission table attached and may retrieve and write
+	 * data per tenant.
+	 *
+	 * @param emf                      the {@link EntityManagerFactory} to use
+	 * @param type                     the return-type of the query (the underlying
+	 *                                 JPA)
+	 * @param tenantJpaType            the JPA of the tenant-permission table
+	 *                                 associated
+	 * @param tenantReferenceFieldName the name of the field holding the reference
+	 *                                 to the main-table-id
+	 * @param tenantIdFieldName        the name of the field holding the tenant-ID
+	 */
+	public JpqlDao(final EntityManagerFactory emf, final Class<P> type, final Class<? extends BasicJpa> tenantJpaType,
+			final String tenantReferenceFieldName, final String tenantIdFieldName) {
+		super(emf, type);
+		this.coreDao.tenantData = new TenantData(tenantJpaType, tenantReferenceFieldName, tenantIdFieldName);
+	}
+
+	/**
+	 * Generates a DAO that lets you build and execute queries.
 	 *
 	 * @param emf  the {@link EntityManagerFactory} to use
 	 * @param type the return-type of the query (the underlying JPA)
