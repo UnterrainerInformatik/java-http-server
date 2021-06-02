@@ -32,15 +32,11 @@ public class BasicListQueryBuilder<P extends BasicJpa, X, R extends BasicListQue
 
 	public TypedQuery<X> getTypedQuery(final EntityManager em) {
 		return dao.coreDao.getQuery(em, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
-				lockPessimistic, null);
-	}
-
-	public TypedQuery<X> getDeleteQuery(final EntityManager em) {
-		return dao.coreDao.getDeleteQuery(em, joinClause, whereClause, parameters);
+				lockPessimistic, null, tenantIds);
 	}
 
 	public javax.persistence.Query getCountQuery(final EntityManager em) {
-		return dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null);
+		return dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null, tenantIds);
 	}
 
 	/**

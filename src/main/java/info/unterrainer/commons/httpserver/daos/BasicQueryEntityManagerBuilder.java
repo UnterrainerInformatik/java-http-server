@@ -19,6 +19,7 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 
 	@Getter
 	protected EntityManager entityManager;
+	@Getter
 	protected Set<Long> tenantIds;
 	protected Set<Long> writeTenantIds;
 

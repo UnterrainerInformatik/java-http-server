@@ -3,9 +3,11 @@ package info.unterrainer.commons.httpserver;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Set;
 
 import info.unterrainer.commons.httpserver.daos.CoreDao;
 import info.unterrainer.commons.httpserver.daos.DaoTransaction;
+import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
@@ -22,17 +24,25 @@ public class HandlerUtils {
 
 	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final E manager, final CoreDao<P, E> dao) {
 		Long id = checkAndGetId(ctx);
-		P jpa = dao.getById(manager, id);
+		P jpa = dao.getById(manager, id, getReadTenantIdsFrom(ctx));
 		if (jpa == null)
 			throw new NotFoundException();
 		return jpa;
+	}
+
+	public Set<Long> getReadTenantIdsFrom(final Context ctx) {
+		return ctx.attribute(Attribute.USER_TENANTS_READ_SET);
+	}
+
+	public Set<Long> getWriteTenantIdsFrom(final Context ctx) {
+		return ctx.attribute(Attribute.USER_TENANTS_WRITE_SET);
 	}
 
 	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final CoreDao<P, E> dao) {
 		Long id = checkAndGetId(ctx);
 		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction();
 		try {
-			P jpa = dao.getById(transaction.getManager(), id);
+			P jpa = dao.getById(transaction.getManager(), id, getReadTenantIdsFrom(ctx));
 			if (jpa == null)
 				throw new NotFoundException();
 			return jpa;

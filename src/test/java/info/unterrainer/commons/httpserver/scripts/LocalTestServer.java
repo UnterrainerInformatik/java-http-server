@@ -8,6 +8,7 @@ import info.unterrainer.commons.httpserver.daos.JpqlDao;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.scripts.handlers.StatusHandler;
 import info.unterrainer.commons.httpserver.scripts.jpas.TestJpa;
+import info.unterrainer.commons.httpserver.scripts.jpas.TestPermissionJpa;
 import info.unterrainer.commons.httpserver.scripts.jsons.TestJson;
 import info.unterrainer.commons.jreutils.ShutdownHook;
 import info.unterrainer.commons.rdbutils.RdbUtils;
@@ -91,6 +92,55 @@ public class LocalTestServer {
 					return response;
 				})
 				.add();
+
+		server.handlerGroupFor(TestJpa.class, TestJson.class,
+				new JpqlDao<>(emf, TestJpa.class, TestPermissionJpa.class))
+				.path("/tenanttests")
+				.endpoints(Endpoint.ALL)
+				.jsonMapper(mapper)
+				.addRoleFor(Endpoint.ALL, RoleBuilder.authenticated())
+				.extension()
+				.preInsertSync((ctx, em, receivedJson, resultJpa) -> {
+					log.info("before insert");
+					return resultJpa;
+				})
+				.extension()
+				.preDeleteSync((ctx, em, receivedId) -> {
+					log.info("before delete id:[{}]", receivedId);
+					return receivedId;
+				})
+				.extension()
+				.preModifySync((ctx, em, receivedId, receivedJson, readJpa, resultJpa) -> {
+					log.info("before modify");
+					return resultJpa;
+				})
+				.extension()
+				.postGetSingleSync((ctx, em, receivedId, readJpa, response) -> {
+					log.info("after get-single");
+					return response;
+				})
+				.extension()
+				.postGetListSync((ctx, em, size, offset, readJpaList, responseList) -> {
+					log.info("after get-list");
+					return responseList;
+				})
+				.extension()
+				.postDeleteSync((ctx, em, receivedId) -> {
+					log.info("after delete");
+					return true;
+				})
+				.extension()
+				.postModifySync((ctx, em, receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response) -> {
+					log.info("after modify");
+					return response;
+				})
+				.extension()
+				.postInsertSync((ctx, em, receivedJson, mappedJpa, createdJpa, response) -> {
+					log.info("after insert");
+					return response;
+				})
+				.add();
+
 		server.start();
 	}
 }

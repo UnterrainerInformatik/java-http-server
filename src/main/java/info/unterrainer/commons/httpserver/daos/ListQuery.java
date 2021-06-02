@@ -132,18 +132,4 @@ public class ListQuery<P extends BasicJpa, T> {
 		Collections.reverse(l);
 		return l;
 	}
-
-	/**
-	 * Make a real DELETE-query deleting the selected items from the database.
-	 * <p>
-	 * As this will result in a real SQL delete-query, it doesn't really care about
-	 * your SELECT or ORDER BY clauses as well as your locking (is always a
-	 * write-lock).
-	 */
-	public void delete() {
-		withEntityManager(em -> {
-			builder.getDeleteQuery(em).executeUpdate();
-			return null;
-		});
-	}
 }
