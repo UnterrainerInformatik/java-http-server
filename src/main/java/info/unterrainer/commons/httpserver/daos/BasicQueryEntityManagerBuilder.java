@@ -6,10 +6,9 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.eclipse.jetty.webapp.WebAppContext.Context;
-
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
+import io.javalin.http.Context;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +42,7 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * <p>
 	 * Overwrites the existing set.
 	 *
-	 * @param id the tenant-ID to use
+	 * @param ids the tenant-ID to use
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	@SuppressWarnings("unchecked")
@@ -63,8 +62,8 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 */
 	@SuppressWarnings("unchecked")
 	public R tenant(final Context ctx) {
-		tenantIds = (Set<Long>) ctx.getAttribute(Attribute.USER_TENANTS_READ_SET);
-		writeTenantIds = (Set<Long>) ctx.getAttribute(Attribute.USER_TENANTS_WRITE_SET);
+		tenantIds = (Set<Long>) ctx.attribute(Attribute.USER_TENANTS_READ_SET);
+		writeTenantIds = (Set<Long>) ctx.attribute(Attribute.USER_TENANTS_WRITE_SET);
 		return (R) this;
 	}
 }
