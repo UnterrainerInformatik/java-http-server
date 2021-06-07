@@ -23,11 +23,13 @@ public class UserDataJson {
 	private Set<String> realmRoles;
 	private Set<String> clientRoles;
 	/**
-	 * Is the custom Keycloak-attribute 'tenant' that has to be set under
-	 * user/attributes within Keycloak and then mapped using an AttributeMapper
-	 * within Keycloak as well. Is a comma-separated list of tenant-IDs.
+	 * Custom Keycloak-attributes 'tenant_read' and 'tenant_write' that have to be
+	 * set under user/attributes within Keycloak and then mapped using an
+	 * AttributeMapper within Keycloak as well. Are comma-separated lists of
+	 * tenant-IDs.
 	 */
-	private String tenant;
+	private String readTenants;
+	private String writeTenants;
 
 	private boolean isActive;
 	private boolean isBearer;
