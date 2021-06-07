@@ -31,7 +31,7 @@ public class SingleQueryBuilder<P extends BasicJpa, T>
 	 */
 	public P get() {
 		return withEntityManager(em -> dao.coreDao
-				.getQuery(em, "o", null, "o.id = :id", Map.of("id", id), dao.type, null, false, null, tenantIds)
+				.getQuery(em, "o", null, "o.id = :id", Map.of("id", id), dao.type, null, false, null, readTenantIds)
 				.getSingleResult());
 	}
 
@@ -40,7 +40,7 @@ public class SingleQueryBuilder<P extends BasicJpa, T>
 	 */
 	public void delete() {
 		withEntityManager(em -> {
-			dao.coreDao.delete(em, id, tenantIds);
+			dao.coreDao.delete(em, id, readTenantIds);
 			return null;
 		});
 	}

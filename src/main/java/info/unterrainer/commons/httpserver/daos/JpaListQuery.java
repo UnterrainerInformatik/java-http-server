@@ -24,8 +24,9 @@ public class JpaListQuery<P extends BasicJpa> extends ListQuery<P, P> {
 	 *         update, and if it was an update, what the old values were
 	 */
 	public UpsertResult<P> upsert(final P entity) {
-		return withEntityManager(
-				em -> builder.getDao().upsert(em, builder.getTypedQuery(em), entity, builder.getTenantIds()));
+		return withEntityManager(em -> builder.getDao()
+				.upsert(em, builder.getTypedQuery(em), entity, builder.getReadTenantIds(),
+						builder.getWriteTenantIds()));
 	}
 
 	/**
@@ -39,7 +40,7 @@ public class JpaListQuery<P extends BasicJpa> extends ListQuery<P, P> {
 		withEntityManager(em -> {
 			List<P> list = builder.getDao().getList(em, builder.getTypedQuery(em), 0, Long.MAX_VALUE);
 			for (P jpa : list)
-				builder.getDao().coreDao.delete(em, jpa.getId(), builder.getTenantIds());
+				builder.getDao().coreDao.delete(em, jpa.getId(), builder.getReadTenantIds());
 			return null;
 		});
 	}

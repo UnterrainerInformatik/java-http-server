@@ -46,17 +46,17 @@ public class BasicJpqlDao<P extends BasicJpa> implements CoreDaoProvider<P, Enti
 	}
 
 	UpsertResult<P> upsert(final EntityManager em, final TypedQuery<P> query, final P entity,
-			final Set<Long> tenantIds) {
+			final Set<Long> readTenantIds, final Set<Long> writeTenantIds) {
 		boolean wasInserted = false;
 		boolean wasUpdated = false;
 		P e = getFirst(em, query);
 		if (e == null) {
-			e = coreDao.create(em, entity, tenantIds);
+			e = coreDao.create(em, entity, writeTenantIds);
 			wasInserted = true;
 		} else {
 			entity.setId(e.getId());
 			entity.setCreatedOn(e.getCreatedOn());
-			e = coreDao.update(em, entity, tenantIds);
+			e = coreDao.update(em, entity, readTenantIds);
 			wasUpdated = true;
 		}
 		return UpsertResult.<P>builder().wasInserted(wasInserted).wasUpdated(wasUpdated).jpa(e).build();

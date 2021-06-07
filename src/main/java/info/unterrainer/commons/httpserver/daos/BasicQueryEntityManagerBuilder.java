@@ -1,8 +1,10 @@
 package info.unterrainer.commons.httpserver.daos;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
@@ -19,7 +21,8 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	@Getter
 	protected EntityManager entityManager;
 	@Getter
-	protected Set<Long> tenantIds;
+	protected Set<Long> readTenantIds;
+	@Getter
 	protected Set<Long> writeTenantIds;
 
 	/**
@@ -38,7 +41,7 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	}
 
 	/**
-	 * Set custom tenant-IDs to be used when querying / writing to the database.
+	 * Set custom tenant-IDs to be used when querying the database.
 	 * <p>
 	 * Overwrites the existing set.
 	 *
@@ -46,24 +49,111 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	@SuppressWarnings("unchecked")
-	public R tenant(final Long... ids) {
-		tenantIds = new HashSet<>(Arrays.asList(ids));
+	public R readTenant(final Long... ids) {
+		readTenantIds = new HashSet<>(Arrays.asList(ids));
 		return (R) this;
+	}
+
+	/**
+	 * Set custom tenant-IDs to be used when querying the database.
+	 * <p>
+	 * Overwrites the existing set.
+	 *
+	 * @param ids the tenant-ID to use
+	 * @return an instance of this builder to provide a fluent interface
+	 */
+	@SuppressWarnings("unchecked")
+	public R readTenant(final Collection<Long> ids) {
+		readTenantIds = new HashSet<>(ids);
+		return (R) this;
+	}
+
+	/**
+	 * Set custom tenant-IDs to be used when querying the database.
+	 * <p>
+	 * Overwrites the existing set.
+	 *
+	 * @param ids the tenant-ID to use
+	 * @return an instance of this builder to provide a fluent interface
+	 */
+	public R readTenant(final String commaSeparatedList) {
+		return readTenant(createSetFrom(commaSeparatedList));
+	}
+
+	/**
+	 * Set custom tenant-IDs to be used when writing to the database.
+	 * <p>
+	 * Overwrites the existing set.
+	 *
+	 * @param ids the tenant-ID to use
+	 * @return an instance of this builder to provide a fluent interface
+	 */
+	@SuppressWarnings("unchecked")
+	public R writeTenant(final Long... ids) {
+		writeTenantIds = new HashSet<>(Arrays.asList(ids));
+		return (R) this;
+	}
+
+	/**
+	 * Set custom tenant-IDs to be used when writing to the database.
+	 * <p>
+	 * Overwrites the existing set.
+	 *
+	 * @param ids the tenant-ID to use
+	 * @return an instance of this builder to provide a fluent interface
+	 */
+	@SuppressWarnings("unchecked")
+	public R writeTenant(final Collection<Long> ids) {
+		writeTenantIds = new HashSet<>(ids);
+		return (R) this;
+	}
+
+	/**
+	 * Set custom tenant-IDs to be used when writing to the database.
+	 * <p>
+	 * Overwrites the existing set.
+	 *
+	 * @param ids the tenant-ID to use
+	 * @return an instance of this builder to provide a fluent interface
+	 */
+	public R writeTenant(final String commaSeparatedList) {
+		return writeTenant(createSetFrom(commaSeparatedList));
 	}
 
 	/**
 	 * Set a custom tenant-ID that is retrieved from the given context to be used
 	 * when querying the database.
 	 * <p>
-	 * Overwrites the existing set.
+	 * Overwrites the existing sets of {@link #readTenant(Long...)} and
+	 * {@link #writeTenant(Long...)}.
 	 *
 	 * @param ctx the context that contains the tenant-ID to use
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	@SuppressWarnings("unchecked")
 	public R tenant(final Context ctx) {
-		tenantIds = (Set<Long>) ctx.attribute(Attribute.USER_TENANTS_READ_SET);
+		readTenantIds = (Set<Long>) ctx.attribute(Attribute.USER_TENANTS_READ_SET);
 		writeTenantIds = (Set<Long>) ctx.attribute(Attribute.USER_TENANTS_WRITE_SET);
 		return (R) this;
+	}
+
+	private Set<Long> createSetFrom(final String commaSeparatedList) {
+		if (commaSeparatedList == null || commaSeparatedList.isBlank())
+			return new HashSet<>();
+
+		return Arrays.stream(commaSeparatedList.split(","))
+				.map(this::parseLong)
+				.filter(java.util.Objects::nonNull)
+				.collect(Collectors.toSet());
+	}
+
+	private Long parseLong(final String s) {
+		if (s == null || s.isBlank())
+			return null;
+		try {
+			return Long.parseLong(s.trim());
+		} catch (NumberFormatException e) {
+			return null;
+		}
 	}
 }

@@ -17,5 +17,7 @@ interface QueryInterface<P extends BasicJpa, T> {
 
 	javax.persistence.Query getCountQuery(final EntityManager em);
 
-	Set<Long> getTenantIds();
+	Set<Long> getReadTenantIds();
+
+	Set<Long> getWriteTenantIds();
 }
