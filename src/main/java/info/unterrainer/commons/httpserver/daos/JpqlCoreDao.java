@@ -222,7 +222,7 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 			r = "( " + whereClause + ") AND ";
 
 		r += String.format("( tenantTable.%1$s IS NULL ", tenantData.getTenantIdField());
-		if (!tenantIds.isEmpty())
+		if (tenantIds != null && !tenantIds.isEmpty())
 			r += String.format(" OR tenantTable.%1$s IN (:tenantIds) ", tenantData.getTenantIdField());
 		r += ")";
 		return r;
@@ -234,7 +234,7 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 			m = new HashMap<>();
 		else
 			m = new HashMap<>(map);
-		if (!hasTenantData() || tenantIds.isEmpty())
+		if (!hasTenantData() || tenantIds == null || tenantIds.isEmpty())
 			return m;
 		m.put("tenantIds", tenantIds);
 		return m;
