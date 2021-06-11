@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import info.unterrainer.commons.httpserver.daos.CoreDao;
 import info.unterrainer.commons.httpserver.daos.ParamMap;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
+import info.unterrainer.commons.httpserver.extensions.AsyncExtensionContextMapper;
 import info.unterrainer.commons.httpserver.interceptors.InterceptorData;
 import info.unterrainer.commons.httpserver.interceptors.InterceptorParamBuilder;
 import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
@@ -35,6 +36,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	private String path;
 	private List<Endpoint> endpoints = new ArrayList<>();
 	private List<GetListInterceptor> getListInterceptors = new ArrayList<>();
+	private List<AsyncExtensionContextMapper> asyncExtensionContextMappers = new ArrayList<>();
 	private ExecutorService executorService;
 
 	HandlerExtensions<P, J, E> extensions = new HandlerExtensions<>();
@@ -49,7 +51,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 			executorService = server.executorService;
 		GenericHandlerGroup<P, J, E> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType,
 				jsonMapper, orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors, extensions,
-				accessRoles, executorService);
+				asyncExtensionContextMappers, accessRoles, executorService);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
 	}
@@ -90,6 +92,20 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 
 	public GenericHandlerGroupBuilder<P, J, E> getListInterceptor(final GetListInterceptor interceptor) {
 		getListInterceptors.add(interceptor);
+		return this;
+	}
+
+	/**
+	 * Here you may register {@link AsyncExtensionContextMapper}s that allow you to
+	 * map attributes located in the {@link Context} to an offline, asynchronous one
+	 * which you can address within asynchronous extension methods.
+	 *
+	 * @param asyncExtensionContextMapper
+	 * @return an instance of this object to asure a fluent interface
+	 */
+	public GenericHandlerGroupBuilder<P, J, E> asyncExtensionContextMapper(
+			final AsyncExtensionContextMapper asyncExtensionContextMapper) {
+		asyncExtensionContextMappers.add(asyncExtensionContextMapper);
 		return this;
 	}
 

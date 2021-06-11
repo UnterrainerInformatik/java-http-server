@@ -13,6 +13,9 @@ import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.Endpoint;
 import info.unterrainer.commons.httpserver.enums.QueryField;
 import info.unterrainer.commons.httpserver.exceptions.BadRequestException;
+import info.unterrainer.commons.httpserver.extensions.AsyncExtensionContext;
+import info.unterrainer.commons.httpserver.extensions.AsyncExtensionContextBaseMapper;
+import info.unterrainer.commons.httpserver.extensions.AsyncExtensionContextMapper;
 import info.unterrainer.commons.httpserver.interceptors.InterceptorData;
 import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
@@ -41,6 +44,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 	private final List<Endpoint> endpoints;
 	private final List<GetListInterceptor> getListInterceptors;
 	private final HandlerExtensions<P, J, E> extensions;
+	private final List<AsyncExtensionContextMapper> asyncExtensionContextMappers;
 	private final LinkedHashMap<Endpoint, Role[]> accessRoles;
 	private final ExecutorService executorService;
 	private final HandlerUtils hu = new HandlerUtils();
@@ -81,6 +85,15 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		return false;
 	}
 
+	private AsyncExtensionContext makeAsyncExtensionContextFor(final Context ctx) {
+		AsyncExtensionContext asyncCtx = new AsyncExtensionContext();
+		for (AsyncExtensionContextMapper e : asyncExtensionContextMappers)
+			e.map(ctx, asyncCtx);
+		AsyncExtensionContextBaseMapper m = new AsyncExtensionContextBaseMapper();
+		m.map(ctx, asyncCtx);
+		return asyncCtx;
+	}
+
 	private Role[] rolesFor(final List<Endpoint> endpointList) {
 		List<Role> roles = new ArrayList<>();
 		for (Entry<Endpoint, Role[]> entry : accessRoles.entrySet())
@@ -90,11 +103,12 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 	}
 
 	private void getEntry(final Context ctx) {
-		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction();
+		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 
 		P jpa = hu.getJpaById(ctx, transaction.getManager(), dao);
 		J json = orikaMapper.map(jpa, jsonType);
-		json = extensions.runPostGetSingle(ctx, transaction.getManager(), jpa.getId(), jpa, json, executorService);
+		json = extensions.runPostGetSingle(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(),
+				jpa.getId(), jpa, json, executorService);
 
 		transaction.end();
 		ctx.attribute(Attribute.RESPONSE_OBJECT, json);
@@ -123,7 +137,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 						e.getMessage());
 			}
 
-		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction();
+		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 
 		ListJson<P> bList = dao.getList(transaction.getManager(), offset, size, interceptorResult.getSelectClause(),
 				interceptorResult.getJoinClause(), interceptorResult.getWhereClause(), interceptorResult.getParams(),
@@ -134,7 +148,8 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 
 		hu.setPaginationParamsFor(jList, offset, size, bList.getCount(), interceptorResult.getPartOfQueryString(), ctx);
 
-		jList = extensions.runPostGetList(ctx, transaction.getManager(), size, offset, bList, jList, executorService);
+		jList = extensions.runPostGetList(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), size,
+				offset, bList, jList, executorService);
 
 		transaction.end();
 		ctx.attribute(Attribute.RESPONSE_OBJECT, jList);
@@ -145,14 +160,15 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, b);
 			P mappedJpa = orikaMapper.map(json, jpaType);
-			DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction();
+			DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 
-			mappedJpa = extensions.runPreInsert(ctx, transaction.getManager(), json, mappedJpa, executorService);
+			mappedJpa = extensions.runPreInsert(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), json,
+					mappedJpa, executorService);
 			P createdJpa = dao.create(transaction.getManager(), mappedJpa, hu.getWriteTenantIdsFrom(ctx));
 			J r = orikaMapper.map(createdJpa, jsonType);
 
-			r = extensions.runPostInsert(ctx, transaction.getManager(), json, mappedJpa, createdJpa, r,
-					executorService);
+			r = extensions.runPostInsert(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), json,
+					mappedJpa, createdJpa, r, executorService);
 
 			transaction.end();
 			ctx.attribute(Attribute.RESPONSE_OBJECT, r);
@@ -163,7 +179,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 	}
 
 	private void fullUpdate(final Context ctx) throws IOException {
-		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction();
+		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 		P jpa = hu.getJpaById(ctx, transaction.getManager(), dao);
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, ctx.body());
@@ -172,13 +188,13 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 			mappedJpa.setCreatedOn(jpa.getCreatedOn());
 			mappedJpa.setEditedOn(jpa.getEditedOn());
 
-			mappedJpa = extensions.runPreModify(ctx, transaction.getManager(), jpa.getId(), json, jpa, mappedJpa,
-					executorService);
+			mappedJpa = extensions.runPreModify(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(),
+					jpa.getId(), json, jpa, mappedJpa, executorService);
 			P persistedJpa = dao.update(transaction.getManager(), mappedJpa, hu.getReadTenantIdsFrom(ctx));
 
 			J r = orikaMapper.map(persistedJpa, jsonType);
-			r = extensions.runPostModify(ctx, transaction.getManager(), jpa.getId(), json, jpa, mappedJpa, persistedJpa,
-					r, executorService);
+			r = extensions.runPostModify(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), jpa.getId(),
+					json, jpa, mappedJpa, persistedJpa, r, executorService);
 
 			ctx.attribute(Attribute.RESPONSE_OBJECT, r);
 
@@ -192,12 +208,13 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 	private void delete(final Context ctx) {
 		ctx.attribute(Attribute.RESPONSE_OBJECT, null);
 		Long id = hu.checkAndGetId(ctx);
-		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction();
+		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 
-		id = extensions.runPreDelete(ctx, transaction.getManager(), id, executorService);
+		id = extensions.runPreDelete(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), id,
+				executorService);
 		dao.delete(transaction.getManager(), id, hu.getReadTenantIdsFrom(ctx));
 		ctx.status(204);
-		extensions.runPostDelete(ctx, transaction.getManager(), id, executorService);
+		extensions.runPostDelete(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), id, executorService);
 
 		transaction.end();
 	}
