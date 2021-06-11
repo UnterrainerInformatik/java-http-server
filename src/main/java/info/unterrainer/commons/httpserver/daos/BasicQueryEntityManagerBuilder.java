@@ -45,7 +45,7 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * <p>
 	 * Overwrites the existing set.
 	 *
-	 * @param ids the tenant-ID to use
+	 * @param ids the tenant-IDs to use
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	@SuppressWarnings("unchecked")
@@ -59,7 +59,7 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * <p>
 	 * Overwrites the existing set.
 	 *
-	 * @param ids the tenant-ID to use
+	 * @param ids the tenant-IDs to use
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	@SuppressWarnings("unchecked")
@@ -73,7 +73,8 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * <p>
 	 * Overwrites the existing set.
 	 *
-	 * @param ids the tenant-ID to use
+	 * @param commaSeparatedList the tenant-IDs to use in the form of a
+	 *                           comma-separated list
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	public R readTenant(final String commaSeparatedList) {
@@ -85,7 +86,7 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * <p>
 	 * Overwrites the existing set.
 	 *
-	 * @param ids the tenant-ID to use
+	 * @param ids the tenant-IDs to use
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	@SuppressWarnings("unchecked")
@@ -99,7 +100,7 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * <p>
 	 * Overwrites the existing set.
 	 *
-	 * @param ids the tenant-ID to use
+	 * @param ids the tenant-IDs to use
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	@SuppressWarnings("unchecked")
@@ -113,7 +114,8 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * <p>
 	 * Overwrites the existing set.
 	 *
-	 * @param ids the tenant-ID to use
+	 * @param commaSeparatedList the tenant-IDs to use in the form of a
+	 *                           comma-separated list
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	public R writeTenant(final String commaSeparatedList) {
@@ -127,7 +129,7 @@ public class BasicQueryEntityManagerBuilder<P extends BasicJpa, T, R extends Bas
 	 * Overwrites the existing sets of {@link #readTenant(Long...)} and
 	 * {@link #writeTenant(Long...)}.
 	 *
-	 * @param ctx the context that contains the tenant-ID to use
+	 * @param ctx the context that contains the tenant-IDs to use (read and write)
 	 * @return an instance of this builder to provide a fluent interface
 	 */
 	@SuppressWarnings("unchecked")

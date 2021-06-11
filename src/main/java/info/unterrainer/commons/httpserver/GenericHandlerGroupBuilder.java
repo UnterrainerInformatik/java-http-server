@@ -97,11 +97,15 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 
 	/**
 	 * Here you may register {@link AsyncExtensionContextMapper}s that allow you to
-	 * map attributes located in the {@link Context} to an offline, asynchronous one
+	 * map attributes located in the Javalin-context to an offline, asynchronous one
 	 * which you can address within asynchronous extension methods.
 	 *
-	 * @param asyncExtensionContextMapper
-	 * @return an instance of this object to asure a fluent interface
+	 * @param asyncExtensionContextMapper a mapper of type
+	 *                                    {@link AsyncExtensionContextMapper} you
+	 *                                    may register as an extension that moves
+	 *                                    variables from the Javalin-context to the
+	 *                                    async-context.
+	 * @return an instance of this object to assure a fluent interface
 	 */
 	public GenericHandlerGroupBuilder<P, J, E> asyncExtensionContextMapper(
 			final AsyncExtensionContextMapper asyncExtensionContextMapper) {
