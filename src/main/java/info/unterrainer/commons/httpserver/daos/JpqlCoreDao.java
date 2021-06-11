@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -21,11 +22,11 @@ import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.jreutils.DateUtils;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
+import io.javalin.http.Context;
 import lombok.Getter;
 
 public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager> {
 
-	protected final EntityManagerFactory emf;
 	protected final Class<P> type;
 	@Getter
 	protected JpqlTransactionManager transactionManager;
@@ -34,9 +35,15 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 
 	public JpqlCoreDao(final EntityManagerFactory emf, final Class<P> type) {
 		super();
-		this.emf = emf;
 		this.type = type;
-		transactionManager = new JpqlTransactionManager(emf);
+		transactionManager = new JpqlTransactionManager(emf, null);
+	}
+
+	public JpqlCoreDao(final Function<Context, EntityManagerFactory> entityManagerFactorySupplier,
+			final Class<P> type) {
+		super();
+		this.type = type;
+		transactionManager = new JpqlTransactionManager(null, entityManagerFactorySupplier);
 	}
 
 	@Override

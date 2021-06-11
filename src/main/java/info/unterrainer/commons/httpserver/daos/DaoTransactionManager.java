@@ -1,5 +1,7 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import io.javalin.http.Context;
+
 public interface DaoTransactionManager<E> {
 
 	/**
@@ -7,5 +9,5 @@ public interface DaoTransactionManager<E> {
 	 *
 	 * @return a {@link JpqlTransaction}
 	 */
-	DaoTransaction<E> beginTransaction();
+	DaoTransaction<E> beginTransaction(Context ctx);
 }

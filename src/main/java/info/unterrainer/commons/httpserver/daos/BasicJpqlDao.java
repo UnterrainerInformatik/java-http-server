@@ -2,12 +2,14 @@ package info.unterrainer.commons.httpserver.daos;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
+import io.javalin.http.Context;
 import lombok.Getter;
 
 public class BasicJpqlDao<P extends BasicJpa> implements CoreDaoProvider<P, EntityManager> {
@@ -22,6 +24,14 @@ public class BasicJpqlDao<P extends BasicJpa> implements CoreDaoProvider<P, Enti
 		this.emf = emf;
 		this.type = type;
 		coreDao = new JpqlCoreDao<>(emf, type);
+	}
+
+	public BasicJpqlDao(final Function<Context, EntityManagerFactory> entityManagerFactorySupplier,
+			final Class<P> type) {
+		super();
+		this.emf = null;
+		this.type = type;
+		coreDao = new JpqlCoreDao<>(entityManagerFactorySupplier, type);
 	}
 
 	<T> List<T> getList(final EntityManager em, final TypedQuery<T> query, final long offset, final long size) {

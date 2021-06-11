@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.exceptions.GracefulCancelationException;
+import info.unterrainer.commons.httpserver.extensions.AsyncExtensionContext;
 import info.unterrainer.commons.httpserver.extensions.delegates.PostDeleteAsync;
 import info.unterrainer.commons.httpserver.extensions.delegates.PostDeleteSync;
 import info.unterrainer.commons.httpserver.extensions.delegates.PostGetListAsync;
@@ -52,10 +53,10 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 	private final List<PreModifyAsync<P, J>> preModifyAsync = new ArrayList<>();
 	private final List<PreModifySync<P, J, E>> preModifySync = new ArrayList<>();
 
-	public J runPostGetSingle(final Context ctx, final E entityManager, final Long receivedId, final P readJpa,
-			final J response, final ExecutorService executorService) {
+	public J runPostGetSingle(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
+			final Long receivedId, final P readJpa, final J response, final ExecutorService executorService) {
 		for (PostGetSingleAsync<P, J> h : postGetSingleAsync())
-			executorService.execute(() -> h.handle(receivedId, readJpa, response));
+			executorService.execute(() -> h.handle(asyncCtx, receivedId, readJpa, response));
 
 		J result = response;
 		for (PostGetSingleSync<P, J, E> h : postGetSingleSync()) {
@@ -66,10 +67,11 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 		return result;
 	}
 
-	public ListJson<J> runPostGetList(final Context ctx, final E entityManager, final Long size, final Long offset,
-			final ListJson<P> readList, final ListJson<J> response, final ExecutorService executorService) {
+	public ListJson<J> runPostGetList(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
+			final Long size, final Long offset, final ListJson<P> readList, final ListJson<J> response,
+			final ExecutorService executorService) {
 		for (PostGetListAsync<P, J> h : postGetListAsync())
-			executorService.execute(() -> h.handle(size, offset, readList, response));
+			executorService.execute(() -> h.handle(asyncCtx, size, offset, readList, response));
 
 		ListJson<J> result = response;
 		for (PostGetListSync<P, J, E> h : postGetListSync()) {
@@ -80,10 +82,10 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 		return result;
 	}
 
-	public P runPreInsert(final Context ctx, final E entityManager, final J receivedJson, final P resultJpa,
-			final ExecutorService executorService) {
+	public P runPreInsert(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
+			final J receivedJson, final P resultJpa, final ExecutorService executorService) {
 		for (PreInsertAsync<P, J> h : preInsertAsync())
-			executorService.execute(() -> h.handle(receivedJson, resultJpa));
+			executorService.execute(() -> h.handle(asyncCtx, receivedJson, resultJpa));
 
 		P result = resultJpa;
 		for (PreInsertSync<P, J, E> h : preInsertSync()) {
@@ -94,10 +96,11 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 		return result;
 	}
 
-	public J runPostInsert(final Context ctx, final E entityManager, final J receivedJson, final P mappedJpa,
-			final P createdJpa, final J response, final ExecutorService executorService) {
+	public J runPostInsert(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
+			final J receivedJson, final P mappedJpa, final P createdJpa, final J response,
+			final ExecutorService executorService) {
 		for (PostInsertAsync<P, J> h : postInsertAsync())
-			executorService.execute(() -> h.handle(receivedJson, mappedJpa, createdJpa, response));
+			executorService.execute(() -> h.handle(asyncCtx, receivedJson, mappedJpa, createdJpa, response));
 
 		J result = response;
 		for (PostInsertSync<P, J, E> h : postInsertSync()) {
@@ -108,10 +111,11 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 		return result;
 	}
 
-	public P runPreModify(final Context ctx, final E entityManager, final Long receivedId, final J receivedJson,
-			final P readJpa, final P resultJpa, final ExecutorService executorService) {
+	public P runPreModify(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
+			final Long receivedId, final J receivedJson, final P readJpa, final P resultJpa,
+			final ExecutorService executorService) {
 		for (PreModifyAsync<P, J> h : preModifyAsync())
-			executorService.execute(() -> h.handle(receivedId, receivedJson, readJpa, resultJpa));
+			executorService.execute(() -> h.handle(asyncCtx, receivedId, receivedJson, readJpa, resultJpa));
 
 		P result = resultJpa;
 		for (PreModifySync<P, J, E> h : preModifySync()) {
@@ -122,12 +126,12 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 		return result;
 	}
 
-	public J runPostModify(final Context ctx, final E entityManager, final Long receivedId, final J receivedJson,
-			final P readJpa, final P mappedJpa, final P persistedJpa, final J response,
-			final ExecutorService executorService) {
+	public J runPostModify(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
+			final Long receivedId, final J receivedJson, final P readJpa, final P mappedJpa, final P persistedJpa,
+			final J response, final ExecutorService executorService) {
 		for (PostModifyAsync<P, J> h : postModifyAsync())
-			executorService
-					.execute(() -> h.handle(receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response));
+			executorService.execute(
+					() -> h.handle(asyncCtx, receivedId, receivedJson, readJpa, mappedJpa, persistedJpa, response));
 
 		J result = response;
 		for (PostModifySync<P, J, E> h : postModifySync()) {
@@ -138,10 +142,10 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 		return result;
 	}
 
-	public Long runPreDelete(final Context ctx, final E entityManager, final Long receivedId,
-			final ExecutorService executorService) {
+	public Long runPreDelete(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
+			final Long receivedId, final ExecutorService executorService) {
 		for (PreDeleteAsync h : preDeleteAsync())
-			executorService.execute(() -> h.handle(receivedId));
+			executorService.execute(() -> h.handle(asyncCtx, receivedId));
 
 		Long result = receivedId;
 		for (PreDeleteSync<E> h : preDeleteSync()) {
@@ -152,10 +156,10 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 		return result;
 	}
 
-	public void runPostDelete(final Context ctx, final E entityManager, final Long receivedId,
-			final ExecutorService executorService) {
+	public void runPostDelete(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
+			final Long receivedId, final ExecutorService executorService) {
 		for (PostDeleteAsync h : postDeleteAsync())
-			executorService.execute(() -> h.handle(receivedId));
+			executorService.execute(() -> h.handle(asyncCtx, receivedId));
 
 		for (PostDeleteSync<E> h : postDeleteSync())
 			if (!h.handle(ctx, entityManager, receivedId))

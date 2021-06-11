@@ -40,7 +40,7 @@ public class HandlerUtils {
 
 	public <P extends BasicJpa, E> P getJpaById(final Context ctx, final CoreDao<P, E> dao) {
 		Long id = checkAndGetId(ctx);
-		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction();
+		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 		try {
 			P jpa = dao.getById(transaction.getManager(), id, getReadTenantIdsFrom(ctx));
 			if (jpa == null)
