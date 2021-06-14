@@ -1,6 +1,7 @@
 package info.unterrainer.commons.httpserver.extensions;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -13,7 +14,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class AsyncExtensionContext {
 
-	private Map<String, Object> parameters;
+	private Map<String, Object> parameters = new HashMap<>();
 
 	public AsyncExtensionContext addParameter(final Context ctx, final String parameterKey) {
 		parameters.put(parameterKey, ctx.attribute(parameterKey));

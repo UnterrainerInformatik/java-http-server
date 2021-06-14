@@ -21,6 +21,7 @@ import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.ResponseType;
 import info.unterrainer.commons.httpserver.exceptions.HttpException;
 import info.unterrainer.commons.httpserver.exceptions.NotFoundException;
+import info.unterrainer.commons.httpserver.exceptions.UnauthorizedException;
 import info.unterrainer.commons.httpserver.handlers.AppNameHandler;
 import info.unterrainer.commons.httpserver.handlers.AppVersionHandler;
 import info.unterrainer.commons.httpserver.handlers.DateTimeHandler;
@@ -164,7 +165,10 @@ public class HttpServer {
 		} else {
 			status = 500;
 			message = "500 Internal Server Error";
-			log.error(e.getMessage(), e);
+			if (e instanceof UnauthorizedException)
+				log.debug(e.getMessage());
+			else
+				log.error(e.getMessage(), e);
 		}
 		ctx.result(jsonMapper.toStringFrom(MessageJson.builder().message(message).build()))
 				.contentType("application/json")

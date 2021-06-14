@@ -226,12 +226,12 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 
 		String r = "";
 		if (whereClause != null && !whereClause.isBlank())
-			r = "( " + whereClause + ") AND ";
+			r = "( " + whereClause + " ) AND ";
 
-		r += String.format("( tenantTable.%1$s IS NULL ", tenantData.getTenantIdField());
+		r += String.format("( tenantTable.%1$s IS NULL", tenantData.getTenantIdField());
 		if (tenantIds != null && !tenantIds.isEmpty())
-			r += String.format(" OR tenantTable.%1$s IN (:tenantIds) ", tenantData.getTenantIdField());
-		r += ")";
+			r += String.format(" OR tenantTable.%1$s IN (:tenantIds)", tenantData.getTenantIdField());
+		r += " )";
 		return r;
 	}
 
