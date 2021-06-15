@@ -10,7 +10,6 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.eclipse.jetty.http.HttpHeader;
 import org.keycloak.TokenVerifier;
@@ -183,23 +182,24 @@ public class HttpAccessManager implements AccessManager {
 				clientRoles = token.getResourceAccess().get(key).getRoles();
 			ctx.attribute(Attribute.USER_CLIENT_ROLES, clientRoles);
 
-			Consumer<UserDataJson> userAccessInterceptor = ((HttpServer) ctx.attribute(Attribute.JAVALIN_SERVER))
+			UserAccessInterceptor userAccessInterceptor = ((HttpServer) ctx.attribute(Attribute.JAVALIN_SERVER))
 					.getUserAccessInterceptor();
 			if (userAccessInterceptor != null)
-				userAccessInterceptor.accept(UserDataJson.builder()
-						.userName(userName)
-						.givenName(token.getGivenName())
-						.client(token.getIssuedFor())
-						.familyName(token.getFamilyName())
-						.email(token.getEmail())
-						.emailVerified(token.getEmailVerified())
-						.realmRoles(token.getRealmAccess().getRoles())
-						.readTenants(readTenants)
-						.writeTenants(writeTenants)
-						.clientRoles(clientRoles)
-						.isActive(token.isActive())
-						.isBearer(token.getType().equalsIgnoreCase("bearer"))
-						.build());
+				userAccessInterceptor.accept(ctx, token,
+						UserDataJson.builder()
+								.userName(userName)
+								.givenName(token.getGivenName())
+								.client(token.getIssuedFor())
+								.familyName(token.getFamilyName())
+								.email(token.getEmail())
+								.emailVerified(token.getEmailVerified())
+								.realmRoles(token.getRealmAccess().getRoles())
+								.readTenants(readTenants)
+								.writeTenants(writeTenants)
+								.clientRoles(clientRoles)
+								.isActive(token.isActive())
+								.isBearer(token.getType().equalsIgnoreCase("bearer"))
+								.build());
 
 			if (!token.isActive()) {
 				setTokenRejectionReason(ctx, "Token is inactive.");

@@ -10,12 +10,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 
 import info.unterrainer.commons.httpserver.accessmanager.HttpAccessManager;
+import info.unterrainer.commons.httpserver.accessmanager.UserAccessInterceptor;
 import info.unterrainer.commons.httpserver.daos.CoreDaoProvider;
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.enums.ResponseType;
@@ -28,7 +28,6 @@ import info.unterrainer.commons.httpserver.handlers.DateTimeHandler;
 import info.unterrainer.commons.httpserver.handlers.HealthHandler;
 import info.unterrainer.commons.httpserver.handlers.PostmanCollectionHandler;
 import info.unterrainer.commons.httpserver.jsons.MessageJson;
-import info.unterrainer.commons.httpserver.jsons.UserDataJson;
 import info.unterrainer.commons.jreutils.ShutdownHook;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.serialization.JsonMapper;
@@ -60,7 +59,7 @@ public class HttpServer {
 	List<String> appVersionFqns;
 	@Getter
 	@Setter
-	private Consumer<UserDataJson> userAccessInterceptor;
+	private UserAccessInterceptor userAccessInterceptor;
 	@Getter
 	@Setter
 	private String enumLookupFqnForInterceptorParser;
