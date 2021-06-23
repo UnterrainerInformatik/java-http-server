@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -15,6 +16,8 @@ import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+
+import org.mapstruct.ap.internal.util.Strings;
 
 import info.unterrainer.commons.httpserver.exceptions.ForbiddenException;
 import info.unterrainer.commons.httpserver.exceptions.InternalServerErrorException;
@@ -24,7 +27,9 @@ import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
 import io.javalin.http.Context;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager> {
 
 	protected final Class<P> type;
@@ -136,6 +141,7 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		else if (!orderBy.isBlank())
 			query += " ORDER BY " + orderBy;
 
+		log.debug("Query is: [{}]", query);
 		query = String.format(query, this.type.getSimpleName());
 
 		@SuppressWarnings("unchecked")
@@ -146,12 +152,24 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		TypedQuery<T> q = em.createQuery(query, t);
 		if (lockPessimistic)
 			q.setLockMode(LockModeType.PESSIMISTIC_WRITE);
-		q = addAsyncStatesParamsToQuery(asyncStates, q);
+
+		log.debug("  with lockmode: [{}]", q.getLockMode());
+
+		if (asyncStates != null)
+			log.debug("  with asynchronous_state: [{}]",
+					Strings.join(asyncStates.stream().map(AsyncState::toString).collect(Collectors.toList()), ", "));
+		addAsyncStatesParamsToQuery(asyncStates, q);
 
 		params = addTenantParams(params, tenantIds);
-		if (params != null)
+		if (params != null) {
+			log.debug("  with parameters: [{}]",
+					Strings.join(params.entrySet()
+							.stream()
+							.map(e -> e.getKey() + ": " + e.getValue().toString())
+							.collect(Collectors.toList()), ", "));
 			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
+		}
 		return q;
 	}
 
@@ -174,7 +192,7 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 
 		Query q = em.createQuery(String.format(query, this.type.getSimpleName()));
 
-		q = addAsyncStatesParamsToQuery(asyncStates, q);
+		addAsyncStatesParamsToQuery(asyncStates, q);
 		if (params != null)
 			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
@@ -269,53 +287,18 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		if (isSet(whereClause) && !isSet(asyncStates))
 			r += whereClause;
 
-		if (!isSet(whereClause) && isSet(asyncStates))
-			r += addAsyncStatesToWhereClause(asyncStates);
-
-		if (isSet(whereClause) && isSet(asyncStates))
-			r += "( " + whereClause + " ) AND ( " + addAsyncStatesToWhereClause(asyncStates) + " )";
+		if (isSet(asyncStates)) {
+			if (isSet(whereClause))
+				r += "( " + whereClause + " ) AND ";
+			r += "( o.state IN :asynchronous_state )";
+		}
 
 		return r;
 	}
 
-	private String addAsyncStatesToWhereClause(final Set<AsyncState> asyncStates) {
-		StringBuilder sb = new StringBuilder();
-		boolean isFirst = true;
-
-		for (int i = 0; i < asyncStates.size(); i++) {
-			if (isFirst)
-				isFirst = false;
-			else
-				sb.append(" OR ");
-			sb.append("state = :state");
-			sb.append(i);
-		}
-
-		return sb.toString();
-	}
-
-	private <T> TypedQuery<T> addAsyncStatesParamsToQuery(final Set<AsyncState> asyncStates,
-			final TypedQuery<T> query) {
-
+	private void addAsyncStatesParamsToQuery(final Set<AsyncState> asyncStates, final Query query) {
 		if (!isSet(asyncStates))
-			return query;
-
-		int count = 0;
-		for (AsyncState state : asyncStates)
-			query.setParameter("state" + count++, state);
-
-		return query;
-	}
-
-	private Query addAsyncStatesParamsToQuery(final Set<AsyncState> asyncStates, final Query query) {
-
-		if (!isSet(asyncStates))
-			return query;
-
-		int count = 0;
-		for (AsyncState state : asyncStates)
-			query.setParameter("state" + count++, state);
-
-		return query;
+			return;
+		query.setParameter("asynchronous_state", asyncStates);
 	}
 }
