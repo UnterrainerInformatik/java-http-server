@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
 
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
@@ -16,6 +18,18 @@ public class AsyncListQueryBuilder<P extends BasicAsyncJpa, T>
 
 	AsyncListQueryBuilder(final EntityManagerFactory emf, final AsyncJpqlDao<P> dao, final Class<T> resultType) {
 		super(emf, dao, resultType);
+	}
+
+	@Override
+	public TypedQuery<T> getTypedQuery(final EntityManager em) {
+		return dao.coreDao.getQuery(em, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,
+				lockPessimistic, asyncStates, readTenantIds);
+	}
+
+	@Override
+	public javax.persistence.Query getCountQuery(final EntityManager em) {
+		return dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, asyncStates,
+				readTenantIds);
 	}
 
 	public ListQuery<P, T> build() {
