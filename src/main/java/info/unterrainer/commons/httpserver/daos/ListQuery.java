@@ -116,7 +116,8 @@ public class ListQuery<P extends BasicJpa, T> {
 	public List<T> getList(final long offset, final long size) {
 		return withEntityManager(em -> {
 			TypedQuery<T> query = builder.getTypedQuery(em);
-			return builder.getDao().getList(em, query, offset, size);
+			List<T> list = builder.getDao().getList(em, query, offset, size);
+			return list;
 		});
 	}
 
