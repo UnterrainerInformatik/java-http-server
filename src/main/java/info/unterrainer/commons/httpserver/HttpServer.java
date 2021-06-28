@@ -43,6 +43,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import okio.BufferedSource;
+import okio.GzipSource;
+import okio.Okio;
 
 @Slf4j
 public class HttpServer {
@@ -119,6 +122,7 @@ public class HttpServer {
 		javalin.before(ctx -> ctx.attribute(Attribute.JAVALIN_SERVER, this));
 		javalin.before(ctx -> ctx.attribute(Attribute.RESPONSE_TYPE, ResponseType.JSON));
 		javalin.before(ctx -> ctx.contentType("application/json"));
+		javalin.before(this::unzip);
 
 		javalin.after(ctx -> render(ctx));
 		javalin.after(ctx -> {
@@ -230,6 +234,22 @@ public class HttpServer {
 				.roles(new HashSet<>(Arrays.asList(roles)))
 				.build());
 		return this;
+	}
+
+	private void unzip(final Context ctx) throws IOException {
+		String body = ctx.body();
+
+		if (body == null)
+			return;
+
+		if (ctx.header("Content-Encoding") == "gzip") {
+			BufferedSource bs = Okio.buffer(Okio.source(ctx.bodyAsInputStream()));
+			GzipSource gzipSource = new GzipSource(bs);
+			body = Okio.buffer(gzipSource).readUtf8();
+		}
+
+		ctx.bodyAsInputStream().reset();
+		ctx.attribute(Attribute.REQUEST_BODY, body);
 	}
 
 	private void render(final Context ctx) throws IOException {
