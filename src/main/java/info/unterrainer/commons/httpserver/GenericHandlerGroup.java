@@ -156,7 +156,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 	}
 
 	private void create(final Context ctx) throws IOException {
-		String b = ctx.body();
+		String b = ctx.attribute(Attribute.REQUEST_BODY);
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, b);
 			P mappedJpa = orikaMapper.map(json, jpaType);
@@ -182,7 +182,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 		P jpa = hu.getJpaById(ctx, transaction.getManager(), dao);
 		try {
-			J json = jsonMapper.fromStringTo(jsonType, ctx.body());
+			J json = jsonMapper.fromStringTo(jsonType, ctx.attribute(Attribute.REQUEST_BODY));
 			P mappedJpa = orikaMapper.map(json, jpaType);
 			mappedJpa.setId(jpa.getId());
 			mappedJpa.setCreatedOn(jpa.getCreatedOn());
