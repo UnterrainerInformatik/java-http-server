@@ -86,8 +86,7 @@ public class ListQuery<P extends BasicJpa, T> {
 	 * Execute a SELECT query that returns a single result-row.
 	 *
 	 * @return the result-row as a JPA
-	 * @throws NoResultException        if there is no
-	 *                                  resultNonUniqueResultException
+	 * @throws NoResultException        if there is no result
 	 * @throws NonUniqueResultException if more than one result
 	 */
 	public T getSingle() {
