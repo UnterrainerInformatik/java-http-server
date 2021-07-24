@@ -133,6 +133,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 						.joinClause(passedData.getJoinClause())
 						.params(ParamMap.builder().parameters(data.getParams()).build())
 						.partOfQueryString(data.getQueryStringAsString())
+						.orderByClause(passedData.getOrderByClause())
 						.build();
 				return r;
 			});
