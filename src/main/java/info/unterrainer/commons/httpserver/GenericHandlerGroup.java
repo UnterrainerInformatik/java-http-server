@@ -123,6 +123,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 				.joinClause("")
 				.whereClause("")
 				.params(null)
+				.orderByClause("")
 				.partOfQueryString("")
 				.build();
 		for (GetListInterceptor interceptor : getListInterceptors)

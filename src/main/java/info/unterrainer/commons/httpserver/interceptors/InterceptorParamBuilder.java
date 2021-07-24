@@ -51,15 +51,12 @@ public class InterceptorParamBuilder<P extends BasicJpa, J extends BasicJson, E>
 	/**
 	 * Here you can specify a special order-by-clause that will be appended to your
 	 * SQL-query later on.
-	 * <p>
-	 * May or may not start with 'order by', your choice.
 	 *
 	 * @param orderByClause the clause (Example: {@code 'o.name DESC'}
 	 * @return itself in order to provide a fluent interface.
 	 */
 	public InterceptorParamBuilder<P, J, E> orderBy(final String orderByClause) {
-		this.orderByClause = orderByClause.trim().toLowerCase().startsWith("order by") ? " " + orderByClause.trim()
-				: " ORDER BY " + orderByClause.trim();
+		this.orderByClause = " " + orderByClause.trim();
 		return this;
 	}
 
