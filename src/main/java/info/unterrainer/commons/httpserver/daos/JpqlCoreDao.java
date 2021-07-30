@@ -21,6 +21,7 @@ import org.mapstruct.ap.internal.util.Strings;
 
 import info.unterrainer.commons.httpserver.exceptions.ForbiddenException;
 import info.unterrainer.commons.httpserver.exceptions.InternalServerErrorException;
+import info.unterrainer.commons.httpserver.jpas.BasicPermissionJpa;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.jreutils.DateUtils;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
@@ -61,7 +62,7 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		if (hasTenantData())
 			try {
 				for (Long tenantId : tenantIds) {
-					BasicJpa tenantJpa = tenantData.getType().getConstructor().newInstance();
+					BasicPermissionJpa tenantJpa = tenantData.getPermissionJpaType().getConstructor().newInstance();
 					tenantData.getReferenceSetMethod().invoke(tenantJpa, entity.getId());
 					tenantData.getTenantIdSetMethod().invoke(tenantJpa, tenantId);
 
@@ -71,8 +72,8 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 				}
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new InternalServerErrorException(
-						String.format("Error creating permission-entry in [%s]", tenantData.getType().getSimpleName()));
+				throw new InternalServerErrorException(String.format("Error creating permission-entry in [%s]",
+						tenantData.getPermissionJpaType().getSimpleName()));
 			}
 		return entity;
 	}
@@ -233,8 +234,8 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 		if (joinClause == null || joinClause.isBlank())
 			r = "";
 
-		r += String.format(" LEFT JOIN %s tenantTable on o.id = tenantTable.%s", tenantData.getType().getSimpleName(),
-				tenantData.getMainTableIdReferenceField());
+		r += String.format(" LEFT JOIN %s tenantTable on o.id = tenantTable.%s",
+				tenantData.getPermissionJpaType().getSimpleName(), tenantData.getMainTableIdReferenceField());
 		return r;
 	}
 
@@ -266,8 +267,8 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 	}
 
 	private boolean hasTenantData() {
-		return tenantData != null && tenantData.getType() != null && tenantData.getMainTableIdReferenceField() != null
-				&& tenantData.getTenantIdField() != null;
+		return tenantData != null && tenantData.getPermissionJpaType() != null
+				&& tenantData.getMainTableIdReferenceField() != null && tenantData.getTenantIdField() != null;
 	}
 
 	private boolean isSet(final String str) {

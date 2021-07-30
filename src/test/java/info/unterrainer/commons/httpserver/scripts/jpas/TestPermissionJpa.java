@@ -3,7 +3,7 @@ package info.unterrainer.commons.httpserver.scripts.jpas;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import info.unterrainer.commons.rdbutils.entities.BasicJpa;
+import info.unterrainer.commons.httpserver.jpas.BasicPermissionJpa;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,8 +15,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 @Entity
 @Table(name = "test_permission")
-public class TestPermissionJpa extends BasicJpa {
-
-	private Long referenceId;
-	private Long tenantId;
+public class TestPermissionJpa extends BasicPermissionJpa {
 }

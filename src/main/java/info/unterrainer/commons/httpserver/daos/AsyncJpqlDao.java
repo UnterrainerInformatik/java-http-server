@@ -2,8 +2,8 @@ package info.unterrainer.commons.httpserver.daos;
 
 import javax.persistence.EntityManagerFactory;
 
+import info.unterrainer.commons.httpserver.jpas.BasicPermissionJpa;
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
-import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
 public class AsyncJpqlDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 
@@ -21,7 +21,7 @@ public class AsyncJpqlDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 * @param tenantJpaType the JPA of the tenant-permission table associated
 	 */
 	public AsyncJpqlDao(final EntityManagerFactory emf, final Class<P> type,
-			final Class<? extends BasicJpa> tenantJpaType) {
+			final Class<? extends BasicPermissionJpa> tenantJpaType) {
 		super(emf, type);
 		this.coreDao.tenantData = new TenantData(tenantJpaType);
 	}
@@ -42,7 +42,7 @@ public class AsyncJpqlDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 * @param tenantIdFieldName        the name of the field holding the tenant-ID
 	 */
 	public AsyncJpqlDao(final EntityManagerFactory emf, final Class<P> type,
-			final Class<? extends BasicJpa> tenantJpaType, final String tenantReferenceFieldName,
+			final Class<? extends BasicPermissionJpa> tenantJpaType, final String tenantReferenceFieldName,
 			final String tenantIdFieldName) {
 		super(emf, type);
 		this.coreDao.tenantData = new TenantData(tenantJpaType, tenantReferenceFieldName, tenantIdFieldName);
