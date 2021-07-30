@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import javax.persistence.EntityManagerFactory;
 
+import info.unterrainer.commons.httpserver.jpas.BasicPermissionJpa;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import io.javalin.http.Context;
 
@@ -22,7 +23,8 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> {
 	 * @param type          the return-type of the query (the underlying JPA)
 	 * @param tenantJpaType the JPA of the tenant-permission table associated
 	 */
-	public JpqlDao(final EntityManagerFactory emf, final Class<P> type, final Class<? extends BasicJpa> tenantJpaType) {
+	public JpqlDao(final EntityManagerFactory emf, final Class<P> type,
+			final Class<? extends BasicPermissionJpa> tenantJpaType) {
 		super(emf, type);
 		this.coreDao.tenantData = new TenantData(tenantJpaType);
 	}
@@ -45,7 +47,7 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> {
 	 *                                     associated
 	 */
 	public JpqlDao(final Function<Context, EntityManagerFactory> entityManagerFactorySupplier, final Class<P> type,
-			final Class<? extends BasicJpa> tenantJpaType) {
+			final Class<? extends BasicPermissionJpa> tenantJpaType) {
 		super(entityManagerFactorySupplier, type);
 		this.coreDao.tenantData = new TenantData(tenantJpaType);
 	}
@@ -65,8 +67,9 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> {
 	 *                                 to the main-table-id
 	 * @param tenantIdFieldName        the name of the field holding the tenant-ID
 	 */
-	public JpqlDao(final EntityManagerFactory emf, final Class<P> type, final Class<? extends BasicJpa> tenantJpaType,
-			final String tenantReferenceFieldName, final String tenantIdFieldName) {
+	public JpqlDao(final EntityManagerFactory emf, final Class<P> type,
+			final Class<? extends BasicPermissionJpa> tenantJpaType, final String tenantReferenceFieldName,
+			final String tenantIdFieldName) {
 		super(emf, type);
 		this.coreDao.tenantData = new TenantData(tenantJpaType, tenantReferenceFieldName, tenantIdFieldName);
 	}
@@ -90,7 +93,7 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> {
 	 *                                     tenant-ID
 	 */
 	public JpqlDao(final Function<Context, EntityManagerFactory> entityManagerFactorySupplier, final Class<P> type,
-			final Class<? extends BasicJpa> tenantJpaType, final String tenantReferenceFieldName,
+			final Class<? extends BasicPermissionJpa> tenantJpaType, final String tenantReferenceFieldName,
 			final String tenantIdFieldName) {
 		super(entityManagerFactorySupplier, type);
 		this.coreDao.tenantData = new TenantData(tenantJpaType, tenantReferenceFieldName, tenantIdFieldName);

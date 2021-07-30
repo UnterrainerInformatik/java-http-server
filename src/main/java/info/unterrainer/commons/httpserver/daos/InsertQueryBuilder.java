@@ -1,11 +1,9 @@
 package info.unterrainer.commons.httpserver.daos;
 
-import java.time.LocalDateTime;
 import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 
-import info.unterrainer.commons.jreutils.DateUtils;
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.Getter;
@@ -31,12 +29,6 @@ public class InsertQueryBuilder<P extends BasicJpa>
 	 * @return the entity after insertion
 	 */
 	public P execute() {
-		return withEntityManager(em -> {
-			LocalDateTime time = DateUtils.nowUtc();
-			entity.setCreatedOn(time);
-			entity.setEditedOn(time);
-			em.persist(entity);
-			return entity;
-		});
+		return withEntityManager(em -> dao.coreDao.create(em, entity, writeTenantIds));
 	}
 }
