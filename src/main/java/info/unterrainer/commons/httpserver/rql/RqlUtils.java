@@ -19,7 +19,7 @@ public class RqlUtils {
 
 	private final Context ctx;
 	private final HandlerUtils hu;
-	private final String enumFqn;
+	private final List<String> enumFqn;
 
 	public RqlData parseRql(final String expression) {
 		CharStream in = CharStreams.fromString(expression);

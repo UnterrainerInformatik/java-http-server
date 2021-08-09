@@ -116,7 +116,7 @@ server.handlerGroupFor(UserJpa.class, UserJson.class, new JpqlDao<UserJpa>(emf, 
     .endpoints(Endpoint.ALL)
     .addRoleFor(Endpoint.ALL, RoleBuilder.open())
     .getListInterceptor()
-    .query("userName = :userName[string]")
+    .query("o.userName = :userName[string]")
     .build()
     .add();
 
@@ -251,7 +251,7 @@ server.handlerGroupFor(SubscriptionJpa.class, SubscriptionJson.class, subscripti
     .endpoints(Endpoint.ALL)
     .addRoleFor(Endpoint.ALL, RoleBuilder.open())
     .getListInterceptor()
-    .query("idString = :stringId[string]")
+    .query("o.idString = :stringId[string]")
     .build()
     .add();
 server.start();
@@ -271,7 +271,7 @@ You may specify a parameter as optional by pre-fixing the database-field name wi
 
 ```java
 .getListInterceptor()
-    .query("scanId = :scanId[long] AND (?name LIKE :sn[string] OR ?idString LIKE :sn[string] OR ?description LIKE :sn[string])")
+    .query("o.scanId = :scanId[long] AND (?o.name LIKE :sn[string] OR ?o.idString LIKE :sn[string] OR ?o.description LIKE :sn[string])")
     .build()
 ```
 
@@ -312,7 +312,7 @@ Where `scanId` is a numeric mandatory parameter and the rest is checked using th
 
 ```java
 .getListInterceptor()
-	.query("endsOn >= :startOn[datetime] AND ?type = :type[~EventType]")
+	.query("o.endsOn >= :startOn[datetime] AND ?o.type = :type[~EventType]")
 	.build()
 ```
 
