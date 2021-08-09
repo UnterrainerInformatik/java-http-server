@@ -101,7 +101,7 @@ public class RqlParserTest {
 
 	private void setupMocks(final Map<String, String> queryParams) {
 		hu = mock(HandlerUtils.class);
-		rqlUtils = new RqlUtils(null, hu, "");
+		rqlUtils = new RqlUtils(null, hu, List.of(""));
 
 		lenient().when(hu.getQueryParamAsString(any(), anyString())).thenAnswer(invocation -> {
 			String name = invocation.getArgument(1, String.class);

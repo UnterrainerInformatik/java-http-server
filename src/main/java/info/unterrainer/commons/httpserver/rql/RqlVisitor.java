@@ -1,5 +1,7 @@
 package info.unterrainer.commons.httpserver.rql;
 
+import java.util.List;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import info.unterrainer.commons.httpserver.HandlerUtils;
@@ -21,7 +23,7 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 	private final RqlData data;
 	private final HandlerUtils hu;
 	private final Context ctx;
-	private final String enumFqn;
+	private final List<String> enumFqn;
 
 	@Override
 	public String visitAnd(final AndContext ctx) {
@@ -194,13 +196,20 @@ public class RqlVisitor extends RqlBaseVisitor<String> {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Enum castToEnum(final String value, final String type, final String field) {
 		try {
-			final Class<Enum> cl = (Class<Enum>) Class.forName(enumFqn + "." + type);
+			Class<Enum> cl = null;
+			for (String enumFqn : this.enumFqn)
+				try {
+					cl = (Class<Enum>) Class.forName(enumFqn + "." + type);
+					break;
+				} catch (ClassNotFoundException e) {
+					// NOOP
+				}
+			if (cl == null)
+				throw new InternalServerErrorException(
+						String.format("The Enum type [%s] you want to cast to is not available", type));
 			return Enum.valueOf(cl, value);
 		} catch (ClassCastException e) {
 			throw new InternalServerErrorException();
-		} catch (ClassNotFoundException e) {
-			throw new InternalServerErrorException(
-					String.format("The Enum type [%s] you want to cast to is not available", type));
 		} catch (IllegalArgumentException e) {
 			throw new BadRequestException(
 					String.format("Value [%s] of field [%s] has to be of type [%s]", value, field, type));

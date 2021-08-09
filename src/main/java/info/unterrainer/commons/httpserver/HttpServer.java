@@ -65,7 +65,7 @@ public class HttpServer {
 	private UserAccessInterceptor userAccessInterceptor;
 	@Getter
 	@Setter
-	private String enumLookupFqnForInterceptorParser;
+	private List<String> enumLookupFqnForInterceptorParser;
 
 	private HttpServer() {
 	}
