@@ -1,8 +1,9 @@
 package info.unterrainer.commons.httpserver.extensions.delegates;
 
+import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import io.javalin.http.Context;
 
-public interface PreDeleteSync<E> {
+public interface PreDeleteSync<P extends BasicJpa, E> {
 
 	/**
 	 * Allows you to execute code before the deletion of an item.<br>
@@ -15,7 +16,8 @@ public interface PreDeleteSync<E> {
 	 * @param entityManager the entity-manager you can use to get the active
 	 *                      transaction, if any
 	 * @param receivedId    the ID of the item that is about to get deleted
+	 * @param jpaToDelete   the JPA to delete
 	 * @return the ID of the item that is about to get deleted
 	 */
-	Long handle(Context ctx, E entityManager, Long receivedId);
+	Long handle(Context ctx, E entityManager, Long receivedId, P jpaToDelete);
 }

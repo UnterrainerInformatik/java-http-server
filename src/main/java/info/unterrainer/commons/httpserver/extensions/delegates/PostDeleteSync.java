@@ -1,8 +1,9 @@
 package info.unterrainer.commons.httpserver.extensions.delegates;
 
+import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import io.javalin.http.Context;
 
-public interface PostDeleteSync<E> {
+public interface PostDeleteSync<P extends BasicJpa, E> {
 
 	/**
 	 * Allows you to execute code after the deletion of an item.<br>
@@ -15,8 +16,9 @@ public interface PostDeleteSync<E> {
 	 * @param entityManager the entity-manager you can use to get the active
 	 *                      transaction, if any
 	 * @param receivedId    the ID of the item that was deleted
+	 * @param deletedJpa    the JPA that was deleted
 	 * @return true, if the handler-chain should be continued to be processed, false
 	 *         otherwise.
 	 */
-	boolean handle(Context ctx, E entityManager, Long receivedId);
+	boolean handle(Context ctx, E entityManager, Long receivedId, P deletedJpa);
 }

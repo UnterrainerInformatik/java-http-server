@@ -25,12 +25,12 @@ public class AddonBuilder<P extends BasicJpa, J extends BasicJson, E> {
 
 	private final GenericHandlerGroupBuilder<P, J, E> builder;
 
-	public GenericHandlerGroupBuilder<P, J, E> postDeleteAsync(final PostDeleteAsync delegate) {
+	public GenericHandlerGroupBuilder<P, J, E> postDeleteAsync(final PostDeleteAsync<P> delegate) {
 		builder.extensions.postDeleteAsync().add(delegate);
 		return builder;
 	}
 
-	public GenericHandlerGroupBuilder<P, J, E> postDeleteSync(final PostDeleteSync<E> delegate) {
+	public GenericHandlerGroupBuilder<P, J, E> postDeleteSync(final PostDeleteSync<P, E> delegate) {
 		builder.extensions.postDeleteSync().add(delegate);
 		return builder;
 	}
@@ -75,12 +75,12 @@ public class AddonBuilder<P extends BasicJpa, J extends BasicJson, E> {
 		return builder;
 	}
 
-	public GenericHandlerGroupBuilder<P, J, E> preDeleteAsync(final PreDeleteAsync delegate) {
+	public GenericHandlerGroupBuilder<P, J, E> preDeleteAsync(final PreDeleteAsync<P> delegate) {
 		builder.extensions.preDeleteAsync().add(delegate);
 		return builder;
 	}
 
-	public GenericHandlerGroupBuilder<P, J, E> preDeleteSync(final PreDeleteSync<E> delegate) {
+	public GenericHandlerGroupBuilder<P, J, E> preDeleteSync(final PreDeleteSync<P, E> delegate) {
 		builder.extensions.preDeleteSync().add(delegate);
 		return builder;
 	}

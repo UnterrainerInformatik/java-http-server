@@ -36,8 +36,8 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 
-	private final List<PostDeleteAsync> postDeleteAsync = new ArrayList<>();
-	private final List<PostDeleteSync<E>> postDeleteSync = new ArrayList<>();
+	private final List<PostDeleteAsync<P>> postDeleteAsync = new ArrayList<>();
+	private final List<PostDeleteSync<P, E>> postDeleteSync = new ArrayList<>();
 	private final List<PostGetListAsync<P, J>> postGetListAsync = new ArrayList<>();
 	private final List<PostGetListSync<P, J, E>> postGetListSync = new ArrayList<>();
 	private final List<PostGetSingleAsync<P, J>> postGetSingleAsync = new ArrayList<>();
@@ -46,8 +46,8 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 	private final List<PostInsertSync<P, J, E>> postInsertSync = new ArrayList<>();
 	private final List<PostModifyAsync<P, J>> postModifyAsync = new ArrayList<>();
 	private final List<PostModifySync<P, J, E>> postModifySync = new ArrayList<>();
-	private final List<PreDeleteAsync> preDeleteAsync = new ArrayList<>();
-	private final List<PreDeleteSync<E>> preDeleteSync = new ArrayList<>();
+	private final List<PreDeleteAsync<P>> preDeleteAsync = new ArrayList<>();
+	private final List<PreDeleteSync<P, E>> preDeleteSync = new ArrayList<>();
 	private final List<PreInsertAsync<P, J>> preInsertAsync = new ArrayList<>();
 	private final List<PreInsertSync<P, J, E>> preInsertSync = new ArrayList<>();
 	private final List<PreModifyAsync<P, J>> preModifyAsync = new ArrayList<>();
@@ -143,13 +143,13 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 	}
 
 	public Long runPreDelete(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
-			final Long receivedId, final ExecutorService executorService) {
-		for (PreDeleteAsync h : preDeleteAsync())
-			executorService.execute(() -> h.handle(asyncCtx, receivedId));
+			final Long receivedId, final P jpaToDelete, final ExecutorService executorService) {
+		for (PreDeleteAsync<P> h : preDeleteAsync())
+			executorService.execute(() -> h.handle(asyncCtx, receivedId, jpaToDelete));
 
 		Long result = receivedId;
-		for (PreDeleteSync<E> h : preDeleteSync()) {
-			result = h.handle(ctx, entityManager, receivedId);
+		for (PreDeleteSync<P, E> h : preDeleteSync()) {
+			result = h.handle(ctx, entityManager, receivedId, jpaToDelete);
 			if (result == null)
 				throw new GracefulCancelationException();
 		}
@@ -157,12 +157,12 @@ public class HandlerExtensions<P extends BasicJpa, J extends BasicJson, E> {
 	}
 
 	public void runPostDelete(final Context ctx, final AsyncExtensionContext asyncCtx, final E entityManager,
-			final Long receivedId, final ExecutorService executorService) {
-		for (PostDeleteAsync h : postDeleteAsync())
-			executorService.execute(() -> h.handle(asyncCtx, receivedId));
+			final Long receivedId, final P deletedJpa, final ExecutorService executorService) {
+		for (PostDeleteAsync<P> h : postDeleteAsync())
+			executorService.execute(() -> h.handle(asyncCtx, receivedId, deletedJpa));
 
-		for (PostDeleteSync<E> h : postDeleteSync())
-			if (!h.handle(ctx, entityManager, receivedId))
+		for (PostDeleteSync<P, E> h : postDeleteSync())
+			if (!h.handle(ctx, entityManager, receivedId, deletedJpa))
 				throw new GracefulCancelationException();
 	}
 }
