@@ -184,6 +184,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 		P jpa = hu.getJpaById(ctx, transaction.getManager(), dao);
 		try {
+			P detachedJpa = orikaMapper.map(jpa, jpaType);
 			J json = jsonMapper.fromStringTo(jsonType, ctx.attribute(Attribute.REQUEST_BODY));
 			P mappedJpa = orikaMapper.map(json, jpaType);
 			mappedJpa.setId(jpa.getId());
@@ -192,11 +193,12 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 
 			mappedJpa = extensions.runPreModify(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(),
 					jpa.getId(), json, jpa, mappedJpa, executorService);
+
 			P persistedJpa = dao.update(transaction.getManager(), mappedJpa, hu.getReadTenantIdsFrom(ctx));
 
 			J r = orikaMapper.map(persistedJpa, jsonType);
 			r = extensions.runPostModify(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), jpa.getId(),
-					json, jpa, mappedJpa, persistedJpa, r, executorService);
+					json, detachedJpa, mappedJpa, persistedJpa, r, executorService);
 
 			ctx.attribute(Attribute.RESPONSE_OBJECT, r);
 
