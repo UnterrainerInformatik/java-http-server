@@ -1,5 +1,6 @@
 package info.unterrainer.commons.httpserver.daos;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -30,6 +31,22 @@ public class SingleQueryBuilder<P extends BasicJpa, T>
 	 * @return the selected entity
 	 */
 	public P get() {
+		return withEntityManager(em -> {
+			List<P> resultList = dao.coreDao
+					.getQuery(em, "o", null, "o.id = :id", Map.of("id", id), dao.type, null, false, null, readTenantIds)
+					.getResultList();
+			if (resultList.isEmpty())
+				return null;
+			return resultList.get(0);
+		});
+	}
+
+	/**
+	 * Get the selected entity or throw an exception if it wasn't found.
+	 *
+	 * @return the selected entity
+	 */
+	public P getOrException() {
 		return withEntityManager(em -> dao.coreDao
 				.getQuery(em, "o", null, "o.id = :id", Map.of("id", id), dao.type, null, false, null, readTenantIds)
 				.getSingleResult());
