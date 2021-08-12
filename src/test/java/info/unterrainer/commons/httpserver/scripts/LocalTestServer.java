@@ -57,7 +57,7 @@ public class LocalTestServer {
 					return resultJpa;
 				})
 				.extension()
-				.preDeleteSync((ctx, em, receivedId) -> {
+				.preDeleteSync((ctx, em, receivedId, deletedJpa) -> {
 					log.info("before delete id:[{}]", receivedId);
 					return receivedId;
 				})
@@ -77,7 +77,7 @@ public class LocalTestServer {
 					return responseList;
 				})
 				.extension()
-				.postDeleteSync((ctx, em, receivedId) -> {
+				.postDeleteSync((ctx, em, receivedId, deletedJpa) -> {
 					log.info("after delete");
 					return true;
 				})
@@ -105,7 +105,7 @@ public class LocalTestServer {
 					return resultJpa;
 				})
 				.extension()
-				.preDeleteSync((ctx, em, receivedId) -> {
+				.preDeleteSync((ctx, em, receivedId, deletedJpa) -> {
 					log.info("before delete id:[{}]", receivedId);
 					return receivedId;
 				})
@@ -125,7 +125,7 @@ public class LocalTestServer {
 					return responseList;
 				})
 				.extension()
-				.postDeleteSync((ctx, em, receivedId) -> {
+				.postDeleteSync((ctx, em, receivedId, deletedJpa) -> {
 					log.info("after delete");
 					return true;
 				})

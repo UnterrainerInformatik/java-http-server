@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.daos.CoreDao;
@@ -211,11 +212,14 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		Long id = hu.checkAndGetId(ctx);
 		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 
-		id = extensions.runPreDelete(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), id,
+		Set<Long> tenants = hu.getReadTenantIdsFrom(ctx);
+		P jpa = dao.getById(transaction.getManager(), id, tenants);
+		id = extensions.runPreDelete(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), id, jpa,
 				executorService);
 		dao.delete(transaction.getManager(), id, hu.getReadTenantIdsFrom(ctx));
 		ctx.status(204);
-		extensions.runPostDelete(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), id, executorService);
+		extensions.runPostDelete(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), id, jpa,
+				executorService);
 
 		transaction.end();
 	}
