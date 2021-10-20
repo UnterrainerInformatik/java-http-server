@@ -105,6 +105,25 @@ public class HandlerUtils {
 		return result;
 	}
 
+	public Double getQueryParamAsDouble(final Context ctx, final String name) {
+		return getQueryParamAsDouble(ctx, name, true, null);
+	}
+
+	public Double getQueryParamAsDouble(final Context ctx, final String name, final Double defaultValue) {
+		return getQueryParamAsDouble(ctx, name, false, defaultValue);
+	}
+
+	private Double getQueryParamAsDouble(final Context ctx, final String name, final boolean mandatory,
+			final Double defaultValue) {
+		String o = ctx.queryParam(name);
+		Double result = defaultValue;
+		if (o != null)
+			result = convertToDouble(o);
+		else if (mandatory)
+			throw new BadRequestException(String.format("Parameter %s is mandatory", name));
+		return result;
+	}
+
 	public long convertToLong(final String s) {
 		try {
 			return Long.parseLong(s);
