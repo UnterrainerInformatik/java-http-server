@@ -32,6 +32,16 @@ You may edit the grammar.
 
 When pressing `F5` a new tab should pop up with the title `Parse Tree: Rql.g4` showing the resulting parse-tree after parsing your grammar (see settings in `launch.json`).
 
+
+
+> **! When updating generated Files !**
+>
+> You have to update the `*.g4` file you use for generation before pressing F5 since the internal caching mechanism will kick in and no files will be generated a second time for the same file.
+>
+> It suffices to add a space, remove it again and save the file.
+
+
+
 You may also go to your grammar file, right click and select either:
 
 - Show Railroad Diagram for Rule

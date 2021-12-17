@@ -2,7 +2,7 @@
     "antlr4.generation": {
         "mode": "external",
         "visitors": true,
-        "outputDir": "C:\\code\\java-http-server\\src\\main\\java\\info\\unterrainer\\commons\\httpserver\\antlr",
+        "outputDir": "C:/code/java-http-server/src/main/java/info/unterrainer/commons/httpserver/antlr",
         "package": "info.unterrainer.commons.httpserver.antlr"
     },
     "antlr4.referencesCodeLens.enabled": true
