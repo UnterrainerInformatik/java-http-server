@@ -21,13 +21,73 @@ A relational database (MariaDB) that holds your entities (we use Liquibase for g
 
 ### Minimal Example
 
+#### Persistence.xml
+
+Of course you can use your own. This example is only given as a reference and quick-start support.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0"
+	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence 
+   http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+   
+	<persistence-unit name="my-persistence-unit" transaction-type="RESOURCE_LOCAL">
+		<!-- Hibernate specific -->
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		
+		<class>info.unterrainer.commons.rdbutils.entities.BasicJpa</class>
+		<class>info.unterrainer.commons.rdbutils.converters.LocalDateTimeConverter</class>
+		
+		<properties>
+			<!-- Hibernate-specific / MariaDB-JDBC-driver specific -->
+			<property name="javax.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver" />
+			<property name="javax.persistence.lock.timeout" value="10000" />
+			<property name="javax.persistence.query.timeout" value="60000" />
+			<property name="hibernate.connection.driver_class" value="org.mariadb.jdbc.Driver" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MariaDBDialect" />
+			<property name="hibernate.temp.use_jdbc_metadata_defaults" value="false" />
+			<property name="hibernate.jdbc.time_zone" value="UTC"/>
+			
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.format_sql" value="false" />
+			<property name="hibernate.c3p0.min_size" value="5" />
+			<property name="hibernate.c3p0.max_size" value="200" />
+			<!-- Seconds a Connection can remain pooled but unused before being discarded. Zero means idle connections never expire. -->
+			<property name="hibernate.c3p0.timeout" value="300" />
+			<!-- The size of c3p0’s global PreparedStatement cache over all connections. Zero means statement caching is turned off. -->
+			<property name="hibernate.c3p0.max_statements" value="500" />
+			<!-- If this is a number greater than 0, c3p0 will test all idle, pooled but unchecked-out connections, every this number of seconds. -->
+			<property name="hibernate.c3p0.idle_test_period" value="3000" />
+			<!-- Is set to true, the connection is tested with a simple query before being returned to a user -->
+			<property name="hibernate.c3p0.testConnectionOnCheckout" value="true" />
+			<property name="hibernate.c3p0.statementCacheNumDeferredCloseThreads" value="1" />
+
+		</properties>
+	</persistence-unit>
+</persistence>
+```
+
+#### Code
+
 ```java
-// Get configuration containing necessary environment variables.
-configuration = MyProgramConfiguration.read();
+// To get the necessary configuration values, we use environment variables.
+// You can see the necessary fields in the java-rdb-utils project (configuration).
+// Those currently are:
+//
+// DB_SERVER the IP or URI of your server
+// DB_PORT
+// DB_NAME
+// DB_USER
+// DB_PASSWORD
+
 // Create an EntityManagerFactory using java-rdb-utils.
 // Registers shutdownhook to close emf as well.
+// This method gets the connection data from the environment variables
+// as stated above.
+// "my-server" is the persistence-unit-name
 EntityManagerFactory emf = 
-    dbUtils.createAutoclosingEntityManagerFactory(MyProgram.class, "my-server");
+    dbUtils.createAutoclosingEntityManagerFactory(MyProgram.class, "my-persistence-unit");
 
 // Create the server.
 HttpServer server = HttpServer.builder()

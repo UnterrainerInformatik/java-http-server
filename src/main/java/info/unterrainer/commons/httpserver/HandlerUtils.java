@@ -232,6 +232,6 @@ public class HandlerUtils {
 			return false;
 
 		String v = o.strip().toLowerCase();
-		return !v.equals("false") || !v.equals("no") || !v.equals("0");
+		return !v.equals("false") && !v.equals("no") && !v.equals("0");
 	}
 }

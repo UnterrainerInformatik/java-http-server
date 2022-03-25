@@ -39,3 +39,5 @@ hs_err_pid*
 /bin/
 
 src/main/java/info/unterrainer/commons/httpserver/Information.java
+
+antlr4/.antlr/
