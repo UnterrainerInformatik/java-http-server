@@ -121,13 +121,10 @@ public class HttpServer {
 
 		javalin.before(ctx -> ctx.attribute(Attribute.JAVALIN_SERVER, this));
 		javalin.before(ctx -> ctx.attribute(Attribute.RESPONSE_TYPE, ResponseType.JSON));
-		javalin.before(ctx -> ctx.contentType("application/json"));
+		javalin.before(ctx -> ctx.attribute(Attribute.RESPONSE_CONTENT_TYPE, "application/json"));
 		javalin.before(this::unzip);
 
-		javalin.after(ctx -> render(ctx));
-		javalin.after(ctx -> {
-			ctx.contentType("application/json");
-		});
+		javalin.after(this::render);
 
 		javalin.error(404, ctx -> {
 			ctx.result(jsonMapper.toStringFrom(MessageJson.builder()
@@ -267,5 +264,9 @@ public class HttpServer {
 		Integer status = ctx.attribute(Attribute.RESPONSE_STATUS);
 		if (status != null)
 			ctx.status(status);
+
+		String contentType = ctx.attribute(Attribute.RESPONSE_CONTENT_TYPE);
+		if (contentType != null)
+			ctx.contentType(contentType);
 	}
 }
