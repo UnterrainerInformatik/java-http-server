@@ -8,6 +8,7 @@ public class Attribute {
 	public static final String RESPONSE_OBJECT = "response_object";
 	public static final String RESPONSE_STATUS = "response_status";
 	public static final String RESPONSE_TYPE = "response_type";
+	public static final String RESPONSE_CONTENT_TYPE = "response_content_type";
 
 	public static final String USER_NAME = "user_name";
 	public static final String USER_GIVEN_NAME = "user_given_name";
