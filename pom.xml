@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>info.unterrainer.commons</groupId>
 		<artifactId>parent-javalin-pom</artifactId>
-		<version>0.0.12</version>
+		<version>0.0.15</version>
 	</parent>
 
 	<properties>
@@ -17,7 +17,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.2.42</version>
+	<version>0.2.43</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
@@ -30,17 +30,17 @@
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>jre-utils</artifactId>
-			<version>0.2.11</version>
+			<version>0.2.13</version>
 		</dependency>
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>rdb-utils</artifactId>
-			<version>0.1.17</version>
+			<version>0.1.18</version>
 		</dependency>
 		<dependency>
 			<groupId>info.unterrainer.commons</groupId>
 			<artifactId>serialization</artifactId>
-			<version>0.1.6</version>
+			<version>0.1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.persistence</groupId>
@@ -60,12 +60,12 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-common</artifactId>
-			<version>15.0.2</version>
+			<version>17.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-core</artifactId>
-			<version>15.0.2</version>
+			<version>17.0.1</version>
 		</dependency>
 	</dependencies>
 
