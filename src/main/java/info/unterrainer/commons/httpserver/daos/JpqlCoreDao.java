@@ -17,8 +17,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import org.mapstruct.ap.internal.util.Strings;
-
 import info.unterrainer.commons.httpserver.exceptions.ForbiddenException;
 import info.unterrainer.commons.httpserver.exceptions.InternalServerErrorException;
 import info.unterrainer.commons.httpserver.jpas.BasicPermissionJpa;
@@ -158,16 +156,17 @@ public class JpqlCoreDao<P extends BasicJpa> implements CoreDao<P, EntityManager
 
 		if (asyncStates != null)
 			log.debug("  with asynchronous_state: [{}]",
-					Strings.join(asyncStates.stream().map(AsyncState::toString).collect(Collectors.toList()), ", "));
+					String.join(", ", asyncStates.stream().map(AsyncState::toString).collect(Collectors.toList())));
 		addAsyncStatesParamsToQuery(asyncStates, q);
 
 		params = addTenantParams(params, tenantIds);
 		if (params != null) {
 			log.debug("  with parameters: [{}]",
-					Strings.join(params.entrySet()
-							.stream()
-							.map(e -> e.getKey() + ": " + e.getValue().toString())
-							.collect(Collectors.toList()), ", "));
+					String.join(", ",
+							params.entrySet()
+									.stream()
+									.map(e -> e.getKey() + ": " + e.getValue().toString())
+									.collect(Collectors.toList())));
 			for (Entry<String, Object> e : params.entrySet())
 				q.setParameter(e.getKey(), e.getValue());
 		}
