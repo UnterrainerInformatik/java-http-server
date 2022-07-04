@@ -17,7 +17,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.3.0</version>
+	<version>0.3.1</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
-			<version>4.10.1</version>
+			<version>4.8-1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
