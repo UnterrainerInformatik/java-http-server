@@ -1,7 +1,7 @@
 package info.unterrainer.commons.httpserver.scripts.handlers;
 
 import info.unterrainer.commons.httpserver.scripts.jsons.TestJson;
-import info.unterrainer.commons.serialization.JsonMapper;
+import info.unterrainer.commons.serialization.jsonmapper.JsonMapper;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import lombok.RequiredArgsConstructor;

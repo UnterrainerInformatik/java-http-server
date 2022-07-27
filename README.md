@@ -93,7 +93,7 @@ EntityManagerFactory emf =
 HttpServer server = HttpServer.builder()
     .applicationName("my-rest-server")
     .jsonMapper(jsonMapper)
-    .orikaFactory(orikaFactory)
+    .objectMapper(objectMapper)
     .build();
 
 // All handlers are added and considered in order.

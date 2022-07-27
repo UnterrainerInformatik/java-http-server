@@ -9,25 +9,22 @@ import org.junit.jupiter.api.Test;
 
 import info.unterrainer.commons.httpserver.jpas.ChildJpa;
 import info.unterrainer.commons.httpserver.jsons.ChildJson;
-import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
+import info.unterrainer.commons.serialization.objectmapper.ObjectMapper;
 
-public class OrikaMappingTests {
+public class ObjectMapperMappingTests {
 
-	public static MapperFactory orikaFactory = new DefaultMapperFactory.Builder().build();
-	public static MapperFacade orikaMapper;
+	public static ObjectMapper objectMapper;
 
 	@BeforeAll
 	public static void beforeClass() {
-		orikaMapper = orikaFactory.getMapperFacade();
+		objectMapper = new ObjectMapper();
 	}
 
 	@Test
 	public void mappingJsonToJpaWorks() {
 		LocalDateTime now = LocalDateTime.now();
 		ChildJson json = ChildJson.builder().id(4L).message("test").createdOn(now).editedOn(now).build();
-		ChildJpa jpa = orikaMapper.map(json, ChildJpa.class);
+		ChildJpa jpa = objectMapper.map(ChildJpa.class, json);
 		assertThat(jpa.getId()).isEqualTo(json.getId());
 		assertThat(jpa.getMessage()).isEqualTo(json.getMessage());
 		assertThat(jpa.getCreatedOn()).isEqualTo(json.getCreatedOn());
@@ -38,7 +35,7 @@ public class OrikaMappingTests {
 	public void mappingJpaToJsonWorks() {
 		LocalDateTime now = LocalDateTime.now();
 		ChildJpa jpa = ChildJpa.builder().id(4L).message("test").createdOn(now).editedOn(now).build();
-		ChildJson json = orikaMapper.map(jpa, ChildJson.class);
+		ChildJson json = objectMapper.map(ChildJson.class, jpa);
 		assertThat(json.getId()).isEqualTo(jpa.getId());
 		assertThat(json.getMessage()).isEqualTo(jpa.getMessage());
 		assertThat(json.getCreatedOn()).isEqualTo(jpa.getCreatedOn());
