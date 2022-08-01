@@ -1,6 +1,6 @@
 package info.unterrainer.commons.httpserver.jpas;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.Data;

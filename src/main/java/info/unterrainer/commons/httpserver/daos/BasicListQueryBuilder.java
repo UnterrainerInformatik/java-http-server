@@ -2,9 +2,9 @@ package info.unterrainer.commons.httpserver.daos;
 
 import java.util.HashMap;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.TypedQuery;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.AccessLevel;
@@ -35,7 +35,7 @@ public class BasicListQueryBuilder<P extends BasicJpa, X, R extends BasicListQue
 				lockPessimistic, null, readTenantIds);
 	}
 
-	public javax.persistence.Query getCountQuery(final EntityManager em) {
+	public jakarta.persistence.Query getCountQuery(final EntityManager em) {
 		return dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null, readTenantIds);
 	}
 

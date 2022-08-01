@@ -1,6 +1,6 @@
 package info.unterrainer.commons.httpserver.scripts;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.httpserver.HttpServer;
 import info.unterrainer.commons.httpserver.accessmanager.RoleBuilder;

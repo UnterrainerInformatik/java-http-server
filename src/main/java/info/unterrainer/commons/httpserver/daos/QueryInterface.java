@@ -2,8 +2,8 @@ package info.unterrainer.commons.httpserver.daos;
 
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 
@@ -15,7 +15,7 @@ interface QueryInterface<P extends BasicJpa, T> {
 
 	TypedQuery<T> getTypedQuery(final EntityManager em);
 
-	javax.persistence.Query getCountQuery(final EntityManager em);
+	jakarta.persistence.Query getCountQuery(final EntityManager em);
 
 	Set<Long> getReadTenantIds();
 
