@@ -1,6 +1,7 @@
 {
     "antlr4.generation": {
         "mode": "external",
+        "language": "Java",
         "visitors": true,
         "outputDir": "C:/code/java-http-server/src/main/java/info/unterrainer/commons/httpserver/antlr",
         "package": "info.unterrainer.commons.httpserver.antlr"
