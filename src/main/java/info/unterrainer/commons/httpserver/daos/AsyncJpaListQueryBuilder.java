@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.TypedQuery;
 
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
 import info.unterrainer.commons.rdbutils.enums.AsyncState;
@@ -27,7 +27,7 @@ public class AsyncJpaListQueryBuilder<P extends BasicAsyncJpa>
 	}
 
 	@Override
-	public javax.persistence.Query getCountQuery(final EntityManager em) {
+	public jakarta.persistence.Query getCountQuery(final EntityManager em) {
 		return dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, asyncStates,
 				readTenantIds);
 	}

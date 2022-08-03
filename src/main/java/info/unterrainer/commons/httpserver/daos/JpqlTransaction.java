@@ -1,6 +1,6 @@
 package info.unterrainer.commons.httpserver.daos;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import lombok.RequiredArgsConstructor;
 

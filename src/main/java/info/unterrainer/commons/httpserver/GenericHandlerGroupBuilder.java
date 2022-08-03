@@ -16,13 +16,12 @@ import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterce
 import info.unterrainer.commons.httpserver.rql.RqlData;
 import info.unterrainer.commons.httpserver.rql.RqlUtils;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
-import info.unterrainer.commons.serialization.JsonMapper;
+import info.unterrainer.commons.serialization.jsonmapper.JsonMapper;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
+import info.unterrainer.commons.serialization.objectmapper.ObjectMapper;
 import io.javalin.core.security.Role;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson, E> {
@@ -32,7 +31,7 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	private final Class<J> jsonType;
 	private final CoreDao<P, E> dao;
 	private JsonMapper jsonMapper;
-	private MapperFactory orikaFactory;
+	private ObjectMapper objectMapper;
 	private String path;
 	private List<Endpoint> endpoints = new ArrayList<>();
 	private List<GetListInterceptor> getListInterceptors = new ArrayList<>();
@@ -45,12 +44,12 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 	public HttpServer add() {
 		if (jsonMapper == null)
 			jsonMapper = JsonMapper.create();
-		if (orikaFactory == null)
-			orikaFactory = new DefaultMapperFactory.Builder().build();
+		if (objectMapper == null)
+			objectMapper = new ObjectMapper();
 		if (executorService == null)
 			executorService = server.executorService;
 		GenericHandlerGroup<P, J, E> handlerGroupInstance = new GenericHandlerGroup<>(dao, jpaType, jsonType,
-				jsonMapper, orikaFactory.getMapperFacade(), path, endpoints, getListInterceptors, extensions,
+				jsonMapper, objectMapper, path, endpoints, getListInterceptors, extensions,
 				asyncExtensionContextMappers, accessRoles, executorService);
 		server.addHandlerGroup(handlerGroupInstance);
 		return server;
@@ -70,8 +69,8 @@ public class GenericHandlerGroupBuilder<P extends BasicJpa, J extends BasicJson,
 		return this;
 	}
 
-	public GenericHandlerGroupBuilder<P, J, E> orikaFactory(final MapperFactory orikaFactory) {
-		this.orikaFactory = orikaFactory;
+	public GenericHandlerGroupBuilder<P, J, E> objectMapper(final ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
 		return this;
 	}
 

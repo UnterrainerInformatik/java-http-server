@@ -27,10 +27,11 @@ Of course you can use your own. This example is only given as a reference and qu
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.0"
-	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence 
-   http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+<persistence version="3.0" 
+    xmlns="https://jakarta.ee/xml/ns/persistence" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+
    
 	<persistence-unit name="my-persistence-unit" transaction-type="RESOURCE_LOCAL">
 		<!-- Hibernate specific -->
@@ -41,9 +42,9 @@ Of course you can use your own. This example is only given as a reference and qu
 		
 		<properties>
 			<!-- Hibernate-specific / MariaDB-JDBC-driver specific -->
-			<property name="javax.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver" />
-			<property name="javax.persistence.lock.timeout" value="10000" />
-			<property name="javax.persistence.query.timeout" value="60000" />
+			<property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver" />
+			<property name="jakarta.persistence.lock.timeout" value="10000" />
+			<property name="jakarta.persistence.query.timeout" value="60000" />
 			<property name="hibernate.connection.driver_class" value="org.mariadb.jdbc.Driver" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MariaDBDialect" />
 			<property name="hibernate.temp.use_jdbc_metadata_defaults" value="false" />
@@ -93,7 +94,7 @@ EntityManagerFactory emf =
 HttpServer server = HttpServer.builder()
     .applicationName("my-rest-server")
     .jsonMapper(jsonMapper)
-    .orikaFactory(orikaFactory)
+    .objectMapper(objectMapper)
     .build();
 
 // All handlers are added and considered in order.

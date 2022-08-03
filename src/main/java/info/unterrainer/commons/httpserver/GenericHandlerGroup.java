@@ -21,16 +21,16 @@ import info.unterrainer.commons.httpserver.interceptors.InterceptorData;
 import info.unterrainer.commons.httpserver.interceptors.delegates.GetListInterceptor;
 import info.unterrainer.commons.httpserver.jsons.ListJson;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
-import info.unterrainer.commons.serialization.JsonMapper;
-import info.unterrainer.commons.serialization.exceptions.JsonMappingException;
-import info.unterrainer.commons.serialization.exceptions.JsonProcessingException;
+import info.unterrainer.commons.serialization.jsonmapper.JsonMapper;
+import info.unterrainer.commons.serialization.jsonmapper.exceptions.JsonMappingException;
+import info.unterrainer.commons.serialization.jsonmapper.exceptions.JsonProcessingException;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
+import info.unterrainer.commons.serialization.objectmapper.ObjectMapper;
 import io.javalin.core.security.Role;
 import io.javalin.http.Context;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ma.glasnost.orika.MapperFacade;
 
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
@@ -40,7 +40,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 	private final Class<P> jpaType;
 	private final Class<J> jsonType;
 	private final JsonMapper jsonMapper;
-	private final MapperFacade orikaMapper;
+	private final ObjectMapper objectMapper;
 	private final String path;
 	private final List<Endpoint> endpoints;
 	private final List<GetListInterceptor> getListInterceptors;
@@ -107,7 +107,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 
 		P jpa = hu.getJpaById(ctx, transaction.getManager(), dao);
-		J json = orikaMapper.map(jpa, jsonType);
+		J json = objectMapper.map(jsonType, jpa);
 		json = extensions.runPostGetSingle(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(),
 				jpa.getId(), jpa, json, executorService);
 
@@ -146,7 +146,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 				interceptorResult.getOrderByClause(), hu.getReadTenantIdsFrom(ctx));
 		ListJson<J> jList = new ListJson<>();
 		for (P entry : bList.getEntries())
-			jList.getEntries().add(orikaMapper.map(entry, jsonType));
+			jList.getEntries().add(objectMapper.map(jsonType, entry));
 
 		hu.setPaginationParamsFor(jList, offset, size, bList.getCount(), interceptorResult.getPartOfQueryString(), ctx);
 
@@ -161,13 +161,13 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		String b = ctx.attribute(Attribute.REQUEST_BODY);
 		try {
 			J json = jsonMapper.fromStringTo(jsonType, b);
-			P mappedJpa = orikaMapper.map(json, jpaType);
+			P mappedJpa = objectMapper.map(jpaType, json);
 			DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 
 			mappedJpa = extensions.runPreInsert(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), json,
 					mappedJpa, executorService);
 			P createdJpa = dao.create(transaction.getManager(), mappedJpa, hu.getWriteTenantIdsFrom(ctx));
-			J r = orikaMapper.map(createdJpa, jsonType);
+			J r = objectMapper.map(jsonType, createdJpa);
 
 			r = extensions.runPostInsert(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), json,
 					mappedJpa, createdJpa, r, executorService);
@@ -184,9 +184,9 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 		P jpa = hu.getJpaById(ctx, transaction.getManager(), dao);
 		try {
-			P detachedJpa = orikaMapper.map(jpa, jpaType);
+			P detachedJpa = objectMapper.map(jpaType, jpaType, jpa);
 			J json = jsonMapper.fromStringTo(jsonType, ctx.attribute(Attribute.REQUEST_BODY));
-			P mappedJpa = orikaMapper.map(json, jpaType);
+			P mappedJpa = objectMapper.map(jpaType, json);
 			mappedJpa.setId(jpa.getId());
 			mappedJpa.setCreatedOn(jpa.getCreatedOn());
 			mappedJpa.setEditedOn(jpa.getEditedOn());
@@ -196,7 +196,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 
 			P persistedJpa = dao.update(transaction.getManager(), mappedJpa, hu.getReadTenantIdsFrom(ctx));
 
-			J r = orikaMapper.map(persistedJpa, jsonType);
+			J r = objectMapper.map(jsonType, persistedJpa);
 			r = extensions.runPostModify(ctx, makeAsyncExtensionContextFor(ctx), transaction.getManager(), jpa.getId(),
 					json, detachedJpa, mappedJpa, persistedJpa, r, executorService);
 

@@ -2,7 +2,7 @@ package info.unterrainer.commons.httpserver.daos;
 
 import java.util.function.Function;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;

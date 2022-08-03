@@ -1,6 +1,6 @@
 package info.unterrainer.commons.httpserver.scripts;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.httpserver.HttpServer;
 import info.unterrainer.commons.httpserver.accessmanager.RoleBuilder;
@@ -13,7 +13,7 @@ import info.unterrainer.commons.httpserver.scripts.jsons.TestJson;
 import info.unterrainer.commons.jreutils.ShutdownHook;
 import info.unterrainer.commons.rdbutils.RdbUtils;
 import info.unterrainer.commons.rdbutils.Transactions;
-import info.unterrainer.commons.serialization.JsonMapper;
+import info.unterrainer.commons.serialization.jsonmapper.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

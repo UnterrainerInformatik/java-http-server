@@ -1,6 +1,6 @@
 package info.unterrainer.commons.httpserver.daos;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.rdbutils.Transactions;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
@@ -14,10 +14,12 @@ public class CountQueryBuilder<P extends BasicJpa> extends BasicListQueryBuilder
 	public Long build() {
 		if (entityManager != null)
 			return (Long) dao.coreDao
-					.getCountQuery(entityManager, selectClause, joinClause, whereClause, parameters, null, readTenantIds)
+					.getCountQuery(entityManager, selectClause, joinClause, whereClause, parameters, null,
+							readTenantIds)
 					.getSingleResult();
 		return (Long) Transactions.withNewTransactionReturning(emf,
-				em -> dao.coreDao.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null, readTenantIds)
+				em -> dao.coreDao
+						.getCountQuery(em, selectClause, joinClause, whereClause, parameters, null, readTenantIds)
 						.getSingleResult());
 	}
 }

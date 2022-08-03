@@ -1,6 +1,6 @@
 package info.unterrainer.commons.httpserver.daos;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.httpserver.jpas.BasicPermissionJpa;
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;

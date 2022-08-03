@@ -3,7 +3,7 @@ package info.unterrainer.commons.httpserver.daos;
 import java.time.LocalDateTime;
 import java.util.function.Function;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import info.unterrainer.commons.jreutils.DateUtils;
 import info.unterrainer.commons.rdbutils.Transactions;

@@ -2,8 +2,8 @@ package info.unterrainer.commons.httpserver.daos;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 

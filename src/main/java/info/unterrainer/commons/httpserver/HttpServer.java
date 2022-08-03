@@ -30,8 +30,9 @@ import info.unterrainer.commons.httpserver.handlers.PostmanCollectionHandler;
 import info.unterrainer.commons.httpserver.jsons.MessageJson;
 import info.unterrainer.commons.jreutils.ShutdownHook;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
-import info.unterrainer.commons.serialization.JsonMapper;
+import info.unterrainer.commons.serialization.jsonmapper.JsonMapper;
 import info.unterrainer.commons.serialization.jsons.BasicJson;
+import info.unterrainer.commons.serialization.objectmapper.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.core.security.Role;
 import io.javalin.http.Context;
@@ -41,8 +42,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
 import okio.BufferedSource;
 import okio.GzipSource;
 import okio.Okio;
@@ -55,7 +54,7 @@ public class HttpServer {
 	private HttpServerConfiguration config;
 	private String applicationName;
 	private JsonMapper jsonMapper;
-	private MapperFactory orikaFactory;
+	private ObjectMapper objectMapper;
 	private final List<HandlerGroup> handlerGroups = new ArrayList<>();
 	private List<HandlerInstance> handlerInstances = new ArrayList<>();
 	ExecutorService executorService;
@@ -71,7 +70,7 @@ public class HttpServer {
 	}
 
 	@Builder
-	private HttpServer(final String configPrefix, final String applicationName, final MapperFactory orikaFactory,
+	private HttpServer(final String configPrefix, final String applicationName, final ObjectMapper objectMapper,
 			final JsonMapper jsonMapper, final ExecutorService executorService, final String... appVersionFqns) {
 		config = HttpServerConfiguration.read(configPrefix);
 		this.applicationName = applicationName;
@@ -89,9 +88,9 @@ public class HttpServer {
 		this.jsonMapper = jsonMapper;
 		if (this.jsonMapper == null)
 			this.jsonMapper = JsonMapper.create();
-		this.orikaFactory = orikaFactory;
-		if (this.orikaFactory == null)
-			this.orikaFactory = new DefaultMapperFactory.Builder().build();
+		this.objectMapper = objectMapper;
+		if (this.objectMapper == null)
+			this.objectMapper = new ObjectMapper();
 
 		create();
 	}
@@ -254,11 +253,11 @@ public class HttpServer {
 		Object dto = ctx.attribute(Attribute.RESPONSE_OBJECT);
 		if (dto != null)
 			switch ((ResponseType) ctx.attribute(Attribute.RESPONSE_TYPE)) {
-			case JSON:
-				ctx.result(jsonMapper.toStringFrom(dto));
-				break;
-			default:
-				ctx.result((String) dto);
+				case JSON:
+					ctx.result(jsonMapper.toStringFrom(dto));
+					break;
+				default:
+					ctx.result((String) dto);
 			}
 
 		Integer status = ctx.attribute(Attribute.RESPONSE_STATUS);

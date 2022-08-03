@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
