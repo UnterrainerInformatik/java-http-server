@@ -10,6 +10,12 @@ There is a `.vscode` directory in the `antlr4` folder containing the proper sett
 The `settings.json` contains settings for the ANTLR-plugin ([ANTLR4 grammar syntax support](https://marketplace.visualstudio.com/items?itemName=mike-lischke.vscode-antlr4)) which we use.
 The `launch.json` contains a debug-launch setting ready to be opened with `VS Code -> launch/debug -> open file`. Both contains variables you'll probably want to change:
 
+## Version
+The version of ANTLR4 used is the version that's registered in your npm-install (the local vscode folder).
+Currently, as of this writing, it's 4.9.2, even if there's already a version 4.10.1 out there for some time.
+That's because the maintainer of the VsCode plugin hasn't updated it yet (because of TS issues).
+You have to use the same version in Java as was used when generating the code.
+
 ### settings.json
 
 `outputDir` is the directory (absolute) you want the parser-generator to copy the java-files into.
@@ -49,7 +55,7 @@ You may also go to your grammar file, right click and select either:
 - Show ATN Graph for Rule
 - Show Grammar Call Graph
 
-Which will open in a new tab and are, depending on which point you chose,  depending on the rule your cursor currently is located in.
+Which will open in a new tab, depending on which point you chose, depending on the rule your cursor currently is located in.
 
 After pressing `F5` your grammar is generated and the files are copied.
 

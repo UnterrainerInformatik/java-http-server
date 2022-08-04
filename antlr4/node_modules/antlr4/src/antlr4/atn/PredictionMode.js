@@ -1,17 +1,14 @@
-/* Copyright (c) 2012-2022 The ANTLR Project. All rights reserved.
+/* Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
  * Use of this file is governed by the BSD 3-clause license that
  * can be found in the LICENSE.txt file in the project root.
  */
 
-import ATN from './ATN.js';
-import RuleStopState from '../state/RuleStopState.js';
-import ATNConfigSet from './ATNConfigSet.js';
-import ATNConfig from './ATNConfig.js';
-import SemanticContext from './SemanticContext.js';
-import BitSet from "../misc/BitSet.js";
-import AltDict from "../misc/AltDict.js";
-import HashCode from "../misc/HashCode.js";
-import HashMap from "../misc/HashMap.js";
+const {Map, BitSet, AltDict, hashStuff} = require('./../Utils');
+const ATN = require('./ATN');
+const {RuleStopState} = require('./ATNState');
+const {ATNConfigSet} = require('./ATNConfigSet');
+const {ATNConfig} = require('./ATNConfig');
+const {SemanticContext} = require('./SemanticContext');
 
 /**
  * This enumeration defines the prediction modes available in ANTLR 4 along with
@@ -502,14 +499,14 @@ const PredictionMode = {
      * </pre>
      */
     getConflictingAltSubsets: function(configs) {
-        const configToAlts = new HashMap();
-        configToAlts.hashFunction = function(cfg) { HashCode.hashStuff(cfg.state.stateNumber, cfg.context); };
+        const configToAlts = new Map();
+        configToAlts.hashFunction = function(cfg) { hashStuff(cfg.state.stateNumber, cfg.context); };
         configToAlts.equalsFunction = function(c1, c2) { return c1.state.stateNumber === c2.state.stateNumber && c1.context.equals(c2.context);};
         configs.items.map(function(cfg) {
             let alts = configToAlts.get(cfg);
             if (alts === null) {
                 alts = new BitSet();
-                configToAlts.set(cfg, alts);
+                configToAlts.put(cfg, alts);
             }
             alts.add(cfg.alt);
         });
@@ -530,7 +527,7 @@ const PredictionMode = {
             let alts = m.get(c.state);
             if (alts === null) {
                 alts = new BitSet();
-                m.set(c.state, alts);
+                m.put(c.state, alts);
             }
             alts.add(c.alt);
         });
@@ -562,4 +559,4 @@ const PredictionMode = {
     }
 };
 
-export default PredictionMode;
+module.exports = PredictionMode;

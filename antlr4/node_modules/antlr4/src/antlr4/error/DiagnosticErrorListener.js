@@ -1,11 +1,11 @@
-/* Copyright (c) 2012-2022 The ANTLR Project. All rights reserved.
+/* Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
  * Use of this file is governed by the BSD 3-clause license that
  * can be found in the LICENSE.txt file in the project root.
  */
 
-import ErrorListener from './ErrorListener.js';
-import Interval from '../misc/Interval.js';
-import BitSet from "../misc/BitSet.js";
+const {BitSet} = require('./../Utils');
+const {ErrorListener} = require('./ErrorListener')
+const {Interval} = require('./../IntervalSet')
 
 
 /**
@@ -27,7 +27,7 @@ import BitSet from "../misc/BitSet.js";
  *  this situation occurs.</li>
  *  </ul>
  */
-export default class DiagnosticErrorListener extends ErrorListener {
+class DiagnosticErrorListener extends ErrorListener {
 	constructor(exactOnly) {
 		super();
 		exactOnly = exactOnly || true;
@@ -101,3 +101,5 @@ export default class DiagnosticErrorListener extends ErrorListener {
 		return `{${result.values().join(", ")}}`;
 	}
 }
+
+module.exports = DiagnosticErrorListener

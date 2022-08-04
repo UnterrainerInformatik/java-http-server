@@ -1,12 +1,14 @@
-/* Copyright (c) 2012-2022 The ANTLR Project. All rights reserved.
+/* Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
  * Use of this file is governed by the BSD 3-clause license that
  * can be found in the LICENSE.txt file in the project root.
  */
 
-import Token from './Token.js';
-import Lexer from './Lexer.js';
-import Interval from './misc/Interval.js';
-import TokenStream from "./TokenStream.js";
+const {Token} = require('./Token');
+const Lexer = require('./Lexer');
+const {Interval} = require('./IntervalSet');
+
+// this is just to keep meaningful parameter types to Parser
+class TokenStream {}
 
 /**
  * This implementation of {@link TokenStream} loads tokens from a
@@ -20,7 +22,7 @@ import TokenStream from "./TokenStream.js";
  * {@link Token//HIDDEN_CHANNEL}, use a filtering token stream such a
  * {@link CommonTokenStream}.</p>
  */
-export default class BufferedTokenStream extends TokenStream {
+class BufferedTokenStream extends TokenStream {
 	constructor(tokenSource) {
 
 		super();
@@ -379,3 +381,6 @@ export default class BufferedTokenStream extends TokenStream {
 		}
 	}
 }
+
+
+module.exports = BufferedTokenStream;
