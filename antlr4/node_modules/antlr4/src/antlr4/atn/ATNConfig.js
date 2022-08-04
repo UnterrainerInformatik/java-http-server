@@ -1,10 +1,12 @@
-/* Copyright (c) 2012-2022 The ANTLR Project. All rights reserved.
+/* Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
  * Use of this file is governed by the BSD 3-clause license that
  * can be found in the LICENSE.txt file in the project root.
  */
 
-import SemanticContext from './SemanticContext.js';
-import HashCode from "../misc/HashCode.js";
+const {DecisionState} = require('./ATNState');
+const {SemanticContext} = require('./SemanticContext');
+const {Hash} = require("../Utils");
+
 
 function checkParams(params, isCfg) {
 	if(params===null) {
@@ -27,7 +29,7 @@ function checkParams(params, isCfg) {
 	}
 }
 
-export default class ATNConfig {
+class ATNConfig {
     /**
      * @param {Object} params A tuple: (ATN state, predicted alt, syntactic, semantic context).
      * The syntactic context is a graph-structured stack node whose
@@ -75,7 +77,7 @@ export default class ATNConfig {
     }
 
     hashCode() {
-        const hash = new HashCode();
+        const hash = new Hash();
         this.updateHashCode(hash);
         return hash.finish();
     }
@@ -104,7 +106,7 @@ export default class ATNConfig {
     }
 
     hashCodeForConfigSet() {
-        const hash = new HashCode();
+        const hash = new Hash();
         hash.update(this.state.stateNumber, this.alt, this.semanticContext);
         return hash.finish();
     }
@@ -132,3 +134,39 @@ export default class ATNConfig {
                     : "") + ")";
     }
 }
+
+
+class LexerATNConfig extends ATNConfig {
+    constructor(params, config) {
+        super(params, config);
+
+        // This is the backing field for {@link //getLexerActionExecutor}.
+        const lexerActionExecutor = params.lexerActionExecutor || null;
+        this.lexerActionExecutor = lexerActionExecutor || (config!==null ? config.lexerActionExecutor : null);
+        this.passedThroughNonGreedyDecision = config!==null ? this.checkNonGreedyDecision(config, this.state) : false;
+        this.hashCodeForConfigSet = LexerATNConfig.prototype.hashCode;
+        this.equalsForConfigSet = LexerATNConfig.prototype.equals;
+        return this;
+    }
+
+    updateHashCode(hash) {
+        hash.update(this.state.stateNumber, this.alt, this.context, this.semanticContext, this.passedThroughNonGreedyDecision, this.lexerActionExecutor);
+    }
+
+    equals(other) {
+        return this === other ||
+                (other instanceof LexerATNConfig &&
+                this.passedThroughNonGreedyDecision === other.passedThroughNonGreedyDecision &&
+                (this.lexerActionExecutor ? this.lexerActionExecutor.equals(other.lexerActionExecutor) : !other.lexerActionExecutor) &&
+                super.equals(other));
+    }
+
+    checkNonGreedyDecision(source, target) {
+        return source.passedThroughNonGreedyDecision ||
+            (target instanceof DecisionState) && target.nonGreedy;
+    }
+}
+
+
+module.exports.ATNConfig = ATNConfig;
+module.exports.LexerATNConfig = LexerATNConfig;
