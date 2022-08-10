@@ -15,7 +15,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.3.8</version>
+	<version>0.3.9</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
