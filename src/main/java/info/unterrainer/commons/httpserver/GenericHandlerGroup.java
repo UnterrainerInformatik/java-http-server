@@ -184,7 +184,7 @@ public class GenericHandlerGroup<P extends BasicJpa, J extends BasicJson, E> imp
 		DaoTransaction<E> transaction = dao.getTransactionManager().beginTransaction(ctx);
 		P jpa = hu.getJpaById(ctx, transaction.getManager(), dao);
 		try {
-			P detachedJpa = objectMapper.map(jpaType, jpaType, jpa);
+			P detachedJpa = objectMapper.map(jpaType, jpa);
 			J json = jsonMapper.fromStringTo(jsonType, ctx.attribute(Attribute.REQUEST_BODY));
 			P mappedJpa = objectMapper.map(jpaType, json);
 			mappedJpa.setId(jpa.getId());
