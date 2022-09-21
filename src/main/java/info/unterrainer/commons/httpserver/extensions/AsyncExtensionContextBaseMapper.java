@@ -11,6 +11,8 @@ public class AsyncExtensionContextBaseMapper implements AsyncExtensionContextMap
 		asyncCtx.addParameter(ctx, Attribute.USER_CLIENT_ATTRIBUTE_TENANTS_WRITE);
 		asyncCtx.addParameter(ctx, Attribute.USER_TENANTS_READ_SET);
 		asyncCtx.addParameter(ctx, Attribute.USER_TENANTS_WRITE_SET);
+		asyncCtx.addParameter(ctx, Attribute.USER_TENANT_READ);
+		asyncCtx.addParameter(ctx, Attribute.USER_TENANT_WRITE);
 		asyncCtx.addParameter(ctx, Attribute.JAVALIN_SERVER);
 		asyncCtx.addParameter(ctx, Attribute.RESPONSE_OBJECT);
 		asyncCtx.addParameter(ctx, Attribute.RESPONSE_STATUS);

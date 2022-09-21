@@ -171,10 +171,12 @@ public class HttpAccessManager implements AccessManager {
 			String readTenants = (String) token.getOtherClaims().get("tenants_read");
 			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANTS_READ, readTenants);
 			ctx.attribute(Attribute.USER_TENANTS_READ_SET, createTenantSetFrom(readTenants));
+			ctx.attribute(Attribute.USER_TENANT_READ, getFirstTenantFrom(readTenants));
 
 			String writeTenants = (String) token.getOtherClaims().get("tenants_write");
 			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANTS_WRITE, writeTenants);
 			ctx.attribute(Attribute.USER_TENANTS_WRITE_SET, createTenantSetFrom(writeTenants));
+			ctx.attribute(Attribute.USER_TENANT_WRITE, getFirstTenantFrom(writeTenants));
 
 			Set<String> clientRoles = Set.of();
 			String key = token.getIssuedFor();
@@ -238,6 +240,23 @@ public class HttpAccessManager implements AccessManager {
 			}
 		}
 		return tenantSet;
+	}
+
+	private Long getFirstTenantFrom(final String tenant) {
+		if (tenant == null || tenant.isBlank())
+			return null;
+
+		String[] tenants = tenant.split(",");
+		for (String t : tenants) {
+			if (t.isBlank())
+				continue;
+			try {
+				return Long.parseLong(t.trim());
+			} catch (NumberFormatException e) {
+				// NOOP
+			}
+		}
+		return null;
 	}
 
 	private void setTokenRejectionReason(final Context ctx, final String reason) {

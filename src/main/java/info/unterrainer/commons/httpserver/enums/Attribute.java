@@ -22,6 +22,8 @@ public class Attribute {
 	public static final String USER_CLIENT_ATTRIBUTE_TENANTS_WRITE = "user_client_attribute_tenants_write";
 	public static final String USER_TENANTS_READ_SET = "user_tenant_read_set";
 	public static final String USER_TENANTS_WRITE_SET = "user_tenant_write_set";
+	public static final String USER_TENANT_READ = "user_tenant_read";
+	public static final String USER_TENANT_WRITE = "user_tenant_write";
 
 	public static final String KEYCLOAK_TOKEN_REJECTION_REASON = "kc_token_rejection_reason";
 }
