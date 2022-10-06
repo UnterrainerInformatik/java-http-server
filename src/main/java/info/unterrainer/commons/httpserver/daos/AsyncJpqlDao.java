@@ -1,9 +1,8 @@
 package info.unterrainer.commons.httpserver.daos;
 
-import jakarta.persistence.EntityManagerFactory;
-
 import info.unterrainer.commons.httpserver.jpas.BasicPermissionJpa;
 import info.unterrainer.commons.rdbutils.entities.BasicAsyncJpa;
+import jakarta.persistence.EntityManagerFactory;
 
 public class AsyncJpqlDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 
@@ -78,38 +77,6 @@ public class AsyncJpqlDao<P extends BasicAsyncJpa> extends BasicJpqlDao<P> {
 	 */
 	public <T> AsyncListQueryBuilder<P, T> select(final Class<T> resultType) {
 		return new AsyncListQueryBuilder<>(emf, this, resultType);
-	}
-
-	/**
-	 * Build a SELECT-query with a custom select-clause. The result will be of the
-	 * given type (use this for a COUNT(*) query, for example).
-	 *
-	 * @param <T>          the type the result will be
-	 * @param selectClause your custom select-clause (the base-object has the alias
-	 *                     'o'. So the default would be "o" internally resulting in
-	 *                     a "SELECT o")
-	 * @param resultType   the type the result will be
-	 * @return a query-builder
-	 */
-	public <T> AsyncListQueryBuilder<P, T> select(final String selectClause, final Class<T> resultType) {
-		AsyncListQueryBuilder<P, T> b = new AsyncListQueryBuilder<>(emf, this, resultType);
-		b.setSelect(selectClause);
-		return b;
-	}
-
-	/**
-	 * Build a SELECT-query with a custom select-clause. The result will be of the
-	 * underlying generic type.
-	 *
-	 * @param selectClause your custom select-clause (the base-object has the alias
-	 *                     'o'. So the default would be "o" internally resulting in
-	 *                     a "SELECT o")
-	 * @return a query-builder
-	 */
-	public AsyncJpaListQueryBuilder<P> select(final String selectClause) {
-		AsyncJpaListQueryBuilder<P> b = new AsyncJpaListQueryBuilder<>(emf, this, type);
-		b.setSelect(selectClause);
-		return b;
 	}
 
 	/**
