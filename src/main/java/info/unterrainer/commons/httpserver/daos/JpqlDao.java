@@ -2,11 +2,10 @@ package info.unterrainer.commons.httpserver.daos;
 
 import java.util.function.Function;
 
-import jakarta.persistence.EntityManagerFactory;
-
 import info.unterrainer.commons.httpserver.jpas.BasicPermissionJpa;
 import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import io.javalin.http.Context;
+import jakarta.persistence.EntityManagerFactory;
 
 public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> {
 
@@ -142,38 +141,6 @@ public class JpqlDao<P extends BasicJpa> extends BasicJpqlDao<P> {
 	 */
 	public <T> ListQueryBuilder<P, T> select(final Class<T> resultType) {
 		return new ListQueryBuilder<>(emf, this, resultType);
-	}
-
-	/**
-	 * Build a SELECT-query with a custom select-clause. The result will be of the
-	 * given type (use this for a COUNT(*) query, for example).
-	 *
-	 * @param <T>          the type the result will be
-	 * @param selectClause your custom select-clause (the base-object has the alias
-	 *                     'o'. So the default would be "o" internally resulting in
-	 *                     a "SELECT o")
-	 * @param resultType   the type the result will be
-	 * @return a query-builder
-	 */
-	public <T> ListQueryBuilder<P, T> select(final String selectClause, final Class<T> resultType) {
-		ListQueryBuilder<P, T> b = new ListQueryBuilder<>(emf, this, resultType);
-		b.setSelect(selectClause);
-		return b;
-	}
-
-	/**
-	 * Build a SELECT-query with a custom select-clause. The result will be of the
-	 * underlying generic type.
-	 *
-	 * @param selectClause your custom select-clause (the base-object has the alias
-	 *                     'o'. So the default would be "o" internally resulting in
-	 *                     a "SELECT o")
-	 * @return a query-builder
-	 */
-	public JpaListQueryBuilder<P> select(final String selectClause) {
-		JpaListQueryBuilder<P> b = new JpaListQueryBuilder<>(emf, this, type);
-		b.setSelect(selectClause);
-		return b;
 	}
 
 	/**

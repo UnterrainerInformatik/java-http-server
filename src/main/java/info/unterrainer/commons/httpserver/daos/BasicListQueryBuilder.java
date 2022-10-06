@@ -2,11 +2,10 @@ package info.unterrainer.commons.httpserver.daos;
 
 import java.util.HashMap;
 
+import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
-
-import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +19,8 @@ public class BasicListQueryBuilder<P extends BasicJpa, X, R extends BasicListQue
 	protected final BasicJpqlDao<P> dao;
 	protected final Class<X> resultType;
 
-	protected String selectClause = "o";
 	protected String orderByClause;
 	protected boolean lockPessimistic = false;
-
-	void setSelect(final String selectClause) {
-		this.selectClause = selectClause;
-		if (this.selectClause == null || this.selectClause.isBlank())
-			this.selectClause = "o";
-	}
 
 	public TypedQuery<X> getTypedQuery(final EntityManager em) {
 		return dao.coreDao.getQuery(em, selectClause, joinClause, whereClause, parameters, resultType, orderByClause,

@@ -11,10 +11,30 @@ import lombok.RequiredArgsConstructor;
 public class BasicQueryGeneralBuilder<P extends BasicJpa, T, R extends BasicQueryGeneralBuilder<P, T, R>>
 		extends BasicQueryEntityManagerBuilder<P, T, R> {
 
+	protected String selectClause = "o";
 	protected String joinClause;
 	protected String whereClause;
 
 	protected Map<String, Object> parameters = new HashMap<>();
+
+	/**
+	 * Sets a custom select-clause.
+	 * <p>
+	 * Default is "o"<br>
+	 * To reset it to default, set it to null or directly to "o".
+	 *
+	 * @param selectClause your custom select-clause (the base-object has the alias
+	 *                     'o'. So the default would be changed to "o" internally
+	 *                     resulting in a "SELECT o")
+	 * @return an instance of this builder to provide a fluent interface
+	 */
+	@SuppressWarnings("unchecked")
+	public R selectClause(final String selectClause) {
+		this.selectClause = selectClause;
+		if (this.selectClause == null || this.selectClause.isBlank())
+			this.selectClause = "o";
+		return (R) this;
+	}
 
 	/**
 	 * Sets a custom join-clause.
