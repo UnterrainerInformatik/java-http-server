@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import info.unterrainer.server.overmindserver.baseobjects.LimitedExecutorService;
 
 import info.unterrainer.commons.httpserver.daos.CoreDao;
 import info.unterrainer.commons.httpserver.daos.DaoTransaction;
