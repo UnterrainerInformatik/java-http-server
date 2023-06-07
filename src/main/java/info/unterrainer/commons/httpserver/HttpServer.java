@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import info.unterrainer.server.overmindserver.baseobjects.LimitedExecutorService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.LimitedExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.server.Server;
@@ -71,7 +71,7 @@ public class HttpServer {
 
 	@Builder
 	private HttpServer(final String configPrefix, final String applicationName, final ObjectMapper objectMapper,
-			final JsonMapper jsonMapper, final LimitedExecutorService executorService, final String... appVersionFqns) {
+			final JsonMapper jsonMapper, final ExecutorService executorService, final String... appVersionFqns) {
 		config = HttpServerConfiguration.read(configPrefix);
 		this.applicationName = applicationName;
 		this.executorService = executorService;
@@ -79,9 +79,9 @@ public class HttpServer {
 		if (!this.appVersionFqns.contains(VERSION_FQN))
 			this.appVersionFqns.add(VERSION_FQN);
 		if (executorService == null) {
-			this.executorService = new LimitedExecutorService(200, 200, 60L, TimeUnit.SECONDS,
+			this.executorService = new ThreadPoolExecutor(200, 200, 60L, TimeUnit.SECONDS,
 					new LinkedBlockingQueue<Runnable>());
-			((LimitedExecutorService) this.executorService).allowCoreThreadTimeOut(true);
+			((ThreadPoolExecutor) this.executorService).allowCoreThreadTimeOut(true);
 		}
 		if (applicationName == null)
 			throw new IllegalArgumentException("The application-name cannot be null");

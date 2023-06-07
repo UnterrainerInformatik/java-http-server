@@ -2,7 +2,7 @@ package info.unterrainer.commons.httpserver;
 
 import java.util.ArrayList;
 import java.util.List;
-import info.unterrainer.server.overmindserver.baseobjects.LimitedExecutorService;
+import java.util.concurrent.ExecutorService;
 
 import info.unterrainer.commons.httpserver.exceptions.GracefulCancelationException;
 import info.unterrainer.commons.httpserver.extensions.AsyncExtensionContext;
