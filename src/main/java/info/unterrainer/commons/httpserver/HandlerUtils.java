@@ -3,6 +3,8 @@ package info.unterrainer.commons.httpserver;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import info.unterrainer.commons.httpserver.daos.CoreDao;
@@ -154,6 +156,25 @@ public class HandlerUtils {
 		} catch (NumberFormatException e) {
 			throw new BadRequestException("Parameter has to be of a numeric type.");
 		}
+	}
+
+	public <T extends Enum<T>> List<T> convertToEnumList(final String[] o, final Class<T> enumType) {
+		List<T> result = new ArrayList<>();
+		try {
+			for (String s : o)
+				result.add(Enum.valueOf(enumType, s));
+		} catch (IllegalArgumentException e) {
+			throw new BadRequestException("Parameter has to be a comma-separated list of a valid enum type.");
+		}
+		return result;
+	}
+
+	public <T extends Enum<T>> List<T> getQueryParamAsEnumList(final Context ctx, final String name,
+			final Class<T> enumType, final List<T> defaultValue) {
+		String paramString = getQueryParamAsString(ctx, name);
+		if (paramString == null)
+			return defaultValue;
+		return convertToEnumList(paramString.split(","), enumType);
 	}
 
 	public String getQueryParamAsString(final Context ctx, final String name) {
