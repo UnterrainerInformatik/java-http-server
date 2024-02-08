@@ -4,15 +4,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import info.unterrainer.commons.httpserver.jsons.ListJson;
+import info.unterrainer.commons.rdbutils.Transactions;
+import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.TypedQuery;
-
-import info.unterrainer.commons.httpserver.jsons.ListJson;
-import info.unterrainer.commons.rdbutils.Transactions;
-import info.unterrainer.commons.rdbutils.entities.BasicJpa;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -59,7 +58,7 @@ public class ListQuery<P extends BasicJpa, T> {
 	}
 
 	/**
-	 * Gets the first row this query returns.
+	 * Gets the first row this query returns or null, if no row was returned at all.
 	 *
 	 * @return the result-row as a JPA
 	 */
