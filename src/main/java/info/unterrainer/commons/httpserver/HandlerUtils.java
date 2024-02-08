@@ -171,7 +171,7 @@ public class HandlerUtils {
 
 	public <T extends Enum<T>> List<T> getQueryParamAsEnumList(final Context ctx, final String name,
 			final Class<T> enumType, final List<T> defaultValue) {
-		String paramString = getQueryParamAsString(ctx, name);
+		String paramString = getQueryParamAsString(ctx, name, null);
 		if (paramString == null)
 			return defaultValue;
 		return convertToEnumList(paramString.split(","), enumType);
