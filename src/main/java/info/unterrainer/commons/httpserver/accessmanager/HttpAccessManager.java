@@ -66,7 +66,7 @@ public class HttpAccessManager implements AccessManager {
 		if (!realm.startsWith("/"))
 			realm = "/" + realm;
 
-		authUrl = host + "auth/realms" + realm;
+		authUrl = host + "realms" + realm;
 		try {
 			log.info("Getting public key from: [{}]", authUrl);
 			HttpClient client = HttpClient.newHttpClient();

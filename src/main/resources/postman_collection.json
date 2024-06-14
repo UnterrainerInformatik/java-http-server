@@ -328,7 +328,7 @@
 		{
 			"id": "f29301eb-5f34-4e27-80ae-9b0fc72e3cf7",
 			"key": "auth-url",
-			"value": "http://10.10.196.4:14888/auth/realms/Nexus/protocol/openid-connect/token"
+			"value": "http://10.10.196.4:14888/realms/Nexus/protocol/openid-connect/token"
 		},
 		{
 			"id": "8e8e8fa0-9bf8-410e-9971-e27b6ad18060",
