@@ -41,3 +41,5 @@ hs_err_pid*
 src/main/java/info/unterrainer/commons/httpserver/Information.java
 
 antlr4/.antlr/
+/.apt_generated/
+/.apt_generated_tests/
