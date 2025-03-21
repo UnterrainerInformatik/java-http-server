@@ -1,13 +1,15 @@
 package info.unterrainer.commons.httpserver.accessmanager;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.math.BigInteger;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse.BodyHandlers;
+import java.net.http.HttpResponse;
+import java.security.KeyFactory;
 import java.security.PublicKey;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,14 +17,13 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.keycloak.TokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.idm.PublishedRealmRepresentation;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.unterrainer.commons.httpserver.HttpServer;
 import info.unterrainer.commons.httpserver.enums.Attribute;
 import info.unterrainer.commons.httpserver.exceptions.ForbiddenException;
-import info.unterrainer.commons.httpserver.exceptions.GatewayTimeoutException;
 import info.unterrainer.commons.httpserver.exceptions.UnauthorizedException;
 import info.unterrainer.commons.httpserver.jsons.UserDataJson;
 import io.javalin.core.security.AccessManager;
@@ -56,6 +57,35 @@ public class HttpAccessManager implements AccessManager {
 		handler.handle(ctx);
 	}
 
+	private PublicKey fetchPublicKey(String jwksUrl) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		HttpClient client = HttpClient.newHttpClient();
+		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(jwksUrl)).GET().build();
+
+		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+		if (response.statusCode() >= 300) {
+			throw new IOException("Failed to fetch JWKS: HTTP " + response.statusCode());
+		}
+
+		JsonNode jwks = objectMapper.readTree(response.body());
+		// Just take the first key for now.
+		JsonNode key = jwks.get("keys").get(0);
+
+		String modulusBase64 = key.get("n").asText();
+		String exponentBase64 = key.get("e").asText();
+
+		byte[] modulusBytes = Base64.getUrlDecoder().decode(modulusBase64);
+		byte[] exponentBytes = Base64.getUrlDecoder().decode(exponentBase64);
+
+		BigInteger modulus = new BigInteger(1, modulusBytes);
+		BigInteger exponent = new BigInteger(1, exponentBytes);
+
+		RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, exponent);
+		KeyFactory factory = KeyFactory.getInstance("RSA");
+		return factory.generatePublic(spec);
+	}
+
 	private void initPublicKey() {
 		if (publicKey != null)
 			return;
@@ -66,36 +96,12 @@ public class HttpAccessManager implements AccessManager {
 		if (!realm.startsWith("/"))
 			realm = "/" + realm;
 
-		authUrl = host + "realms" + realm;
+		authUrl = host + "realms" + realm + "/protocol/openid-connect/certs";
 		try {
 			log.info("Getting public key from: [{}]", authUrl);
-			HttpClient client = HttpClient.newHttpClient();
-			HttpRequest request = HttpRequest.newBuilder().uri(new URI(authUrl)).build();
-			ObjectMapper objectMapper = new ObjectMapper();
-
-			client.sendAsync(request, BodyHandlers.ofString()).thenApply(response -> {
-				if (response.statusCode() >= 300) {
-					log.error("HTTP status [{}] getting public key from keycloak instance [{}].", response.statusCode(),
-							authUrl);
-					throw new GatewayTimeoutException(String
-							.format("The keycloak instance returned an error (status: %d).", response.statusCode()));
-				}
-				return response.body();
-			}).thenAccept(body -> {
-				if (body == null) {
-					log.warn("Received empty body.");
-					return;
-				}
-				try {
-					publicKey = objectMapper.readValue(body, PublishedRealmRepresentation.class).getPublicKey();
-					log.info("Public key received.");
-				} catch (IOException e) {
-					log.error("Error parsing answer from keycloak.");
-					throw new UncheckedIOException(e);
-				}
-			}).join();
-		} catch (URISyntaxException e) {
-			log.error("The keycloak URL was illegal [{}].", authUrl);
+			publicKey = fetchPublicKey(authUrl);
+		} catch (Exception e) {
+			log.error("There was an error fetching the PublicKey from the openIdConnect-server [{}].", authUrl);
 			throw new IllegalStateException(e);
 		}
 	}
