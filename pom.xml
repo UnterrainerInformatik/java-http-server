@@ -15,7 +15,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>http-server</artifactId>
-	<version>0.3.14</version>
+	<version>0.3.15</version>
 	<name>HttpServer</name>
 	<packaging>jar</packaging>
 
@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-common</artifactId>
-			<version>18.0.2</version>
+			<version>26.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
