@@ -1,0 +1,28 @@
+name: PIPELINE
+
+on:
+  push:
+    branches:
+      - 'master'
+  workflow_dispatch:
+
+jobs:
+  bump:
+    uses: UnterrainerInformatik/bump-semver-workflow/.github/workflows/workflow.yml@master
+
+  build:
+    name: Build and publish to Maven Central 🚀
+    needs: bump
+    uses: UnterrainerInformatik/maven-central-workflow/.github/workflows/workflow.yml@master
+    with:
+      major_version: ${{ needs.bump.outputs.major_version }}
+      minor_version: ${{ needs.bump.outputs.minor_version }}
+      build_version: ${{ needs.bump.outputs.build_version }}
+      maven_profiles: release-to-sonatype
+      maven_args: -Dmaven.test.skip=true
+    secrets:
+      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
+      GPG_OWNERTRUST: ${{ secrets.GPG_OWNERTRUST }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
