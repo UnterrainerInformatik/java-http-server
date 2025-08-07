@@ -59,6 +59,7 @@ public class HttpServer {
 	private final List<HandlerGroup> handlerGroups = new ArrayList<>();
 	private List<HandlerInstance> handlerInstances = new ArrayList<>();
 	ExecutorService executorService;
+	Consumer<Javalin> beforeStartHandler;
 	List<String> appVersionFqns;
 	@Getter
 	@Setter
@@ -72,8 +73,10 @@ public class HttpServer {
 
 	@Builder
 	private HttpServer(final String configPrefix, final String applicationName, final ObjectMapper objectMapper,
-			final JsonMapper jsonMapper, final ExecutorService executorService, final String... appVersionFqns) {
+			final JsonMapper jsonMapper, final ExecutorService executorService,
+			final Consumer<Javalin> beforeStartHandler, final String... appVersionFqns) {
 		config = HttpServerConfiguration.read(configPrefix);
+		this.beforeStartHandler = beforeStartHandler;
 		this.applicationName = applicationName;
 		this.executorService = executorService;
 		this.appVersionFqns = new ArrayList<>(List.of(Optional.ofNullable(appVersionFqns).orElse(new String[0])));
@@ -106,10 +109,6 @@ public class HttpServer {
 	}
 
 	private void create() {
-		create(null);
-	}
-
-	private void create(Consumer<Javalin> beforeStartHandler) {
 		Server server = new Server();
 		ServerConnector connector = new ServerConnector(server);
 		connector.setHost(config.host());
