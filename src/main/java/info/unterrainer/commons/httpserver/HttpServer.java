@@ -104,6 +104,10 @@ public class HttpServer {
 		return new GenericHandlerGroupBuilder<>(this, jpaType, jsonType, coreDaoProvider.getCoreDao());
 	}
 
+	public Javalin getJavalin() {
+		return javalin;
+	}
+
 	private void create() {
 
 		Server server = new Server();
@@ -253,11 +257,11 @@ public class HttpServer {
 		Object dto = ctx.attribute(Attribute.RESPONSE_OBJECT);
 		if (dto != null)
 			switch ((ResponseType) ctx.attribute(Attribute.RESPONSE_TYPE)) {
-				case JSON:
-					ctx.result(jsonMapper.toStringFrom(dto));
-					break;
-				default:
-					ctx.result((String) dto);
+			case JSON:
+				ctx.result(jsonMapper.toStringFrom(dto));
+				break;
+			default:
+				ctx.result((String) dto);
 			}
 
 		Integer status = ctx.attribute(Attribute.RESPONSE_STATUS);
