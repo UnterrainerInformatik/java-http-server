@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -104,12 +105,11 @@ public class HttpServer {
 		return new GenericHandlerGroupBuilder<>(this, jpaType, jsonType, coreDaoProvider.getCoreDao());
 	}
 
-	public Javalin getJavalin() {
-		return javalin;
+	private void create() {
+		create(null);
 	}
 
-	private void create() {
-
+	private void create(Consumer<Javalin> beforeStartHandler) {
 		Server server = new Server();
 		ServerConnector connector = new ServerConnector(server);
 		connector.setHost(config.host());
@@ -120,7 +120,11 @@ public class HttpServer {
 			c.server(() -> server)
 					.accessManager(new HttpAccessManager(config.keycloakHost(), config.keycloakRealm()))
 					.enableCorsForAllOrigins();
-		}).start(config.port());
+		});
+		if (beforeStartHandler != null) {
+			beforeStartHandler.accept(javalin);
+		}
+		javalin.start(config.port());
 
 		javalin.before(ctx -> ctx.attribute(Attribute.JAVALIN_SERVER, this));
 		javalin.before(ctx -> ctx.attribute(Attribute.RESPONSE_TYPE, ResponseType.JSON));
