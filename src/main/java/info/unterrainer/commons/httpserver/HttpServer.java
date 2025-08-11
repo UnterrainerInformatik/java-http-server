@@ -12,9 +12,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-
 import info.unterrainer.commons.httpserver.accessmanager.HttpAccessManager;
 import info.unterrainer.commons.httpserver.accessmanager.UserAccessInterceptor;
 import info.unterrainer.commons.httpserver.daos.CoreDaoProvider;
@@ -109,21 +106,15 @@ public class HttpServer {
 	}
 
 	private void create() {
-		Server server = new Server();
-		ServerConnector connector = new ServerConnector(server);
-		connector.setHost(config.host());
-		connector.setPort(config.port());
-		server.setConnectors(new ServerConnector[] { connector });
-
 		javalin = Javalin.create(c -> {
-			c.server(() -> server)
-					.accessManager(new HttpAccessManager(config.keycloakHost(), config.keycloakRealm()))
-					.enableCorsForAllOrigins();
+			c.accessManager(new HttpAccessManager(config.keycloakHost(), config.keycloakRealm()));
+			c.enableCorsForAllOrigins();
 		});
+
 		if (beforeStartHandler != null) {
 			beforeStartHandler.accept(javalin);
 		}
-		javalin.start(config.port());
+		javalin.start(config.host(), config.port());
 
 		javalin.before(ctx -> ctx.attribute(Attribute.JAVALIN_SERVER, this));
 		javalin.before(ctx -> ctx.attribute(Attribute.RESPONSE_TYPE, ResponseType.JSON));
