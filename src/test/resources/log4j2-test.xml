@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout charset="UTF-8"
+                           pattern="%-4r [%t] %-5p %c %x - %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="io.netty" level="WARN"/>
+        <Logger name="org.eclipse.milo" level="WARN"/>
+        <Logger name="org.hibernate" level="WARN"/>
+        <Logger name="com.mchange.v2.log.MLog" level="WARN"/>
+        <Logger name="org.jboss.logging" level="WARN"/>
+        <Logger name="liquibase.servicelocator" level="WARN"/>
+        <Logger name="liquibase.resource" level="WARN"/>
+        <Logger name="com.mchange.v2" level="WARN"/>
+        <Logger name="org.eclipse.jetty" level="WARN"/>
+        <Logger name="liquibase.util" level="WARN"/>
+        <Logger name="liquibase.executor" level="WARN"/>
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
