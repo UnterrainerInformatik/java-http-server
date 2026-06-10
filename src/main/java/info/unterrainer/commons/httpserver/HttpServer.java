@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -55,6 +56,12 @@ public class HttpServer {
 	private ObjectMapper objectMapper;
 	private final List<HandlerGroup> handlerGroups = new ArrayList<>();
 	private List<HandlerInstance> handlerInstances = new ArrayList<>();
+	/**
+	 * Routes (keyed as "{HTTP-METHOD} {normalized-path-template}") that opted out of request-body
+	 * buffering via {@link #postRaw}/{@link #putRaw}. For these the {@code unzip} before-handler never
+	 * reads the body, leaving the raw {@code InputStream} untouched for the handler to stream.
+	 */
+	private final Set<String> rawBodyRoutes = new HashSet<>();
 	ExecutorService executorService;
 	Consumer<Javalin> beforeStartHandler;
 	List<String> appVersionFqns;
@@ -230,13 +237,97 @@ public class HttpServer {
 		return this;
 	}
 
+	/**
+	 * Registers a POST route that opts out of request-body buffering.
+	 * <p>
+	 * Unlike {@link #post}, the {@code unzip} before-handler will not call {@code ctx.body()} for this
+	 * route, so {@link Attribute#REQUEST_BODY} stays {@code null} and the raw, unbuffered request body
+	 * remains available. The handler must read the body via {@code ctx.req.getInputStream()} (and must
+	 * NOT call {@code ctx.body()}/{@code ctx.bodyAsBytes()}/{@code ctx.bodyAsInputStream()}, all of which
+	 * buffer it). Use this for
+	 * streaming large uploads straight to their destination. Auth/roles are enforced exactly as with
+	 * {@link #post}.
+	 */
+	public HttpServer postRaw(final String path, final Handler handler, final Role... roles) {
+		rawBodyRoutes.add(rawRouteKey(HandlerType.POST, path));
+		return post(path, handler, roles);
+	}
+
+	/**
+	 * Registers a PUT route that opts out of request-body buffering. See {@link #postRaw} for the
+	 * contract the handler must follow.
+	 */
+	public HttpServer putRaw(final String path, final Handler handler, final Role... roles) {
+		rawBodyRoutes.add(rawRouteKey(HandlerType.PUT, path));
+		return put(path, handler, roles);
+	}
+
+	private static String rawRouteKey(final HandlerType method, final String path) {
+		return method.name() + " " + normalizePath(path);
+	}
+
+	private boolean isRawBodyRoute(final String method, final String requestPath) {
+		if (rawBodyRoutes.isEmpty())
+			return false;
+		String normalizedRequest = normalizePath(requestPath);
+		for (String key : rawBodyRoutes) {
+			int separator = key.indexOf(' ');
+			if (!key.substring(0, separator).equalsIgnoreCase(method))
+				continue;
+			if (pathMatches(key.substring(separator + 1), normalizedRequest))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Strips a leading/trailing slash and surrounding whitespace so that registered path templates and
+	 * incoming request paths compare regardless of slash style ("/foo/" vs "foo").
+	 */
+	static String normalizePath(final String path) {
+		if (path == null)
+			return "";
+		String p = path.trim();
+		while (p.startsWith("/"))
+			p = p.substring(1);
+		while (p.endsWith("/"))
+			p = p.substring(0, p.length() - 1);
+		return p;
+	}
+
+	/**
+	 * Matches a Javalin path template (already normalized) against a normalized request path, treating
+	 * path-parameter segments ({@code {id}}, {@code <id>}) and wildcards ({@code *}) as matching any
+	 * single segment.
+	 */
+	static boolean pathMatches(final String template, final String requestPath) {
+		String[] t = template.isEmpty() ? new String[0] : template.split("/");
+		String[] r = requestPath.isEmpty() ? new String[0] : requestPath.split("/");
+		if (t.length != r.length)
+			return false;
+		for (int i = 0; i < t.length; i++) {
+			String segment = t[i];
+			boolean isParam = segment.equals("*") || segment.startsWith("{") || segment.startsWith("<");
+			if (isParam)
+				continue;
+			if (!segment.equals(r[i]))
+				return false;
+		}
+		return true;
+	}
+
 	private void unzip(final Context ctx) throws IOException {
+		// Raw-body routes (postRaw/putRaw) must keep their request InputStream untouched: never read it
+		// here, so REQUEST_BODY stays null and the handler can stream the raw body.
+		if (isRawBodyRoute(ctx.method(), ctx.path()))
+			return;
+
 		String body = ctx.body();
 
 		if (body == null)
 			return;
 
-		if (ctx.header("Content-Encoding") == "gzip") {
+		if ("gzip".equalsIgnoreCase(ctx.header("Content-Encoding"))) {
 			BufferedSource bs = Okio.buffer(Okio.source(ctx.bodyAsInputStream()));
 			GzipSource gzipSource = new GzipSource(bs);
 			body = Okio.buffer(gzipSource).readUtf8();

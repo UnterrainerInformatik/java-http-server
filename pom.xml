@@ -11,6 +11,9 @@
 		<name>Http-Server</name>
 		<package-path>info/unterrainer/commons/httpserver</package-path>
 		<packg-string>info.unterrainer.commons.httpserver</packg-string>
+		<!-- Override the parent's Lombok (1.18.24) which fails on JDK 21+ ("NoSuchFieldError ... JCImport
+		     qualid"). 1.18.30+ supports JDK 21; this is compile-only and not shipped in the artifact. -->
+		<lombok-version>1.18.34</lombok-version>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
