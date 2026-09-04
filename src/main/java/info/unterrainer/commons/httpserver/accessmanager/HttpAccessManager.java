@@ -17,6 +17,7 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.keycloak.TokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.AccessToken.Access;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -166,13 +167,22 @@ public class HttpAccessManager implements AccessManager {
 			String userName = token.getPreferredUsername();
 			if (userName == null)
 				userName = "unknown";
+			// Standard-claims are optional as far as the JWT is concerned. A token minted by a
+			// different IdP, or one missing a mapper in its Keycloak-client, may omit any of them.
+			// Reading them without a null-check turns such a token into an NPE, which the catch-all
+			// in checkAccess re-throws as an HTTP 500 instead of an authentication-response.
+			boolean emailVerified = Boolean.TRUE.equals(token.getEmailVerified());
+			Set<String> realmRoles = rolesOf(token.getRealmAccess());
+			String tokenType = token.getType();
+			boolean isBearer = tokenType != null && tokenType.equalsIgnoreCase("bearer");
+
 			ctx.attribute(Attribute.USER_NAME, userName);
 			ctx.attribute(Attribute.USER_GIVEN_NAME, token.getGivenName());
 			ctx.attribute(Attribute.USER_FAMILY_NAME, token.getFamilyName());
 			ctx.attribute(Attribute.USER_CLIENT, token.getIssuedFor());
 			ctx.attribute(Attribute.USER_EMAIL, token.getEmail());
-			ctx.attribute(Attribute.USER_EMAIL_VERIFIED, token.getEmailVerified());
-			ctx.attribute(Attribute.USER_REALM_ROLES, token.getRealmAccess().getRoles());
+			ctx.attribute(Attribute.USER_EMAIL_VERIFIED, emailVerified);
+			ctx.attribute(Attribute.USER_REALM_ROLES, realmRoles);
 
 			String readTenants = (String) token.getOtherClaims().get("tenants_read");
 			ctx.attribute(Attribute.USER_CLIENT_ATTRIBUTE_TENANTS_READ, readTenants);
@@ -186,8 +196,8 @@ public class HttpAccessManager implements AccessManager {
 
 			Set<String> clientRoles = Set.of();
 			String key = token.getIssuedFor();
-			if (token.getResourceAccess().containsKey(key))
-				clientRoles = token.getResourceAccess().get(key).getRoles();
+			if (key != null && token.getResourceAccess() != null)
+				clientRoles = rolesOf(token.getResourceAccess().get(key));
 			ctx.attribute(Attribute.USER_CLIENT_ROLES, clientRoles);
 
 			UserAccessInterceptor userAccessInterceptor = ((HttpServer) ctx.attribute(Attribute.JAVALIN_SERVER))
@@ -200,21 +210,22 @@ public class HttpAccessManager implements AccessManager {
 								.client(token.getIssuedFor())
 								.familyName(token.getFamilyName())
 								.email(token.getEmail())
-								.emailVerified(token.getEmailVerified())
-								.realmRoles(token.getRealmAccess().getRoles())
+								.emailVerified(emailVerified)
+								.realmRoles(realmRoles)
 								.readTenants(readTenants)
 								.writeTenants(writeTenants)
 								.clientRoles(clientRoles)
 								.isActive(token.isActive())
-								.isBearer(token.getType().equalsIgnoreCase("bearer"))
+								.isBearer(isBearer)
 								.build());
 
 			if (!token.isActive()) {
 				setTokenRejectionReason(ctx, "Token is inactive.");
 				return null;
 			}
-			if (!token.getType().equalsIgnoreCase("bearer")) {
-				setTokenRejectionReason(ctx, "Token is no bearer-token.");
+			if (!isBearer) {
+				setTokenRejectionReason(ctx,
+						tokenType == null ? "Token has no type-claim ('typ')." : "Token is no bearer-token.");
 				return null;
 			}
 			// Disabled to enable getting token from side-channels like 'localhost'.
@@ -228,6 +239,12 @@ public class HttpAccessManager implements AccessManager {
 			setTokenRejectionReason(ctx, "Token was checked and deemed invalid.");
 			return null;
 		}
+	}
+
+	private Set<String> rolesOf(final Access access) {
+		if (access == null || access.getRoles() == null)
+			return Set.of();
+		return access.getRoles();
 	}
 
 	private Object createTenantSetFrom(final String tenant) {
